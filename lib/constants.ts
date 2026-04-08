@@ -11,6 +11,7 @@ export interface Paper {
   color?: string;
   type: "color" | "image";
   label: string;
+  theme?: "light" | "dark";
 }
 
 export interface Tone {
@@ -48,19 +49,19 @@ export const FONTS: Font[] = [
 ];
 
 export const PAPERS: Paper[] = [
-  { id: "void", color: "#0D0B09", type: "color", label: "Void" },
-  { id: "paper-1", path: "/papers/paper-1.jpg", type: "image", label: "Paper 1" },
-  { id: "paper-2", path: "/papers/paper-2.jpg", type: "image", label: "Paper 2" },
-  { id: "paper-3", path: "/papers/paper-3.jpg", type: "image", label: "Paper 3" },
-  { id: "paper-4", path: "/papers/paper-4.jpg", type: "image", label: "Paper 4" },
-  { id: "paper-5", path: "/papers/paper-5.jpg", type: "image", label: "Paper 5" },
-  { id: "paper-6", path: "/papers/paper-6.jpg", type: "image", label: "Paper 6" },
-  { id: "paper-7", path: "/papers/paper-7.jpg", type: "image", label: "Paper 7" },
-  { id: "paper-8", path: "/papers/paper-8.jpg", type: "image", label: "Paper 8" },
-  { id: "paper-9", path: "/papers/paper-9.jpg", type: "image", label: "Paper 9" },
-  { id: "paper-10", path: "/papers/paper-10.jpg", type: "image", label: "Paper 10" },
-  { id: "paper-11", path: "/papers/paper-11.jpg", type: "image", label: "Paper 11" },
-  { id: "paper-12", path: "/papers/paper-12.jpg", type: "image", label: "Paper 12" },
+  { id: "void", color: "#0D0B09", type: "color", label: "Void", theme: "dark" },
+  { id: "paper-1", path: "/papers/paper-1.jpg", type: "image", label: "Paper 1", theme: "light" },
+  { id: "paper-2", path: "/papers/paper-2.jpg", type: "image", label: "Paper 2", theme: "light" },
+  { id: "paper-3", path: "/papers/paper-3.jpg", type: "image", label: "Paper 3", theme: "light" },
+  { id: "paper-4", path: "/papers/paper-4.jpg", type: "image", label: "Paper 4", theme: "light" },
+  { id: "paper-5", path: "/papers/paper-5.jpg", type: "image", label: "Paper 5", theme: "light" },
+  { id: "paper-6", path: "/papers/paper-6.jpg", type: "image", label: "Paper 6", theme: "light" },
+  { id: "paper-7", path: "/papers/paper-7.jpg", type: "image", label: "Paper 7", theme: "light" },
+  { id: "paper-8", path: "/papers/paper-8.jpg", type: "image", label: "Paper 8", theme: "light" },
+  { id: "paper-9", path: "/papers/paper-9.jpg", type: "image", label: "Paper 9", theme: "light" },
+  { id: "paper-10", path: "/papers/paper-10.jpg", type: "image", label: "Paper 10", theme: "light" },
+  { id: "paper-11", path: "/papers/paper-11.jpg", type: "image", label: "Paper 11", theme: "light" },
+  { id: "paper-12", path: "/papers/paper-12.jpg", type: "image", label: "Paper 12", theme: "light" },
 ];
 
 export const TONES: Tone[] = [

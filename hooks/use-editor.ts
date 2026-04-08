@@ -36,7 +36,9 @@ export function useEditor() {
             id: p.name,
             path: p.path,
             type: "image" as const,
-            label: p.name.split('.')[0]
+            label: p.name.split('.')[0],
+            // Detect theme based on filename/category or default to light
+            theme: (p.path.includes('modern') && ['2', '11'].includes(p.name.split('.')[0])) ? 'dark' : 'light'
           }))
         ];
         
@@ -128,7 +130,16 @@ export function useEditor() {
   const handleSetPaper = useCallback((p: Paper) => {
     trigger("medium");
     setPaper(p);
-  }, [trigger]);
+    
+    // Auto-switch tone if it clashes with paper theme
+    if (p.theme === "light" && tone.ink === "ink-light") {
+      const lightTone = TONES.find(t => t.id === "paper") || TONES[4];
+      setTone(lightTone);
+    } else if (p.theme === "dark" && tone.ink === "ink-dark") {
+      const darkTone = TONES.find(t => t.id === "void") || TONES[0];
+      setTone(darkTone);
+    }
+  }, [trigger, tone]);
 
   const handleSetTone = useCallback((t: Tone) => {
     trigger("medium");
