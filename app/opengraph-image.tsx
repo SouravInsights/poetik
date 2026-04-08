@@ -10,31 +10,26 @@ export const size = {
 export const contentType = 'image/jpeg';
 
 export default async function Image() {
-  // Read the image robustly using Node APIs (removed edge runtime)
   const bgPath = join(process.cwd(), 'public', 'modern-backgrounds', '10.jpg');
   const bgData = readFileSync(bgPath);
   const bgBase64 = `data:image/jpeg;base64,${bgData.toString('base64')}`;
 
-  // Safely load the logo font (Italiana)
   let fontItaliana = null;
+  let fontJost = null;
   try {
-    const res = await fetch('https://raw.githubusercontent.com/google/fonts/main/ofl/italiana/Italiana-Regular.ttf');
-    if (res.ok) {
-      fontItaliana = await res.arrayBuffer();
-    }
+    const [resIta, resJost] = await Promise.all([
+      fetch('https://raw.githubusercontent.com/google/fonts/main/ofl/italiana/Italiana-Regular.ttf'),
+      fetch('https://raw.githubusercontent.com/google/fonts/main/ofl/jost/static/Jost-Regular.ttf')
+    ]);
+    if (resIta.ok) fontItaliana = await resIta.arrayBuffer();
+    if (resJost.ok) fontJost = await resJost.arrayBuffer();
   } catch (error) {
-    console.error("Failed to load font:", error);
+    console.error("Failed to load fonts:", error);
   }
 
   const fonts: any[] = [];
-  if (fontItaliana) {
-    fonts.push({
-      name: 'Italiana',
-      data: fontItaliana,
-      style: 'normal',
-      weight: 400,
-    });
-  }
+  if (fontItaliana) fonts.push({ name: 'Italiana', data: fontItaliana, style: 'normal', weight: 400 });
+  if (fontJost) fonts.push({ name: 'Jost', data: fontJost, style: 'normal', weight: 400 });
 
   return new ImageResponse(
     (
@@ -43,8 +38,10 @@ export default async function Image() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          color: '#1A1714',
+          flexDirection: 'row',
           position: 'relative',
+          fontFamily: fontJost ? '"Jost"' : 'sans-serif',
+          color: '#1A1714',
         }}
       >
         {/* Background Image */}
@@ -60,87 +57,153 @@ export default async function Image() {
           }}
         />
 
-        {/* Elegant Inner Frame */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            width: '1120px',  // 1200 - 80
-            height: '550px',  // 630 - 80
-            margin: '40px',
-            border: '1.5px solid rgba(26,23,20,0.15)',
-            position: 'relative',
-          }}
-        >
-          {/* Top Logo Area */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
+        {/* Content Wrapper */}
+        <div style={{ display: 'flex', width: '100%', height: '100%', backgroundColor: 'rgba(255,255,255,0.03)' }}>
+          
+          {/* Left Column: Brand & Copy */}
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '0 80px', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
               <span
                 style={{
                   fontFamily: fontItaliana ? '"Italiana"' : 'serif',
-                  fontSize: 32,
-                  letterSpacing: '0.4em',
+                  fontSize: 80,
+                  letterSpacing: '0.25em',
                   textTransform: 'uppercase',
-                  marginRight: -10,
+                  marginRight: -15, // visually balanced tracking
                 }}
               >
                 poetik
               </span>
               <div
                 style={{
-                  width: 6,
-                  height: 6,
+                  width: 12,
+                  height: 12,
                   backgroundColor: '#1A1714',
                   borderRadius: '50%',
-                  marginTop: 6,
-                  marginLeft: 5,
+                  marginTop: 12,
+                  marginLeft: 15,
                 }}
               />
             </div>
-          </div>
 
-          {/* Center Hero Statement */}
-          <div
-            style={{
-              display: 'flex',
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '0 100px',
-              textAlign: 'center',
-            }}
-          >
             <span
               style={{
-                fontFamily: fontItaliana ? '"Italiana"' : 'serif',
-                fontSize: 80,
-                lineHeight: 1.3,
-                letterSpacing: '0.02em',
-                opacity: 0.85,
+                marginTop: 24,
+                fontSize: 34,
+                lineHeight: 1.4,
+                opacity: 0.65,
+                maxWidth: 520,
               }}
             >
               A minimal, distraction-free app for writing poetry.
             </span>
+
+            {/* Feature List (Highly Visible now) */}
+            <div style={{ display: 'flex', gap: 32, marginTop: 48, alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                 <div style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#1A1714', opacity: 0.4 }} />
+                 <span style={{ fontSize: 16, letterSpacing: '0.3em', opacity: 0.8, textTransform: 'uppercase' }}>WRITE</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                 <div style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#1A1714', opacity: 0.4 }} />
+                 <span style={{ fontSize: 16, letterSpacing: '0.3em', opacity: 0.8, textTransform: 'uppercase' }}>STYLE</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                 <div style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#1A1714', opacity: 0.4 }} />
+                 <span style={{ fontSize: 16, letterSpacing: '0.3em', opacity: 0.8, textTransform: 'uppercase' }}>SHARE</span>
+              </div>
+            </div>
           </div>
 
-          {/* Bottom Footnote Area */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: '0 60px',
-              marginBottom: 40,
-              opacity: 0.35,
-              fontSize: 16,
-              letterSpacing: '0.3em',
-              textTransform: 'uppercase',
-              fontFamily: 'sans-serif',
-              fontWeight: 500,
-            }}
-          >
-            <span style={{ display: 'flex' }}>WRITE</span>
-            <span style={{ display: 'flex' }}>STYLE</span>
-            <span style={{ display: 'flex' }}>SHARE</span>
+          {/* Right Column: Visual Product Showcase (Floating Poetry Card) */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingRight: 120 }}>
+            <div
+              style={{
+                width: 315,
+                height: 560, // 9:16 aspect ratio
+                borderRadius: 20,
+                boxShadow: '0 32px 64px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.4)',
+                display: 'flex',
+                position: 'relative',
+                transform: 'rotate(4deg)', // Subtle tilt makes it feel like an object, reducing dominance
+                overflow: 'hidden', // Ensures the nested image respects the card border radius
+              }}
+            >
+              {/* Authentic Canvas Background */}
+              <img
+                src={bgBase64}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: 315,
+                  height: 560,
+                  objectFit: 'cover',
+                }}
+              />
+              {/* Authentic Export Overlay (20% white for light themes) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: 315,
+                  height: 560,
+                  backgroundColor: 'white',
+                  opacity: 0.2,
+                }}
+              />
+
+              {/* Inner Content Wrapper to safely apply padding without breaking Yoga absolute sizing */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  height: '100%',
+                  padding: '0 30px',
+                  color: '#1A1714',
+                  position: 'relative', // keeps content above absolute backgrounds
+                }}
+              >
+                {/* Text Content */}
+                <div
+                  style={{
+                    fontFamily: fontItaliana ? '"Italiana"' : 'serif',
+                    fontSize: 26,
+                    textAlign: 'center',
+                    lineHeight: 1.6,
+                    opacity: 0.85,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    fontStyle: 'italic', // Mimics true export
+                    letterSpacing: '0.03em',
+                  }}
+                >
+                  <span>Dil-e-nadaan tujhe</span>
+                  <span>hua kya hai?</span>
+                  <span style={{ marginTop: 24 }}>Aakhir is dard ki</span>
+                  <span>dawa kya hai?</span>
+                </div>
+                
+                {/* Authentically anchored @handle */}
+                <span
+                  style={{
+                    position: 'absolute',
+                    bottom: 30,
+                    fontSize: 11,
+                    letterSpacing: '0.4em',
+                    opacity: 0.6, // Boosted opacity for visibility
+                    textTransform: 'uppercase',
+                    fontWeight: 500,
+                  }}
+                >
+                  @mirzaghalib
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
