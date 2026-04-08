@@ -75,7 +75,7 @@ export function BackgroundPicker({
       <div className="flex items-center py-1">
         {/* Fixed label */}
         <span className="flex-shrink-0 font-jost text-[9px] font-bold tracking-[0.2em] opacity-40 uppercase pl-8 pr-4">
-          papers
+          canvas
         </span>
         {/* Scrollable swatches */}
         <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-8 py-3">
