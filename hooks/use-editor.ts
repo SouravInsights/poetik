@@ -75,7 +75,7 @@ export function useEditor() {
   }, [text, font, paper, tone, doodle, author, align, bgOpacity]);
 
   const handleSetFont = useCallback((f: Font) => {
-    trigger("selection");
+    trigger("light");
     setFont(f);
   }, [trigger]);
 
@@ -100,7 +100,7 @@ export function useEditor() {
   }, [trigger]);
 
   const handleSetAlign = useCallback(() => {
-    trigger("selection");
+    trigger("medium");
     setAlign(a => a === "center" ? "left" : "center");
   }, [trigger]);
 

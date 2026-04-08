@@ -3,6 +3,7 @@
 import { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Font, Paper, Tone } from "@/lib/constants";
+import { useWebHaptics } from "web-haptics/react";
 
 interface EditorCanvasProps {
   text: string;
@@ -28,6 +29,7 @@ export function EditorCanvas({
   bgOpacity,
 }: EditorCanvasProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { trigger } = useWebHaptics();
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -35,6 +37,12 @@ export function EditorCanvas({
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [text]);
+
+  const handleTextChange = (val: string) => {
+    // Light tactile tick for every character to simulate typewriter/physical keys
+    trigger("light");
+    setText(val);
+  };
 
   const isDark = tone.ink === "ink-light";
 
@@ -64,7 +72,7 @@ export function EditorCanvas({
         <textarea
           ref={textareaRef}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => handleTextChange(e.target.value)}
           spellCheck={false}
           autoComplete="off"
           autoCorrect="off"
