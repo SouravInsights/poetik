@@ -8,9 +8,15 @@ export function useEditor() {
   const { trigger } = useWebHaptics();
   const [text, setText] = useState("");
   const [font, setFont] = useState<Font>(FONTS[0]);
-  const [paper, setPaper] = useState<Paper>(PAPERS[0]);
+  const [paper, setPaper] = useState<Paper>({
+    id: "10.webp",
+    path: "/modern-backgrounds/10.webp",
+    type: "image",
+    label: "10",
+    theme: "light"
+  });
   const [tone, setTone] = useState<Tone>(TONES[0]);
-  const [inkMode, setInkMode] = useState<"ink-light" | "ink-dark">("ink-light");
+  const [inkMode, setInkMode] = useState<"ink-light" | "ink-dark">("ink-dark");
   const [doodle, setDoodle] = useState<string | null>(null);
   const [author, setAuthor] = useState<string>("");
   const [align, setAlign] = useState<"left" | "center">("center");
@@ -61,6 +67,8 @@ export function useEditor() {
           const found = TONES.find(t => t.id === parsed.tone.id);
           if (found) setTone(found);
         }
+        // Restore full paper object (may be a dynamic image paper)
+        if (parsed.paper) setPaper(parsed.paper);
         if (parsed.inkMode) setInkMode(parsed.inkMode);
         if (parsed.doodle) setDoodle(parsed.doodle);
         if (parsed.author) setAuthor(parsed.author);
