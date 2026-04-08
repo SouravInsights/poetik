@@ -32,7 +32,7 @@ export function BackgroundPicker({
         onPaperSelect(paper);
       }}
       className={cn(
-        "w-8 h-8 rounded-full flex-shrink-0 cursor-pointer border transition-all duration-500 overflow-hidden bg-white/5",
+        "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border transition-all duration-500 overflow-hidden bg-white/5",
         currentPaper.id === paper.id
           ? "border-[#F5F0E8] scale-[1.12] ring-2 ring-[#F5F0E8] ring-offset-4 ring-offset-[#161412] shadow-xl"
           : "border-white/10 hover:border-white/30"
@@ -57,7 +57,7 @@ export function BackgroundPicker({
               onToneSelect(tone);
             }}
             className={cn(
-              "w-8 h-8 rounded-full flex-shrink-0 cursor-pointer border-2 transition-all duration-500",
+              "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border-2 transition-all duration-500",
               tone.class,
               currentTone.id === tone.id
                 ? "border-[#F5F0E8] scale-[1.15] shadow-[0_0_20px_rgba(245,240,232,0.2)] ring-2 ring-[#F5F0E8] ring-offset-2 ring-offset-[#161412]"

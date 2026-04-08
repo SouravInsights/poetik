@@ -75,24 +75,42 @@ export function BottomToolbar({
       >
         <AnimatePresence mode="wait">
           {!isOpen ? (
-            <motion.button
+            <motion.div
               key="peek-button"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
-              onClick={() => {
-                trigger(20);
-                onOpenToggle(true);
-              }}
               className={cn(
-                "px-8 py-2.5 rounded-t-[20px] backdrop-blur-3xl transition-all duration-500 hover:py-3.5 hover:scale-105 active:scale-95 group border-t border-x",
-                currentTone.ink === "ink-light" 
-                  ? "bg-white/[0.12] text-white/60 border-white/10" 
-                  : "bg-black/[0.1] text-black/50 border-black/10"
+                "flex items-center gap-0 rounded-t-[20px] overflow-hidden border-t border-x backdrop-blur-3xl shadow-lg",
+                currentTone.ink === "ink-light"
+                  ? "bg-white/[0.12] border-white/10"
+                  : "bg-black/[0.12] border-black/10"
               )}
             >
-              <HugeiconsIcon icon={ArrowUp01Icon} size={20} className="transition-all group-hover:-translate-y-0.5" />
-            </motion.button>
+              {/* Shelf toggle */}
+              <button
+                onClick={() => { trigger(20); onOpenToggle(true); }}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-4 min-h-[52px] transition-all hover:bg-white/10 font-jost text-[11px] font-bold tracking-[0.15em] uppercase select-none",
+                  currentTone.ink === "ink-light" ? "text-white/80" : "text-black/70"
+                )}
+              >
+                <HugeiconsIcon icon={ArrowUp01Icon} size={16} strokeWidth={2.5} />
+                <span>style</span>
+              </button>
+
+              {/* Divider */}
+              <div className={cn("w-[1px] h-5 self-center", currentTone.ink === "ink-light" ? "bg-white/10" : "bg-black/10")} />
+
+              {/* Export — always visible */}
+              <button
+                onClick={() => { trigger("nudge"); onExport(); }}
+                className="flex items-center gap-2 px-6 py-4 min-h-[52px] transition-all hover:bg-[#F5F0E8]/10 font-jost text-[11px] font-bold tracking-[0.15em] uppercase select-none text-[#F5F0E8]"
+              >
+                <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={2.5} />
+                <span>export</span>
+              </button>
+            </motion.div>
           ) : (
             <motion.div 
               key="toolbar-panel"

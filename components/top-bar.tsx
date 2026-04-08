@@ -37,7 +37,7 @@ export function TopBar({ visible, onClear, align, onAlignToggle, tone }: TopBarP
             onAlignToggle();
           }}
           className={cn(
-            "flex items-center gap-2 font-jost text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2 px-3 sm:px-5 rounded-full backdrop-blur-xl border select-none shadow-md",
+            "flex items-center gap-2 font-jost text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2.5 px-4 sm:px-5 rounded-full backdrop-blur-xl border select-none shadow-md",
             isDark 
               ? "bg-white/[0.12] border-white/[0.15] text-white hover:bg-white/[0.25]" 
               : "bg-black/[0.08] border-black/[0.15] text-black hover:bg-black/[0.15]"
@@ -57,7 +57,7 @@ export function TopBar({ visible, onClear, align, onAlignToggle, tone }: TopBarP
           onClear();
         }}
         className={cn(
-          "flex items-center gap-2 font-jost text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2 px-3 sm:px-5 rounded-full backdrop-blur-xl border select-none shadow-md",
+          "flex items-center gap-2 font-jost text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2.5 px-4 sm:px-5 rounded-full backdrop-blur-xl border select-none shadow-md",
           "bg-red-500/15 text-red-500 hover:bg-red-500/25 border-red-500/25"
         )}
       >
