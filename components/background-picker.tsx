@@ -34,7 +34,7 @@ export function BackgroundPicker({
       className={cn(
         "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border transition-all duration-500 overflow-hidden bg-white/5",
         currentPaper.id === paper.id
-          ? "border-[#F5F0E8] scale-[1.12] ring-2 ring-[#F5F0E8] ring-offset-4 ring-offset-[#161412] shadow-xl"
+          ? "border-[#F5F0E8] scale-[1.12] ring-2 ring-[#F5F0E8] ring-offset-4 ring-offset-[#161412]"
           : "border-white/10 hover:border-white/30"
       )}
     >
@@ -46,12 +46,11 @@ export function BackgroundPicker({
     <div className="space-y-3">
       {/* Tones Row */}
       <div className="flex items-center py-1">
-        {/* Fixed label */}
         <span className="flex-shrink-0 font-jost text-[9px] font-bold tracking-[0.2em] opacity-40 uppercase pl-8 pr-4">
           tones
         </span>
-        {/* Scrollable swatches */}
-        <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-8 py-3">
+        {/* pl-3 ensures ring-offset isn't clipped on first item */}
+        <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pl-3 pr-8 py-3">
           {TONES.map((tone) => (
             <button
               key={tone.id}
@@ -63,7 +62,7 @@ export function BackgroundPicker({
                 "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border-2 transition-all duration-500",
                 tone.class,
                 currentTone.id === tone.id
-                  ? "border-[#F5F0E8] scale-[1.15] shadow-[0_0_20px_rgba(245,240,232,0.2)] ring-2 ring-[#F5F0E8] ring-offset-2 ring-offset-[#161412]"
+                  ? "border-[#F5F0E8] scale-[1.15] ring-2 ring-[#F5F0E8] ring-offset-2 ring-offset-[#161412]"
                   : "border-white/5 hover:border-white/20"
               )}
             />
@@ -71,14 +70,12 @@ export function BackgroundPicker({
         </div>
       </div>
 
-      {/* Papers Row */}
+      {/* Canvas Row */}
       <div className="flex items-center py-1">
-        {/* Fixed label */}
         <span className="flex-shrink-0 font-jost text-[9px] font-bold tracking-[0.2em] opacity-40 uppercase pl-8 pr-4">
           canvas
         </span>
-        {/* Scrollable swatches */}
-        <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-8 py-3">
+        <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pl-3 pr-8 py-3">
           {classicPapers.map(renderSwatch)}
           <div className="w-[1.5px] h-5 bg-white/10 flex-shrink-0" />
           {modernPapers.map(renderSwatch)}
