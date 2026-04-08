@@ -20,19 +20,20 @@ export default function PoetikPage() {
     doodle,
     setDoodle,
     align,
-    setAlign,
+    toggleAlign,
+    bgOpacity,
+    setBgOpacity,
     isExporting,
     setIsExporting,
     isDoodleDrawerOpen,
     setIsDoodleDrawerOpen,
+    isToolbarOpen,
+    setIsToolbarOpen,
     uiVisible,
+    dynamicPapers,
+    dynamicDoodles,
+    handleClear,
   } = useEditor();
-
-  const handleClear = () => {
-    if (confirm("Clear all text?")) {
-      setText("");
-    }
-  };
 
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-[#0D0B09]">
@@ -44,25 +45,30 @@ export default function PoetikPage() {
         tone={tone}
         doodle={doodle}
         align={align}
+        bgOpacity={bgOpacity}
       />
 
       <TopBar 
         visible={uiVisible && !isDoodleDrawerOpen} 
         onClear={handleClear} 
         align={align}
-        onAlignToggle={() => setAlign((a: "left" | "center") => a === "center" ? "left" : "center")}
+        onAlignToggle={toggleAlign}
+        tone={tone}
       />
 
       <BottomToolbar
-        visible={uiVisible && !isDoodleDrawerOpen}
+        isOpen={isToolbarOpen}
+        onOpenToggle={setIsToolbarOpen}
         currentFont={font}
         currentTone={tone}
         currentPaper={paper}
+        dynamicPapers={dynamicPapers}
         onFontSelect={setFont}
         onToneSelect={setTone}
         onPaperSelect={setPaper}
         onExport={() => setIsExporting(true)}
         onDoodleToggle={() => setIsDoodleDrawerOpen(true)}
+        uiVisible={uiVisible}
       />
 
       <DoodleDrawer
@@ -71,6 +77,7 @@ export default function PoetikPage() {
         currentDoodle={doodle}
         onSelect={setDoodle}
         tone={tone}
+        dynamicDoodles={dynamicDoodles}
       />
 
       <ExportModal
@@ -82,6 +89,7 @@ export default function PoetikPage() {
         tone={tone}
         doodle={doodle}
         align={align}
+        bgOpacity={bgOpacity}
       />
     </main>
   );

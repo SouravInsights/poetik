@@ -4,72 +4,155 @@ import { Font, Tone, Paper } from "@/lib/constants";
 import { FontPicker } from "./font-picker";
 import { BackgroundPicker } from "./background-picker";
 import { cn } from "@/lib/utils";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { PencilEdit01Icon, ArrowRight01Icon, ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { useWebHaptics } from "web-haptics/react";
+import { motion, AnimatePresence } from "motion/react";
 
 interface BottomToolbarProps {
-  visible: boolean;
+  isOpen: boolean;
+  onOpenToggle: (open: boolean) => void;
   currentFont: Font;
   currentTone: Tone;
   currentPaper: Paper;
+  dynamicPapers: Paper[];
   onFontSelect: (font: Font) => void;
   onToneSelect: (tone: Tone) => void;
   onPaperSelect: (paper: Paper) => void;
   onExport: () => void;
   onDoodleToggle: () => void;
+  uiVisible: boolean;
 }
 
 export function BottomToolbar({
-  visible,
+  isOpen,
+  onOpenToggle,
   currentFont,
   currentTone,
   currentPaper,
+  dynamicPapers,
   onFontSelect,
   onToneSelect,
   onPaperSelect,
   onExport,
   onDoodleToggle,
+  uiVisible,
 }: BottomToolbarProps) {
+  const { trigger } = useWebHaptics();
+
   return (
-    <div
-      className={cn(
-        "fixed bottom-0 left-0 right-0 z-[100] pb-[max(env(safe-area-inset-bottom),16px)] transition-all duration-400 ease-in-out",
-        !visible && "opacity-0 pointer-events-none translate-y-[6px]"
-      )}
-    >
-      <div className="h-[0.5px] bg-current opacity-[0.08] mx-5 mb-3" />
-      
-      <FontPicker currentFont={currentFont} onSelect={onFontSelect} />
-      
-      <BackgroundPicker 
-        currentTone={currentTone} 
-        currentPaper={currentPaper}
-        onToneSelect={onToneSelect}
-        onPaperSelect={onPaperSelect}
-      />
+    <>
+      {/* Backdrop for closing */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              trigger("selection");
+              onOpenToggle(false);
+            }}
+            className="fixed inset-0 z-[90] bg-black/10 backdrop-blur-[2px]"
+          />
+        )}
+      </AnimatePresence>
 
-      <div className="flex items-center justify-between px-6">
-        <button 
-          onClick={onDoodleToggle}
-          className="flex items-center gap-2 opacity-35 hover:opacity-70 transition-opacity"
-        >
-          <span className="font-jost text-[11px] font-light tracking-[0.1em] lowercase flex items-center gap-1.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 19l7-7 3 3-7 7-3-3z" />
-              <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-              <path d="M2 2l7.586 7.586" />
-              <circle cx="11" cy="11" r="2" />
-            </svg>
-            doodle
-          </span>
-        </button>
+      <div
+        className={cn(
+          "fixed bottom-0 left-0 right-0 z-[100] transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col items-center",
+          !uiVisible && !isOpen && "translate-y-full opacity-0"
+        )}
+      >
+        {/* Peek / Tab Button */}
+        {!isOpen && (
+          <button
+            onClick={() => {
+              trigger("selection");
+              onOpenToggle(true);
+            }}
+            className={cn(
+              "px-8 py-2.5 rounded-t-[20px] backdrop-blur-3xl transition-all duration-500 hover:py-3.5 hover:scale-105 active:scale-95 group",
+              currentTone.ink === "ink-light" 
+                ? "bg-white/[0.12] text-white/60 border-t border-x border-white/10" 
+                : "bg-black/[0.06] text-black/50 border-t border-x border-black/10",
+              !uiVisible && "translate-y-full"
+            )}
+          >
+            <div className="flex flex-col items-center">
+              <HugeiconsIcon 
+                icon={ArrowUp01Icon} 
+                size={20} 
+                className="opacity-100 transition-all group-hover:-translate-y-0.5" 
+              />
+            </div>
+          </button>
+        )}
 
-        <button
-          onClick={onExport}
-          className="font-italiana text-base tracking-[0.06em] opacity-50 hover:opacity-90 transition-opacity relative pb-1"
+        {/* Expanded Shelf */}
+        <div 
+          className={cn(
+            "w-full transition-all duration-700 ease-out overflow-hidden bg-[#0D0B09]/98 backdrop-blur-3xl border-t border-white/10 shadow-2xl",
+            isOpen ? "max-h-[500px] translate-y-0" : "max-h-0 translate-y-10"
+          )}
         >
-          export
-          <div className="absolute bottom-0.5 left-0 right-0 h-[0.5px] bg-accent opacity-70" />
-        </button>
+          <div className="pt-6 pb-[max(env(safe-area-inset-bottom),24px)] text-[#F5F0E8] space-y-5">
+            {/* Header / Dismiss */}
+            <div className="flex items-center justify-between px-8 mb-2">
+              <span className="font-italiana text-[10px] uppercase tracking-[0.3em] opacity-30">editing tools</span>
+              <button 
+                onClick={() => onOpenToggle(false)}
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors"
+                aria-label="Close tools"
+              >
+                <HugeiconsIcon icon={ArrowDown01Icon} size={16} className="opacity-40" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <FontPicker currentFont={currentFont} onSelect={onFontSelect} />
+              
+              <div className="h-[1px] bg-white/5 mx-8" />
+              
+              <BackgroundPicker 
+                currentTone={currentTone} 
+                currentPaper={currentPaper}
+                dynamicPapers={dynamicPapers}
+                onToneSelect={onToneSelect}
+                onPaperSelect={onPaperSelect}
+              />
+
+              <div className="flex items-center justify-between px-8 pt-2">
+                <button 
+                  onClick={() => {
+                    trigger("selection");
+                    onDoodleToggle();
+                  }}
+                  className="flex items-center gap-3 opacity-40 hover:opacity-100 transition-all py-2 group"
+                >
+                  <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center bg-white/5 group-hover:border-white/30 transition-colors">
+                    <HugeiconsIcon icon={PencilEdit01Icon} size={16} />
+                  </div>
+                  <span className="font-jost text-[10px] tracking-[0.2em] uppercase opacity-60">graphics</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    trigger("medium");
+                    onExport();
+                  }}
+                  className="flex items-center gap-4 py-2 group transition-all"
+                >
+                  <span className="font-italiana text-xl tracking-[0.1em] opacity-80 group-hover:opacity-100 transition-all">export</span>
+                  <div className="w-10 h-10 rounded-full bg-[#f2ece0] text-black flex items-center justify-center shadow-lg group-hover:scale-105 transition-all">
+                    <HugeiconsIcon icon={ArrowRight01Icon} size={20} />
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

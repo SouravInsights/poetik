@@ -12,6 +12,7 @@ interface EditorCanvasProps {
   tone: Tone;
   doodle: string | null;
   align: "left" | "center";
+  bgOpacity: number;
 }
 
 export function EditorCanvas({
@@ -22,6 +23,7 @@ export function EditorCanvas({
   tone,
   doodle,
   align,
+  bgOpacity,
 }: EditorCanvasProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -37,19 +39,29 @@ export function EditorCanvas({
   return (
     <div
       className={cn(
-        "absolute inset-0 transition-all duration-500 ease-in-out grain",
+        "absolute inset-0 transition-all duration-700 ease-in-out grain",
         paper.type === "image" ? "bg-cover bg-center" : tone.class,
         tone.ink
       )}
       style={{
         backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined,
+        opacity: bgOpacity,
       }}
     >
-      {/* Doodle Ornament */}
+      {/* Background Overlay for UI contrast (only when paper is selected) */}
+      <div 
+        className={cn(
+          "absolute inset-0 transition-opacity duration-1000",
+          paper.type === "image" ? "opacity-20" : "opacity-0",
+          isDark ? "bg-black" : "bg-white"
+        )} 
+      />
+
+      {/* Doodle Ornament (Signature Position) */}
       {doodle && (
         <div 
           className={cn(
-            "absolute bottom-[130px] right-[28px] w-11 h-11 opacity-25 pointer-events-none transition-opacity",
+            "absolute bottom-32 right-10 w-16 h-16 opacity-10 pointer-events-none transition-all duration-1000",
             isDark ? "invert brightness-200" : "brightness-50"
           )}
         >
@@ -59,7 +71,7 @@ export function EditorCanvas({
 
       {/* Writing Area */}
       <div className={cn(
-        "absolute inset-0 flex items-center px-10 pb-[120px] pt-[90px]",
+        "absolute inset-0 flex items-center px-10 pb-[150px] pt-[100px]",
         align === "center" ? "justify-center" : "justify-start"
       )}>
         <textarea
@@ -71,8 +83,9 @@ export function EditorCanvas({
           autoCorrect="off"
           placeholder="kuch likho..."
           className={cn(
-            "w-full max-w-[340px] bg-transparent border-none outline-none resize-none transition-all duration-300",
-            "text-[clamp(17px,4.8vw,28px)] leading-[2] tracking-[0.02em] italic",
+            "w-full bg-transparent border-none outline-none resize-none transition-all duration-300",
+            "text-[clamp(26px,7.5vw,52px)] leading-[1.6] tracking-[0.01em] italic",
+            "placeholder:opacity-20 placeholder:text-current",
             align === "center" ? "text-center" : "text-left",
             font.class
           )}

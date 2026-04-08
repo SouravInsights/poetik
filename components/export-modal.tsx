@@ -5,6 +5,9 @@ import { cn } from "@/lib/utils";
 import { Font, Paper, Tone } from "@/lib/constants";
 import { toPng } from "html-to-image";
 import { motion, AnimatePresence } from "motion/react";
+import { useWebHaptics } from "web-haptics/react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Download01Icon, ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -15,6 +18,7 @@ interface ExportModalProps {
   tone: Tone;
   doodle: string | null;
   align: "left" | "center";
+  bgOpacity: number;
 }
 
 export function ExportModal({
@@ -26,11 +30,14 @@ export function ExportModal({
   tone,
   doodle,
   align,
+  bgOpacity,
 }: ExportModalProps) {
   const exportRef = useRef<HTMLDivElement>(null);
+  const { trigger } = useWebHaptics();
 
   const handleDownload = async () => {
     if (exportRef.current === null) return;
+    trigger("success");
     
     try {
       const dataUrl = await toPng(exportRef.current, {
@@ -56,29 +63,33 @@ export function ExportModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[500] bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center p-8 gap-10"
-        >
+        <div className="fixed inset-0 z-[1000] flex flex-col items-center justify-center p-6 sm:p-10">
           {/* Main Export Frame (Hidden from view but used for generation) */}
           <div className="absolute opacity-0 pointer-events-none overflow-hidden" style={{ width: 1080, height: 1920 }}>
             <div 
               ref={exportRef}
               className={cn(
-                "w-full h-full relative flex items-center justify-center p-20 grain",
+                "w-full h-full relative flex items-center px-[120px] grain",
+                align === "center" ? "justify-center" : "justify-start",
                 paper.type === "image" ? "bg-cover bg-center" : tone.class,
                 tone.ink
               )}
-              style={{
+              style={{ 
                 backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined,
+                opacity: bgOpacity,
               }}
             >
-               {doodle && (
+              <div 
+                className={cn(
+                  "absolute inset-0 transition-opacity",
+                  paper.type === "image" ? "opacity-20" : "opacity-0",
+                  isDark ? "bg-black" : "bg-white"
+                )} 
+              />
+              {doodle && (
                 <div 
                   className={cn(
-                    "absolute bottom-[160px] right-[100px] w-28 h-28 opacity-25 transition-opacity",
+                    "absolute bottom-[240px] right-[100px] w-40 h-40 opacity-30",
                     isDark ? "invert brightness-200" : "brightness-50"
                   )}
                 >
@@ -87,13 +98,13 @@ export function ExportModal({
               )}
               <div 
                 className={cn(
-                  "italic leading-[2] tracking-[0.02em] whitespace-pre-wrap break-words",
+                  "italic leading-[1.8] tracking-[0.03em] whitespace-pre-wrap break-words",
                   align === "center" ? "text-center" : "text-left",
                   font.class
                 )}
                 style={{ 
                   fontFamily: `var(${font.variable})`,
-                  fontSize: "64px",
+                  fontSize: "80px",
                   maxWidth: "900px"
                 }}
               >
@@ -102,26 +113,45 @@ export function ExportModal({
             </div>
           </div>
 
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              trigger("selection");
+              onClose();
+            }}
+            className="absolute inset-0 bg-[#0D0B09]/95 backdrop-blur-3xl"
+          />
+
           {/* Preview Container (Visible) */}
           <motion.div 
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
-            className="relative w-[min(240px,50vw)] aspect-[9/16] rounded-lg overflow-hidden shadow-2xl ring-1 ring-white/10"
+            className="relative w-[min(280px,65vw)] aspect-[9/16] rounded-[24px] overflow-hidden shadow-[0_32px_96px_-16px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
           >
             <div 
               className={cn(
-                "w-full h-full relative flex items-center px-6 grain",
+                "w-full h-full relative flex items-center px-8 grain",
                 align === "center" ? "justify-center" : "justify-start",
                 paper.type === "image" ? "bg-cover bg-center" : tone.class,
                 tone.ink
               )}
               style={{
                 backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined,
+                opacity: bgOpacity,
               }}
             >
               <div 
                 className={cn(
-                  "italic leading-[2] tracking-[0.02em] text-[15px] whitespace-pre-wrap",
+                  "absolute inset-0",
+                  paper.type === "image" ? "opacity-20" : "opacity-0",
+                  isDark ? "bg-black" : "bg-white"
+                )} 
+              />
+              <div 
+                className={cn(
+                  "italic leading-[1.8] tracking-[0.03em] text-[18px] whitespace-pre-wrap z-10",
                   align === "center" ? "text-center" : "text-left",
                   font.class
                 )}
@@ -133,22 +163,36 @@ export function ExportModal({
           </motion.div>
 
           {/* Actions */}
-          <div className="flex flex-col items-center gap-6 w-full max-w-[220px]">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex flex-col items-center gap-8 mt-12 relative z-20"
+          >
+            <p className="font-jost text-[12px] uppercase tracking-[0.4em] opacity-40 text-[#f2ece0] font-light">
+              story ready
+            </p>
+            
             <button
               onClick={handleDownload}
-              className="font-italiana text-lg tracking-wider text-[#f2ece0]/80 hover:text-[#f2ece0] transition-colors relative pb-1 group"
+              className="group flex items-center gap-3 px-10 py-5 bg-[#f2ece0] text-black font-italiana text-lg tracking-[0.1em] rounded-full hover:scale-105 active:scale-95 transition-all shadow-xl"
             >
-              save to photos
-              <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-accent opacity-70 scale-x-100 group-hover:scale-x-110 transition-transform" />
+              <HugeiconsIcon icon={Download01Icon} size={20} className="transition-transform group-hover:translate-y-0.5" />
+              <span>save to phone</span>
             </button>
+
             <button
-              onClick={onClose}
-              className="font-jost text-[11px] font-light tracking-[0.12em] lowercase text-[#f2ece0]/25 hover:text-[#f2ece0]/55 transition-colors"
+              onClick={() => {
+                trigger("selection");
+                onClose();
+              }}
+              className="flex items-center gap-2 font-jost text-[12px] uppercase tracking-[0.2em] opacity-30 hover:opacity-100 transition-all py-2"
             >
-              dismiss
+              <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
+              <span>back to edit</span>
             </button>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );

@@ -1,8 +1,11 @@
 "use client";
 
-import { DOODLES, Tone } from "@/lib/constants";
+import { Tone } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
+import { useWebHaptics } from "web-haptics/react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
 interface DoodleDrawerProps {
   isOpen: boolean;
@@ -10,6 +13,7 @@ interface DoodleDrawerProps {
   currentDoodle: string | null;
   onSelect: (doodle: string | null) => void;
   tone: Tone;
+  dynamicDoodles: string[];
 }
 
 export function DoodleDrawer({
@@ -18,7 +22,9 @@ export function DoodleDrawer({
   currentDoodle,
   onSelect,
   tone,
+  dynamicDoodles,
 }: DoodleDrawerProps) {
+  const { trigger } = useWebHaptics();
   const isDark = tone.ink === "ink-light";
 
   return (
@@ -29,61 +35,69 @@ export function DoodleDrawer({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 z-[150] bg-black/40 backdrop-blur-sm"
+            onClick={() => {
+              trigger("selection");
+              onClose();
+            }}
+            className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-md"
           />
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 z-[200] bg-[#0c0a08]/95 backdrop-blur-2xl border-t border-white/5 p-6 pb-[max(env(safe-area-inset-bottom),24px)]"
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="fixed bottom-0 left-0 right-0 z-[200] bg-[#0D0B09]/98 backdrop-blur-3xl border-t border-white/10 p-6 pb-[max(env(safe-area-inset-bottom),20px)] rounded-t-[24px]"
           >
-            <div className="flex items-center justify-between mb-6">
-              <span className="font-jost text-[10px] font-light tracking-[0.18em] lowercase text-[#f2ece0]/35 uppercase">
-                doodles
+            <div className="flex items-center justify-between mb-6 px-2">
+              <span className="font-jost text-[10px] font-medium tracking-[0.3em] lowercase text-[#f2ece0]/30 uppercase">
+                graphics
               </span>
               <button
-                onClick={onClose}
-                className="font-jost text-[11px] font-light tracking-[0.1em] lowercase text-[#f2ece0]/35 hover:text-[#f2ece0]/70 transition-colors"
+                onClick={() => {
+                  trigger("selection");
+                  onClose();
+                }}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-[#f2ece0]/40 hover:text-[#f2ece0] transition-all"
               >
-                close
+                <HugeiconsIcon icon={Cancel01Icon} size={14} />
               </button>
             </div>
 
-            <div className="grid grid-cols-6 gap-3 max-h-[40dvh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-3 max-h-[40dvh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-2 px-2">
               <button
                 onClick={() => {
+                  trigger("selection");
                   onSelect(null);
                   onClose();
                 }}
                 className={cn(
-                  "aspect-square rounded-md border flex items-center justify-center transition-all duration-200",
+                  "aspect-square rounded-lg border flex items-center justify-center transition-all duration-300",
                   currentDoodle === null
-                    ? "border-accent bg-accent/15"
-                    : "border-white/5 hover:bg-white/5"
+                    ? "border-accent bg-accent/20 text-accent"
+                    : "border-white/5 bg-white/5 hover:bg-white/10 text-white/20"
                 )}
               >
-                <span className="font-jost text-[10px] opacity-40">none</span>
+                <span className="font-jost text-[7px] uppercase tracking-tighter">none</span>
               </button>
-              {DOODLES.map((doodle) => (
+              {dynamicDoodles.map((doodle) => (
                 <button
                   key={doodle}
                   onClick={() => {
+                    trigger("light");
                     onSelect(doodle);
                     onClose();
                   }}
                   className={cn(
-                    "aspect-square rounded-md border p-1.5 transition-all duration-200 flex items-center justify-center",
+                    "aspect-square rounded-lg border p-1.5 transition-all duration-300 flex items-center justify-center group",
                     currentDoodle === doodle
-                      ? "border-accent bg-accent/15"
-                      : "border-white/5 hover:bg-white/5 opacity-45 hover:opacity-85"
+                      ? "border-accent bg-accent/20"
+                      : "border-white/5 bg-white/5 hover:bg-white/10 opacity-60 hover:opacity-100"
                   )}
                 >
                   <img
                     src={`/doodles/${doodle}`}
                     alt=""
-                    className="w-full h-full object-contain invert brightness-200"
+                    className="w-full h-full object-contain invert brightness-200 transition-transform group-hover:scale-110"
                   />
                 </button>
               ))}
