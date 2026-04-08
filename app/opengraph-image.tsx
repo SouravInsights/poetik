@@ -43,14 +43,11 @@ export default async function Image() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
           color: '#1A1714',
-          fontFamily: 'sans-serif', // Fallback for the subtext
+          position: 'relative',
         }}
       >
-        {/* Background Image injected cleanly via base64 */}
+        {/* Background Image */}
         <img
           src={bgBase64}
           style={{
@@ -63,53 +60,87 @@ export default async function Image() {
           }}
         />
 
-        {/* Inner Content Wrapper */}
+        {/* Elegant Inner Frame */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
+            width: '1120px',  // 1200 - 80
+            height: '550px',  // 630 - 80
+            margin: '40px',
+            border: '1.5px solid rgba(26,23,20,0.15)',
             position: 'relative',
           }}
         >
-          {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+          {/* Top Logo Area */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+              <span
+                style={{
+                  fontFamily: fontItaliana ? '"Italiana"' : 'serif',
+                  fontSize: 32,
+                  letterSpacing: '0.4em',
+                  textTransform: 'uppercase',
+                  marginRight: -10,
+                }}
+              >
+                poetik
+              </span>
+              <div
+                style={{
+                  width: 6,
+                  height: 6,
+                  backgroundColor: '#1A1714',
+                  borderRadius: '50%',
+                  marginTop: 6,
+                  marginLeft: 5,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Center Hero Statement */}
+          <div
+            style={{
+              display: 'flex',
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 100px',
+              textAlign: 'center',
+            }}
+          >
             <span
               style={{
                 fontFamily: fontItaliana ? '"Italiana"' : 'serif',
-                fontSize: 100,
-                letterSpacing: '0.3em',
-                textTransform: 'uppercase',
-                marginRight: -10, // visually balanced tracking
+                fontSize: 80,
+                lineHeight: 1.3,
+                letterSpacing: '0.02em',
+                opacity: 0.85,
               }}
             >
-              poetik
+              A minimal, distraction-free app for writing poetry.
             </span>
-            <div
-              style={{
-                width: 14,
-                height: 14,
-                backgroundColor: '#1A1714',
-                borderRadius: '50%',
-                marginTop: 15,
-                marginLeft: 5,
-              }}
-            />
           </div>
 
-          {/* Subtitle */}
+          {/* Bottom Footnote Area */}
           <div
             style={{
-              marginTop: 24,
-              fontSize: 28,
-              color: '#1A1714',
-              opacity: 0.7,
-              letterSpacing: '0.15em',
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '0 60px',
+              marginBottom: 40,
+              opacity: 0.35,
+              fontSize: 16,
+              letterSpacing: '0.3em',
               textTransform: 'uppercase',
+              fontFamily: 'sans-serif',
+              fontWeight: 500,
             }}
           >
-            A minimal, distraction-free app for writing poetry.
+            <span style={{ display: 'flex' }}>WRITE</span>
+            <span style={{ display: 'flex' }}>STYLE</span>
+            <span style={{ display: 'flex' }}>SHARE</span>
           </div>
         </div>
       </div>
