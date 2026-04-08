@@ -154,12 +154,10 @@ export function BottomToolbar({
                         trigger(20);
                         onDoodleToggle();
                       }}
-                      className="flex items-center gap-4 transition-all py-2 group"
+                      className="flex items-center gap-2 font-jost text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2 px-4 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 select-none"
                     >
-                      <div className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center bg-white/5 group-hover:bg-white/10 group-hover:border-accent/40 transition-all shadow-lg">
-                        <HugeiconsIcon icon={PencilEdit01Icon} size={18} strokeWidth={2} />
-                      </div>
-                      <span className="font-jost text-[11px] tracking-[0.3em] uppercase opacity-70 group-hover:opacity-100 font-bold">graphics</span>
+                      <HugeiconsIcon icon={PencilEdit01Icon} size={13} strokeWidth={2.5} />
+                      <span className="mt-0.5">graphics</span>
                     </button>
 
                     <button
@@ -167,12 +165,10 @@ export function BottomToolbar({
                         trigger("nudge");
                         onExport();
                       }}
-                      className="flex items-center gap-5 py-2 group transition-all"
+                      className="flex items-center gap-2 font-jost text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2 px-4 rounded-full bg-[#F5F0E8] text-[#1A1714] hover:bg-white active:scale-95 select-none shadow-md"
                     >
-                      <span className="font-italiana text-2xl tracking-[0.1em] opacity-90 group-hover:opacity-100 transition-all group-hover:translate-x-[-4px]">export</span>
-                      <div className="w-12 h-12 rounded-full bg-[#f2ece0] text-black flex items-center justify-center shadow-xl group-hover:scale-110 active:scale-95 transition-all">
-                        <HugeiconsIcon icon={ArrowRight01Icon} size={22} strokeWidth={2.5} />
-                      </div>
+                      <HugeiconsIcon icon={ArrowRight01Icon} size={13} strokeWidth={2.5} />
+                      <span className="mt-0.5">export</span>
                     </button>
                   </div>
                 </div>
