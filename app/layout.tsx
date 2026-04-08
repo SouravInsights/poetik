@@ -7,17 +7,21 @@ import {
   Lora,
   Italiana,
   Jost
-} from "next/font/google"
+} from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "poetik",
-  description: "A tool for feeling, not for function.",
-  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+  description: "A minimal, distraction-free app for writing poetry. Pick a canvas, choose a font, and easily share your poems with the world.",
 };
 
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 const cormorant = Cormorant_Garamond({ 
