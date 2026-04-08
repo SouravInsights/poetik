@@ -11,6 +11,8 @@ interface EditorCanvasProps {
   paper: Paper;
   tone: Tone;
   doodle: string | null;
+  doodleColor: string;
+  author: string;
   align: "left" | "center";
   bgOpacity: number;
 }
@@ -22,6 +24,8 @@ export function EditorCanvas({
   paper,
   tone,
   doodle,
+  doodleColor,
+  author,
   align,
   bgOpacity,
 }: EditorCanvasProps) {
@@ -48,7 +52,7 @@ export function EditorCanvas({
         opacity: bgOpacity,
       }}
     >
-      {/* Background Overlay for UI contrast (only when paper is selected) */}
+      {/* Background Overlay for UI contrast */}
       <div 
         className={cn(
           "absolute inset-0 transition-opacity duration-1000",
@@ -57,22 +61,9 @@ export function EditorCanvas({
         )} 
       />
 
-      {/* Doodle Ornament (Signature Position) */}
-      {doodle && (
-        <div 
-          className={cn(
-            "absolute bottom-32 right-10 w-16 h-16 opacity-10 pointer-events-none transition-all duration-1000",
-            isDark ? "invert brightness-200" : "brightness-50"
-          )}
-        >
-          <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
-        </div>
-      )}
-
       {/* Writing Area */}
       <div className={cn(
-        "absolute inset-0 flex items-center px-10 pb-[150px] pt-[100px]",
-        align === "center" ? "justify-center" : "justify-start"
+        "absolute inset-0 flex flex-col items-center justify-center px-8 pb-[140px] pt-[80px]"
       )}>
         <textarea
           ref={textareaRef}
@@ -93,6 +84,36 @@ export function EditorCanvas({
           rows={1}
         />
       </div>
+
+      {/* Brand/Signature Block (Detached) */}
+      {(doodle || author) && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 transition-all duration-700 pointer-events-none">
+          {doodle && (
+            <div 
+              className="w-10 h-10 opacity-30"
+              style={{
+                WebkitMaskImage: `url(/doodles/${doodle})`,
+                maskImage: `url(/doodles/${doodle})`,
+                WebkitMaskSize: 'contain',
+                maskSize: 'contain',
+                WebkitMaskRepeat: 'no-repeat',
+                maskRepeat: 'no-repeat',
+                WebkitMaskPosition: 'center',
+                maskPosition: 'center',
+                backgroundColor: doodleColor
+              }}
+            />
+          )}
+          {author && (
+            <span className={cn(
+              "font-jost text-[9px] tracking-[0.3em] uppercase opacity-30",
+              isDark ? "text-white" : "text-black"
+            )}>
+              {author.startsWith('@') ? author : `@${author}`}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

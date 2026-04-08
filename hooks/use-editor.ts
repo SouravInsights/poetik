@@ -11,6 +11,8 @@ export function useEditor() {
   const [paper, setPaper] = useState<Paper>(PAPERS[0]);
   const [tone, setTone] = useState<Tone>(TONES[0]);
   const [doodle, setDoodle] = useState<string | null>(null);
+  const [doodleColor, setDoodleColor] = useState<string>("#FFFFFF");
+  const [author, setAuthor] = useState<string>("");
   const [align, setAlign] = useState<"left" | "center">("center");
   const [bgOpacity, setBgOpacity] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
@@ -73,6 +75,8 @@ export function useEditor() {
           if (found) setTone(found);
         }
         if (parsed.doodle) setDoodle(parsed.doodle);
+        if (parsed.doodleColor) setDoodleColor(parsed.doodleColor);
+        if (parsed.author) setAuthor(parsed.author);
         if (parsed.align) setAlign(parsed.align);
         if (parsed.bgOpacity !== undefined) setBgOpacity(parsed.bgOpacity);
       } catch (e) {
@@ -83,7 +87,7 @@ export function useEditor() {
 
   useEffect(() => {
     localStorage.setItem("poetik-state", JSON.stringify({ 
-      text, font, paper, tone, doodle, align, bgOpacity 
+      text, font, paper, tone, doodle, doodleColor, align, bgOpacity 
     }));
   }, [text, font, paper, tone, doodle, align, bgOpacity]);
 
@@ -159,6 +163,10 @@ export function useEditor() {
     setTone: handleSetTone,
     doodle,
     setDoodle: handleSetDoodle,
+    doodleColor,
+    setDoodleColor,
+    author,
+    setAuthor,
     align,
     toggleAlign: handleSetAlign,
     bgOpacity,

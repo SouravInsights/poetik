@@ -19,6 +19,10 @@ export default function PoetikPage() {
     setTone,
     doodle,
     setDoodle,
+    doodleColor,
+    setDoodleColor,
+    author,
+    setAuthor,
     align,
     toggleAlign,
     bgOpacity,
@@ -44,6 +48,8 @@ export default function PoetikPage() {
         paper={paper}
         tone={tone}
         doodle={doodle}
+        doodleColor={doodleColor}
+        author={author}
         align={align}
         bgOpacity={bgOpacity}
       />
@@ -63,6 +69,8 @@ export default function PoetikPage() {
         currentTone={tone}
         currentPaper={paper}
         dynamicPapers={dynamicPapers}
+        author={author}
+        onAuthorChange={setAuthor}
         onFontSelect={setFont}
         onToneSelect={setTone}
         onPaperSelect={setPaper}
@@ -76,6 +84,8 @@ export default function PoetikPage() {
         onClose={() => setIsDoodleDrawerOpen(false)}
         currentDoodle={doodle}
         onSelect={setDoodle}
+        currentDoodleColor={doodleColor}
+        onColorSelect={setDoodleColor}
         tone={tone}
         dynamicDoodles={dynamicDoodles}
       />
@@ -88,6 +98,8 @@ export default function PoetikPage() {
         paper={paper}
         tone={tone}
         doodle={doodle}
+        doodleColor={doodleColor}
+        author={author}
         align={align}
         bgOpacity={bgOpacity}
       />

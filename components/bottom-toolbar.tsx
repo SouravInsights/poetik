@@ -5,7 +5,7 @@ import { FontPicker } from "./font-picker";
 import { BackgroundPicker } from "./background-picker";
 import { cn } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { PencilEdit01Icon, ArrowRight01Icon, ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { PencilEdit01Icon, ArrowRight01Icon, ArrowUp01Icon, ArrowDown01Icon, UserIcon } from "@hugeicons/core-free-icons";
 import { useWebHaptics } from "web-haptics/react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -16,6 +16,8 @@ interface BottomToolbarProps {
   currentTone: Tone;
   currentPaper: Paper;
   dynamicPapers: Paper[];
+  author: string;
+  onAuthorChange: (val: string) => void;
   onFontSelect: (font: Font) => void;
   onToneSelect: (tone: Tone) => void;
   onPaperSelect: (paper: Paper) => void;
@@ -31,6 +33,8 @@ export function BottomToolbar({
   currentTone,
   currentPaper,
   dynamicPapers,
+  author,
+  onAuthorChange,
   onFontSelect,
   onToneSelect,
   onPaperSelect,
@@ -42,7 +46,6 @@ export function BottomToolbar({
 
   return (
     <>
-      {/* Backdrop for closing */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -64,7 +67,6 @@ export function BottomToolbar({
           !uiVisible && !isOpen && "translate-y-full opacity-0"
         )}
       >
-        {/* Peek / Tab Button */}
         {!isOpen && (
           <button
             onClick={() => {
@@ -80,25 +82,20 @@ export function BottomToolbar({
             )}
           >
             <div className="flex flex-col items-center">
-              <HugeiconsIcon 
-                icon={ArrowUp01Icon} 
-                size={20} 
-                className="opacity-100 transition-all group-hover:-translate-y-0.5" 
-              />
+              <HugeiconsIcon icon={ArrowUp01Icon} size={20} className="opacity-100 transition-all group-hover:-translate-y-0.5" />
             </div>
           </button>
         )}
 
-        {/* Expanded Shelf */}
         <div 
           className={cn(
             "w-full transition-all duration-700 ease-out overflow-hidden bg-[#0D0B09]/98 backdrop-blur-3xl border-t border-white/10 shadow-2xl",
-            isOpen ? "max-h-[500px] translate-y-0" : "max-h-0 translate-y-10"
+            isOpen ? "max-h-[600px] translate-y-0" : "max-h-0 translate-y-10"
           )}
         >
-          <div className="pt-6 pb-[max(env(safe-area-inset-bottom),24px)] text-[#F5F0E8] space-y-5">
+          <div className="pt-6 pb-[max(env(safe-area-inset-bottom),24px)] text-[#F5F0E8] space-y-6">
             {/* Header / Dismiss */}
-            <div className="flex items-center justify-between px-8 mb-2">
+            <div className="flex items-center justify-between px-8">
               <span className="font-italiana text-[10px] uppercase tracking-[0.3em] opacity-30">editing tools</span>
               <button 
                 onClick={() => onOpenToggle(false)}
@@ -109,7 +106,24 @@ export function BottomToolbar({
               </button>
             </div>
 
-            <div className="space-y-4">
+            {/* Author Input Section */}
+            <div className="px-8">
+              <div className="relative group">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none opacity-20 group-focus-within:opacity-100 group-focus-within:text-accent transition-all">
+                  <HugeiconsIcon icon={UserIcon} size={14} />
+                  <span className="font-jost text-[10px] uppercase tracking-[0.2em]">@</span>
+                </div>
+                <input
+                  type="text"
+                  value={author}
+                  onChange={(e) => onAuthorChange(e.target.value)}
+                  placeholder="USERNAME"
+                  className="w-full bg-transparent border-b border-white/5 py-3 pl-10 outline-none font-jost text-[11px] tracking-[0.3em] uppercase placeholder:opacity-20 focus:border-accent/40 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-5">
               <FontPicker currentFont={currentFont} onSelect={onFontSelect} />
               
               <div className="h-[1px] bg-white/5 mx-8" />
