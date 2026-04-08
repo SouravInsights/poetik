@@ -25,7 +25,7 @@ export default function PoetikPage() {
   } = useEditor();
 
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-[#0D0B09]">
+    <main className="relative h-[100dvh] w-screen overflow-hidden bg-[#0D0B09]">
       <EditorCanvas
         text={text}
         setText={setText}
