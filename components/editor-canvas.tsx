@@ -77,7 +77,7 @@ export function EditorCanvas({
           spellCheck={false}
           autoComplete="off"
           autoCorrect="off"
-          placeholder="kuch likho..."
+          placeholder="arz kiya hai..."
           className={cn(
             "w-full bg-transparent border-none outline-none resize-none transition-all duration-300",
             "text-[clamp(26px,7.5vw,52px)] leading-[1.6] tracking-[0.01em] italic",
