@@ -68,7 +68,7 @@ export function EditorCanvas({
       />
 
       <div className={cn(
-        "absolute inset-0 flex flex-col items-center justify-center px-8 pb-[140px] pt-[80px]"
+        "absolute inset-0 flex flex-col items-center justify-center px-8 pb-[90px] pt-[80px]"
       )}>
         <textarea
           ref={textareaRef}
@@ -91,11 +91,11 @@ export function EditorCanvas({
       </div>
 
       {(doodle || author) && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 transition-all duration-700 pointer-events-none">
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-all duration-700 pointer-events-none">
           {doodle && (
             <div 
               className={cn(
-                "w-10 h-10 opacity-40 transition-all duration-700",
+                "w-9 h-9 opacity-40 transition-all duration-700",
                 isDark ? "invert brightness-200" : "brightness-0"
               )}
             >
@@ -104,7 +104,7 @@ export function EditorCanvas({
           )}
           {author && (
             <span className={cn(
-              "font-jost text-[9px] tracking-[0.3em] uppercase opacity-30 mt-1",
+              "font-jost text-[8px] tracking-[0.3em] uppercase opacity-30",
               isDark ? "text-white" : "text-black"
             )}>
               {author.startsWith('@') ? author : `@${author}`}
