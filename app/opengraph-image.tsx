@@ -10,7 +10,7 @@ export const size = {
 export const contentType = 'image/jpeg';
 
 export default async function Image() {
-  const bgPath = join(process.cwd(), 'public', 'modern-backgrounds', '10.jpg');
+  const bgPath = join(process.cwd(), 'public', 'og-bg.jpg');
   const bgData = readFileSync(bgPath);
   const bgBase64 = `data:image/jpeg;base64,${bgData.toString('base64')}`;
 
