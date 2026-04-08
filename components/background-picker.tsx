@@ -28,13 +28,13 @@ export function BackgroundPicker({
     <button
       key={paper.id}
       onClick={() => {
-        trigger("medium");
+        trigger(35);
         onPaperSelect(paper);
       }}
       className={cn(
         "w-8 h-8 rounded-full flex-shrink-0 cursor-pointer border transition-all duration-500 overflow-hidden bg-white/5",
         currentPaper.id === paper.id
-          ? "border-accent scale-[1.1] ring-2 ring-accent/10"
+          ? "border-[#F5F0E8] scale-[1.12] ring-2 ring-[#F5F0E8] ring-offset-4 ring-offset-[#161412] shadow-xl"
           : "border-white/10 hover:border-white/30"
       )}
     >
@@ -53,14 +53,14 @@ export function BackgroundPicker({
           <button
             key={tone.id}
             onClick={() => {
-              trigger("medium");
+              trigger(35);
               onToneSelect(tone);
             }}
             className={cn(
               "w-8 h-8 rounded-full flex-shrink-0 cursor-pointer border-2 transition-all duration-500",
               tone.class,
               currentTone.id === tone.id
-                ? "border-accent scale-[1.15] shadow-[0_0_15px_rgba(139,69,19,0.3)]"
+                ? "border-[#F5F0E8] scale-[1.15] shadow-[0_0_20px_rgba(245,240,232,0.2)] ring-2 ring-[#F5F0E8] ring-offset-2 ring-offset-[#161412]"
                 : "border-white/5 hover:border-white/20"
             )}
           />

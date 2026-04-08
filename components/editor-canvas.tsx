@@ -39,8 +39,6 @@ export function EditorCanvas({
   }, [text]);
 
   const handleTextChange = (val: string) => {
-    // Sharp 15ms pulse for writing. 
-    // This is a direct Vibration API call through web-haptics for maximum intensity.
     trigger(15);
     setText(val);
   };
@@ -67,8 +65,11 @@ export function EditorCanvas({
         )} 
       />
 
+      {/* Writing Area */}
       <div className={cn(
-        "absolute inset-0 flex flex-col items-center justify-center px-8 pb-[140px] pt-[80px]"
+        "absolute inset-0 flex flex-col items-center px-6 sm:px-12",
+        "overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
+        "pb-[220px] pt-[max(env(safe-area-inset-top),100px)]"
       )}>
         <textarea
           ref={textareaRef}
@@ -80,22 +81,26 @@ export function EditorCanvas({
           placeholder="kuch likho..."
           className={cn(
             "w-full bg-transparent border-none outline-none resize-none transition-all duration-300",
-            "text-[clamp(26px,7.5vw,52px)] leading-[1.6] tracking-[0.01em] italic",
+            "text-[clamp(28px,8vw,56px)] leading-[1.5] tracking-[0.01em] italic",
             "placeholder:opacity-20 placeholder:text-current",
             align === "center" ? "text-center" : "text-left",
             font.class
           )}
-          style={{ fontFamily: `var(${font.variable})` }}
+          style={{ 
+            fontFamily: `var(${font.variable})`,
+            minHeight: "100px" 
+          }}
           rows={1}
         />
       </div>
 
+      {/* Signature & Author Block */}
       {(doodle || author) && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 transition-all duration-700 pointer-events-none">
+        <div className="fixed bottom-28 sm:bottom-32 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 transition-all duration-700 pointer-events-none z-20">
           {doodle && (
             <div 
               className={cn(
-                "w-10 h-10 opacity-40 transition-all duration-700",
+                "w-10 h-10 sm:w-12 sm:h-12 opacity-40 transition-all duration-700",
                 isDark ? "invert brightness-200" : "brightness-0"
               )}
             >
@@ -104,7 +109,7 @@ export function EditorCanvas({
           )}
           {author && (
             <span className={cn(
-              "font-jost text-[9px] tracking-[0.3em] uppercase opacity-30 mt-1",
+              "font-jost text-[9px] sm:text-[10px] tracking-[0.3em] uppercase opacity-30 mt-1",
               isDark ? "text-white" : "text-black"
             )}>
               {author.startsWith('@') ? author : `@${author}`}

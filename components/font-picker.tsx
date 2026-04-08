@@ -37,7 +37,7 @@ export function FontPicker({ currentFont, onSelect }: FontPickerProps) {
           {currentFont.name === font.name && (
             <motion.div 
               layoutId="font-underline"
-              className="absolute bottom-1 left-4 right-4 h-[1.5px] bg-accent rounded-full" 
+              className="absolute bottom-1 left-4 right-4 h-[1.5px] bg-[#F5F0E8] rounded-full" 
             />
           )}
         </button>
