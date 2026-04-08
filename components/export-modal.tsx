@@ -120,9 +120,9 @@ export function ExportModal({
                 {text}
               </div>
               {(doodle || author) && (
-                <div className="mt-[120px] flex flex-col items-center gap-8">
+                <div className="absolute bottom-[120px] left-0 right-0 flex flex-col items-center gap-8">
                   {doodle && (
-                    <div className={cn("w-24 h-24 opacity-40 transition-all", isDark ? "invert brightness-200" : "brightness-0")}>
+                    <div className={cn("w-24 h-24 opacity-40", isDark ? "invert brightness-200" : "brightness-0")}>
                       <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
                     </div>
                   )}
@@ -159,9 +159,9 @@ export function ExportModal({
                 {text}
               </div>
               {(doodle || author) && (
-                <div className="mt-8 flex flex-col items-center gap-3 z-10">
+                <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-2 z-10">
                   {doodle && (
-                    <div className={cn("w-8 h-8 opacity-40 transition-all", isDark ? "invert brightness-200" : "brightness-0")}>
+                    <div className={cn("w-8 h-8 opacity-40", isDark ? "invert brightness-200" : "brightness-0")}>
                       <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
                     </div>
                   )}
