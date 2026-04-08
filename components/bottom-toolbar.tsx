@@ -89,41 +89,41 @@ export function BottomToolbar({
 
         <div 
           className={cn(
-            "w-full transition-all duration-700 ease-out overflow-hidden bg-[#0D0B09]/98 backdrop-blur-3xl border-t border-white/10 shadow-2xl",
+            "w-full transition-all duration-700 ease-out overflow-hidden bg-[#161412]/98 backdrop-blur-3xl border-t border-white/10 shadow-2xl",
             isOpen ? "max-h-[600px] translate-y-0" : "max-h-0 translate-y-10"
           )}
         >
-          <div className="pt-6 pb-[max(env(safe-area-inset-bottom),24px)] text-[#F5F0E8] space-y-6">
+          <div className="pt-8 pb-[max(env(safe-area-inset-bottom),24px)] text-[#F5F0E8] space-y-8">
             {/* Header / Dismiss */}
             <div className="flex items-center justify-between px-8">
-              <span className="font-italiana text-[10px] uppercase tracking-[0.3em] opacity-30">editing tools</span>
+              <span className="font-jost text-[10px] uppercase tracking-[0.4em] opacity-40 font-bold">editing shelf</span>
               <button 
                 onClick={() => onOpenToggle(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors"
                 aria-label="Close tools"
               >
-                <HugeiconsIcon icon={ArrowDown01Icon} size={16} className="opacity-40" />
+                <HugeiconsIcon icon={ArrowDown01Icon} size={14} className="opacity-60" />
               </button>
             </div>
 
             {/* Author Input Section */}
             <div className="px-8">
               <div className="relative group">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none opacity-20 group-focus-within:opacity-100 group-focus-within:text-accent transition-all">
-                  <HugeiconsIcon icon={UserIcon} size={14} />
-                  <span className="font-jost text-[10px] uppercase tracking-[0.2em]">@</span>
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none opacity-40 group-focus-within:opacity-100 group-focus-within:text-accent transition-all">
+                  <HugeiconsIcon icon={UserIcon} size={15} strokeWidth={2.5} />
+                  <span className="font-jost text-[10px] uppercase tracking-[0.2em] font-bold">@</span>
                 </div>
                 <input
                   type="text"
                   value={author}
                   onChange={(e) => onAuthorChange(e.target.value)}
                   placeholder="USERNAME"
-                  className="w-full bg-transparent border-b border-white/5 py-3 pl-10 outline-none font-jost text-[11px] tracking-[0.3em] uppercase placeholder:opacity-20 focus:border-accent/40 transition-colors"
+                  className="w-full bg-transparent border-b-2 border-white/5 py-4 pl-12 outline-none font-jost text-[12px] tracking-[0.3em] uppercase placeholder:opacity-20 focus:border-accent/60 transition-all"
                 />
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-6">
               <FontPicker currentFont={currentFont} onSelect={onFontSelect} />
               
               <div className="h-[1px] bg-white/5 mx-8" />
@@ -136,18 +136,18 @@ export function BottomToolbar({
                 onPaperSelect={onPaperSelect}
               />
 
-              <div className="flex items-center justify-between px-8 pt-2">
+              <div className="flex items-center justify-between px-8 pt-4">
                 <button 
                   onClick={() => {
                     trigger("selection");
                     onDoodleToggle();
                   }}
-                  className="flex items-center gap-3 opacity-40 hover:opacity-100 transition-all py-2 group"
+                  className="flex items-center gap-4 transition-all py-2 group"
                 >
-                  <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center bg-white/5 group-hover:border-white/30 transition-colors">
-                    <HugeiconsIcon icon={PencilEdit01Icon} size={16} />
+                  <div className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center bg-white/5 group-hover:bg-white/10 group-hover:border-accent/40 transition-all shadow-lg">
+                    <HugeiconsIcon icon={PencilEdit01Icon} size={18} strokeWidth={2} />
                   </div>
-                  <span className="font-jost text-[10px] tracking-[0.2em] uppercase opacity-60">graphics</span>
+                  <span className="font-jost text-[11px] tracking-[0.3em] uppercase opacity-70 group-hover:opacity-100 font-bold">graphics</span>
                 </button>
 
                 <button
@@ -155,11 +155,11 @@ export function BottomToolbar({
                     trigger("medium");
                     onExport();
                   }}
-                  className="flex items-center gap-4 py-2 group transition-all"
+                  className="flex items-center gap-6 py-2 group transition-all"
                 >
-                  <span className="font-italiana text-xl tracking-[0.1em] opacity-80 group-hover:opacity-100 transition-all">export</span>
-                  <div className="w-10 h-10 rounded-full bg-[#f2ece0] text-black flex items-center justify-center shadow-lg group-hover:scale-105 transition-all">
-                    <HugeiconsIcon icon={ArrowRight01Icon} size={20} />
+                  <span className="font-italiana text-2xl tracking-[0.1em] opacity-90 group-hover:opacity-100 transition-all group-hover:translate-x-[-4px]">export</span>
+                  <div className="w-12 h-12 rounded-full bg-[#f2ece0] text-black flex items-center justify-center shadow-xl group-hover:scale-110 active:scale-95 transition-all">
+                    <HugeiconsIcon icon={ArrowRight01Icon} size={22} strokeWidth={2.5} />
                   </div>
                 </button>
               </div>

@@ -43,10 +43,10 @@ export function BackgroundPicker({
   );
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Tones Row */}
-      <div className="flex gap-3 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8">
-        <span className="font-jost text-[8px] font-medium tracking-[0.2em] opacity-20 flex-shrink-0 uppercase pr-1">
+      <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-3">
+        <span className="font-jost text-[9px] font-bold tracking-[0.2em] opacity-40 flex-shrink-0 uppercase pr-2">
           tones
         </span>
         {TONES.map((tone) => (
@@ -55,27 +55,26 @@ export function BackgroundPicker({
             onClick={() => {
               trigger("medium");
               onToneSelect(tone);
-              onPaperSelect(dynamicPapers[0]);
             }}
             className={cn(
-              "w-7 h-7 rounded-full flex-shrink-0 cursor-pointer border transition-all duration-500",
+              "w-8 h-8 rounded-full flex-shrink-0 cursor-pointer border-2 transition-all duration-500",
               tone.class,
-              currentTone.id === tone.id && currentPaper.type === "color"
-                ? "border-accent scale-[1.1]"
-                : "border-white/10 hover:border-white/30"
+              currentTone.id === tone.id
+                ? "border-accent scale-[1.15] shadow-[0_0_15px_rgba(139,69,19,0.3)]"
+                : "border-white/5 hover:border-white/20"
             )}
           />
         ))}
       </div>
 
       {/* Papers Row */}
-      <div className="flex gap-3 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8">
-        <span className="font-jost text-[8px] font-medium tracking-[0.2em] opacity-20 flex-shrink-0 uppercase pr-1">
+      <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-3">
+        <span className="font-jost text-[9px] font-bold tracking-[0.2em] opacity-40 flex-shrink-0 uppercase pr-2">
           papers
         </span>
         {classicPapers.map(renderSwatch)}
         
-        <div className="w-[1px] h-4 bg-white/5 flex-shrink-0 mx-1" />
+        <div className="w-[1.5px] h-4 bg-white/10 flex-shrink-0 mx-2" />
         
         {modernPapers.map(renderSwatch)}
       </div>
