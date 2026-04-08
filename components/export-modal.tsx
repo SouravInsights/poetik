@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Font, Paper, Tone } from "@/lib/constants";
 import { toPng } from "html-to-image";
 import { motion, AnimatePresence } from "motion/react";
 import { useWebHaptics } from "web-haptics/react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Download01Icon, ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import { Download01Icon, ArrowLeft01Icon, CheckmarkCircle02Icon, Loading03Icon } from "@hugeicons/core-free-icons";
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -34,12 +34,19 @@ export function ExportModal({
 }: ExportModalProps) {
   const exportRef = useRef<HTMLDivElement>(null);
   const { trigger } = useWebHaptics();
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const handleDownload = async () => {
-    if (exportRef.current === null) return;
-    trigger("success");
+    if (exportRef.current === null || isSaving) return;
+    
+    setIsSaving(true);
+    trigger("medium");
     
     try {
+      // Small delay to ensure UI updates
+      await new Promise(r => setTimeout(r, 300));
+      
       const dataUrl = await toPng(exportRef.current, {
         cacheBust: true,
         width: 1080,
@@ -49,12 +56,19 @@ export function ExportModal({
           transformOrigin: "top left",
         }
       });
+      
       const link = document.createElement("a");
       link.download = `poetik-${Date.now()}.png`;
       link.href = dataUrl;
       link.click();
+      
+      trigger("success");
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 3000);
     } catch (err) {
       console.error("Oops, something went wrong!", err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -89,7 +103,7 @@ export function ExportModal({
               {doodle && (
                 <div 
                   className={cn(
-                    "absolute bottom-[240px] right-[100px] w-40 h-40 opacity-30",
+                    "absolute bottom-32 right-10 w-16 h-16 opacity-10",
                     isDark ? "invert brightness-200" : "brightness-50"
                   )}
                 >
@@ -118,8 +132,10 @@ export function ExportModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => {
-              trigger("selection");
-              onClose();
+              if (!isSaving) {
+                trigger("selection");
+                onClose();
+              }
             }}
             className="absolute inset-0 bg-[#0D0B09]/95 backdrop-blur-3xl"
           />
@@ -170,23 +186,36 @@ export function ExportModal({
             className="flex flex-col items-center gap-8 mt-12 relative z-20"
           >
             <p className="font-jost text-[12px] uppercase tracking-[0.4em] opacity-40 text-[#f2ece0] font-light">
-              story ready
+              {isSaving ? "preparing image" : isSaved ? "saved to device" : "story ready"}
             </p>
             
             <button
+              disabled={isSaving}
               onClick={handleDownload}
-              className="group flex items-center gap-3 px-10 py-5 bg-[#f2ece0] text-black font-italiana text-lg tracking-[0.1em] rounded-full hover:scale-105 active:scale-95 transition-all shadow-xl"
+              className={cn(
+                "group flex items-center gap-3 px-10 py-5 font-italiana text-lg tracking-[0.1em] rounded-full transition-all shadow-xl",
+                isSaved 
+                  ? "bg-green-500/20 text-green-400 border border-green-500/30" 
+                  : "bg-[#f2ece0] text-black hover:scale-105 active:scale-95"
+              )}
             >
-              <HugeiconsIcon icon={Download01Icon} size={20} className="transition-transform group-hover:translate-y-0.5" />
-              <span>save to phone</span>
+              {isSaving ? (
+                <HugeiconsIcon icon={Loading03Icon} size={20} className="animate-spin" />
+              ) : isSaved ? (
+                <HugeiconsIcon icon={CheckmarkCircle02Icon} size={20} />
+              ) : (
+                <HugeiconsIcon icon={Download01Icon} size={20} className="transition-transform group-hover:translate-y-0.5" />
+              )}
+              <span>{isSaving ? "generating..." : isSaved ? "success!" : "save to phone"}</span>
             </button>
 
             <button
+              disabled={isSaving}
               onClick={() => {
                 trigger("selection");
                 onClose();
               }}
-              className="flex items-center gap-2 font-jost text-[12px] uppercase tracking-[0.2em] opacity-30 hover:opacity-100 transition-all py-2"
+              className="flex items-center gap-2 font-jost text-[12px] uppercase tracking-[0.2em] opacity-30 hover:opacity-100 transition-all py-2 disabled:opacity-0"
             >
               <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
               <span>back to edit</span>
