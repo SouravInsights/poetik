@@ -1,19 +1,88 @@
-import { Button } from "@/components/ui/button"
+"use client";
 
-export default function Page() {
+import { useEditor } from "@/hooks/use-editor";
+import { EditorCanvas } from "@/components/editor-canvas";
+import { TopBar } from "@/components/top-bar";
+import { BottomToolbar } from "@/components/bottom-toolbar";
+import { ExportModal } from "@/components/export-modal";
+import { DoodleDrawer } from "@/components/doodle-drawer";
+
+export default function PoetikPage() {
+  const {
+    text,
+    setText,
+    font,
+    setFont,
+    paper,
+    setPaper,
+    tone,
+    setTone,
+    doodle,
+    setDoodle,
+    align,
+    setAlign,
+    isExporting,
+    setIsExporting,
+    isDoodleDrawerOpen,
+    setIsDoodleDrawerOpen,
+    uiVisible,
+  } = useEditor();
+
+  const handleClear = () => {
+    if (confirm("Clear all text?")) {
+      setText("");
+    }
+  };
+
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
-    </div>
-  )
+    <main className="relative h-screen w-screen overflow-hidden bg-[#0D0B09]">
+      <EditorCanvas
+        text={text}
+        setText={setText}
+        font={font}
+        paper={paper}
+        tone={tone}
+        doodle={doodle}
+        align={align}
+      />
+
+      <TopBar 
+        visible={uiVisible && !isDoodleDrawerOpen} 
+        onClear={handleClear} 
+        align={align}
+        onAlignToggle={() => setAlign((a: "left" | "center") => a === "center" ? "left" : "center")}
+      />
+
+      <BottomToolbar
+        visible={uiVisible && !isDoodleDrawerOpen}
+        currentFont={font}
+        currentTone={tone}
+        currentPaper={paper}
+        onFontSelect={setFont}
+        onToneSelect={setTone}
+        onPaperSelect={setPaper}
+        onExport={() => setIsExporting(true)}
+        onDoodleToggle={() => setIsDoodleDrawerOpen(true)}
+      />
+
+      <DoodleDrawer
+        isOpen={isDoodleDrawerOpen}
+        onClose={() => setIsDoodleDrawerOpen(false)}
+        currentDoodle={doodle}
+        onSelect={setDoodle}
+        tone={tone}
+      />
+
+      <ExportModal
+        isOpen={isExporting}
+        onClose={() => setIsExporting(false)}
+        text={text}
+        font={font}
+        paper={paper}
+        tone={tone}
+        doodle={doodle}
+        align={align}
+      />
+    </main>
+  );
 }
