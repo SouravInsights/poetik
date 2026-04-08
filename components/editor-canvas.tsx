@@ -91,7 +91,7 @@ export function EditorCanvas({
       </div>
 
       {(doodle || author) && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-all duration-700 pointer-events-none">
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-all duration-700 pointer-events-none">
           {doodle && (
             <div 
               className={cn(
