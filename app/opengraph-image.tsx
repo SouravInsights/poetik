@@ -101,12 +101,12 @@ export default async function Image() {
           {/* Subtitle */}
           <div
             style={{
-              marginTop: 10,
-              fontSize: 22,
-              opacity: 0.5,
-              letterSpacing: '0.3em',
+              marginTop: 24,
+              fontSize: 28,
+              color: '#1A1714',
+              opacity: 0.7,
+              letterSpacing: '0.15em',
               textTransform: 'uppercase',
-              fontWeight: 400,
             }}
           >
             A minimal, distraction-free app for writing poetry.
