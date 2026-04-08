@@ -13,6 +13,7 @@ export default function PoetikPage() {
     font, setFont,
     paper, setPaper,
     tone, setTone,
+    inkMode, setInkMode,
     doodle, setDoodle,
     author, setAuthor,
     align, toggleAlign,
@@ -32,6 +33,7 @@ export default function PoetikPage() {
         font={font}
         paper={paper}
         tone={tone}
+        inkMode={inkMode}
         doodle={doodle}
         author={author}
         align={align}
@@ -43,7 +45,7 @@ export default function PoetikPage() {
         onClear={handleClear} 
         align={align}
         onAlignToggle={toggleAlign}
-        tone={tone}
+        inkMode={inkMode}
       />
 
       <BottomToolbar
@@ -52,12 +54,14 @@ export default function PoetikPage() {
         currentFont={font}
         currentTone={tone}
         currentPaper={paper}
+        inkMode={inkMode}
         dynamicPapers={dynamicPapers}
         author={author}
         onAuthorChange={setAuthor}
         onFontSelect={setFont}
         onToneSelect={setTone}
         onPaperSelect={setPaper}
+        onInkModeChange={setInkMode}
         onExport={() => setIsExporting(true)}
         onDoodleToggle={() => setIsDoodleDrawerOpen(true)}
         uiVisible={uiVisible}
@@ -68,7 +72,7 @@ export default function PoetikPage() {
         onClose={() => setIsDoodleDrawerOpen(false)}
         currentDoodle={doodle}
         onSelect={setDoodle}
-        tone={tone}
+        inkMode={inkMode}
         dynamicDoodles={dynamicDoodles}
       />
 
@@ -79,6 +83,7 @@ export default function PoetikPage() {
         font={font}
         paper={paper}
         tone={tone}
+        inkMode={inkMode}
         doodle={doodle}
         author={author}
         align={align}

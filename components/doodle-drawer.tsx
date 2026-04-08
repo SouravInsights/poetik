@@ -1,6 +1,5 @@
 "use client";
 
-import { Tone } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { useWebHaptics } from "web-haptics/react";
@@ -12,7 +11,7 @@ interface DoodleDrawerProps {
   onClose: () => void;
   currentDoodle: string | null;
   onSelect: (doodle: string | null) => void;
-  tone: Tone;
+  inkMode: "ink-light" | "ink-dark";
   dynamicDoodles: string[];
 }
 
@@ -21,11 +20,11 @@ export function DoodleDrawer({
   onClose,
   currentDoodle,
   onSelect,
-  tone,
+  inkMode,
   dynamicDoodles,
 }: DoodleDrawerProps) {
   const { trigger } = useWebHaptics();
-  const isDark = tone.ink === "ink-light";
+  const isDark = inkMode === "ink-light";
 
   return (
     <AnimatePresence>

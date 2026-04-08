@@ -11,6 +11,7 @@ interface EditorCanvasProps {
   font: Font;
   paper: Paper;
   tone: Tone;
+  inkMode: "ink-light" | "ink-dark";
   doodle: string | null;
   author: string;
   align: "left" | "center";
@@ -23,6 +24,7 @@ export function EditorCanvas({
   font,
   paper,
   tone,
+  inkMode,
   doodle,
   author,
   align,
@@ -39,20 +41,18 @@ export function EditorCanvas({
   }, [text]);
 
   const handleTextChange = (val: string) => {
-    // Sharp 15ms pulse for writing. 
-    // This is a direct Vibration API call through web-haptics for maximum intensity.
     trigger(15);
     setText(val);
   };
 
-  const isDark = tone.ink === "ink-light";
+  const isDark = inkMode === "ink-light"; // dark background = light ink
 
   return (
     <div
       className={cn(
         "absolute inset-0 transition-all duration-700 ease-in-out grain",
         paper.type === "image" ? "bg-cover bg-center" : tone.class,
-        tone.ink
+        inkMode
       )}
       style={{
         backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined,
@@ -67,9 +67,7 @@ export function EditorCanvas({
         )} 
       />
 
-      <div className={cn(
-        "absolute inset-0 flex flex-col items-center justify-center px-8 pb-[90px] pt-[80px]"
-      )}>
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-8 pb-[90px] pt-[80px]">
         <textarea
           ref={textareaRef}
           value={text}
@@ -93,12 +91,10 @@ export function EditorCanvas({
       {(doodle || author) && (
         <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-all duration-700 pointer-events-none">
           {doodle && (
-            <div 
-              className={cn(
-                "w-9 h-9 opacity-40 transition-all duration-700",
-                isDark ? "invert brightness-200" : "brightness-0"
-              )}
-            >
+            <div className={cn(
+              "w-9 h-9 opacity-40 transition-all duration-700",
+              isDark ? "invert brightness-200" : "brightness-0"
+            )}>
               <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
             </div>
           )}

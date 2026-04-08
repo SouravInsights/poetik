@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Tone } from "@/lib/constants";
 import { useWebHaptics } from "web-haptics/react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { TextAlignCenterIcon, TextAlignLeft01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
@@ -12,19 +11,19 @@ interface TopBarProps {
   onClear: () => void;
   align: "left" | "center";
   onAlignToggle: () => void;
-  tone: Tone;
+  inkMode: "ink-light" | "ink-dark";
 }
 
-export function TopBar({ visible, onClear, align, onAlignToggle, tone }: TopBarProps) {
+export function TopBar({ visible, onClear, align, onAlignToggle, inkMode }: TopBarProps) {
   const { trigger } = useWebHaptics();
-  const isDark = tone.ink === "ink-light";
+  const isDark = inkMode === "ink-light";
 
   return (
     <div
       className={cn(
         "fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 sm:px-8 pt-[max(env(safe-area-inset-top),20px)] pb-10 transition-all duration-400 ease-in-out",
         "bg-gradient-to-b from-current/[0.03] to-transparent",
-        tone.ink,
+        inkMode,
         !visible && "opacity-0 pointer-events-none -translate-y-2"
       )}
     >

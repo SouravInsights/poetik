@@ -21,12 +21,14 @@ interface BottomToolbarProps {
   currentFont: Font;
   currentTone: Tone;
   currentPaper: Paper;
+  inkMode: "ink-light" | "ink-dark";
   dynamicPapers: Paper[];
   author: string;
   onAuthorChange: (val: string) => void;
   onFontSelect: (font: Font) => void;
   onToneSelect: (tone: Tone) => void;
   onPaperSelect: (paper: Paper) => void;
+  onInkModeChange: (mode: "ink-light" | "ink-dark") => void;
   onExport: () => void;
   onDoodleToggle: () => void;
   uiVisible: boolean;
@@ -38,17 +40,20 @@ export function BottomToolbar({
   currentFont,
   currentTone,
   currentPaper,
+  inkMode,
   dynamicPapers,
   author,
   onAuthorChange,
   onFontSelect,
   onToneSelect,
   onPaperSelect,
+  onInkModeChange,
   onExport,
   onDoodleToggle,
   uiVisible,
 }: BottomToolbarProps) {
   const { trigger } = useWebHaptics();
+  const isDark = inkMode === "ink-light";
 
   return (
     <>
@@ -58,10 +63,7 @@ export function BottomToolbar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => {
-              trigger(10);
-              onOpenToggle(false);
-            }}
+            onClick={() => { trigger(10); onOpenToggle(false); }}
             className="fixed inset-0 z-[90] bg-black/10 backdrop-blur-[2px]"
           />
         )}
@@ -82,27 +84,24 @@ export function BottomToolbar({
               exit={{ y: 20, opacity: 0 }}
               className={cn(
                 "flex items-center gap-0 rounded-t-[20px] overflow-hidden border-t border-x backdrop-blur-3xl shadow-lg",
-                currentTone.ink === "ink-light"
+                isDark
                   ? "bg-white/[0.12] border-white/10"
                   : "bg-black/[0.12] border-black/10"
               )}
             >
-              {/* Shelf toggle */}
               <button
                 onClick={() => { trigger(20); onOpenToggle(true); }}
                 className={cn(
                   "flex items-center gap-2 px-6 py-4 min-h-[52px] transition-all hover:bg-white/10 font-jost text-[11px] font-bold tracking-[0.15em] uppercase select-none",
-                  currentTone.ink === "ink-light" ? "text-white/80" : "text-black/70"
+                  isDark ? "text-white/80" : "text-black/70"
                 )}
               >
                 <HugeiconsIcon icon={ArrowUp01Icon} size={16} strokeWidth={2.5} />
                 <span>style</span>
               </button>
 
-              {/* Divider */}
-              <div className={cn("w-[1px] h-5 self-center", currentTone.ink === "ink-light" ? "bg-white/10" : "bg-black/10")} />
+              <div className={cn("w-[1px] h-5 self-center", isDark ? "bg-white/10" : "bg-black/10")} />
 
-              {/* Export — always visible */}
               <button
                 onClick={() => { trigger("nudge"); onExport(); }}
                 className="flex items-center gap-2 px-6 py-4 min-h-[52px] transition-all hover:bg-[#F5F0E8]/10 font-jost text-[11px] font-bold tracking-[0.15em] uppercase select-none text-[#F5F0E8]"
@@ -123,12 +122,9 @@ export function BottomToolbar({
               <div className="pt-6 pb-[max(env(safe-area-inset-bottom),20px)] text-[#F5F0E8] space-y-5">
                 {/* Header / Dismiss */}
                 <div className="flex items-center justify-between px-8">
-                  <span className="font-jost text-[10px] uppercase tracking-[0.4em] opacity-40 font-bold">editing shelf</span>
+                  <span className="font-jost text-[10px] uppercase tracking-[0.4em] opacity-40 font-bold">style</span>
                   <button 
-                    onClick={() => {
-                      trigger(10);
-                      onOpenToggle(false);
-                    }}
+                    onClick={() => { trigger(10); onOpenToggle(false); }}
                     className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors"
                     aria-label="Close tools"
                   >
@@ -166,11 +162,13 @@ export function BottomToolbar({
                   <div className="h-[1px] bg-white/5 mx-8" />
                   
                   <BackgroundPicker 
-                    currentTone={currentTone} 
+                    currentTone={currentTone}
                     currentPaper={currentPaper}
+                    inkMode={inkMode}
                     dynamicPapers={dynamicPapers}
                     onToneSelect={onToneSelect}
                     onPaperSelect={onPaperSelect}
+                    onInkModeChange={onInkModeChange}
                   />
                 </div>
               </div>

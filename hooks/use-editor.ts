@@ -10,6 +10,7 @@ export function useEditor() {
   const [font, setFont] = useState<Font>(FONTS[0]);
   const [paper, setPaper] = useState<Paper>(PAPERS[0]);
   const [tone, setTone] = useState<Tone>(TONES[0]);
+  const [inkMode, setInkMode] = useState<"ink-light" | "ink-dark">("ink-light");
   const [doodle, setDoodle] = useState<string | null>(null);
   const [author, setAuthor] = useState<string>("");
   const [align, setAlign] = useState<"left" | "center">("center");
@@ -60,6 +61,7 @@ export function useEditor() {
           const found = TONES.find(t => t.id === parsed.tone.id);
           if (found) setTone(found);
         }
+        if (parsed.inkMode) setInkMode(parsed.inkMode);
         if (parsed.doodle) setDoodle(parsed.doodle);
         if (parsed.author) setAuthor(parsed.author);
         if (parsed.align) setAlign(parsed.align);
@@ -69,48 +71,52 @@ export function useEditor() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("poetik-state", JSON.stringify({ 
-      text, font, paper, tone, doodle, author, align, bgOpacity 
+    localStorage.setItem("poetik-state", JSON.stringify({
+      text, font, paper, tone, inkMode, doodle, author, align, bgOpacity
     }));
-  }, [text, font, paper, tone, doodle, author, align, bgOpacity]);
+  }, [text, font, paper, tone, inkMode, doodle, author, align, bgOpacity]);
 
   const handleSetFont = useCallback((f: Font) => {
-    // Sharp physical click
     trigger(15);
     setFont(f);
   }, [trigger]);
 
-  const handleSetPaper = useCallback((p: Paper) => {
-    // Solid tactile feedback for background swap
-    trigger(35);
-    setPaper(p);
-    if (p.theme === "light" && tone.ink === "ink-light") {
-      setTone(TONES.find(t => t.id === "paper") || TONES[4]);
-    } else if (p.theme === "dark" && tone.ink === "ink-dark") {
-      setTone(TONES.find(t => t.id === "void") || TONES[0]);
-    }
-  }, [trigger, tone]);
-
+  // Selecting a solid tone → clear canvas, apply tone bg, sync inkMode
   const handleSetTone = useCallback((t: Tone) => {
-    // Solid 35ms pulse to match the 'Paper' selection feel (user preferred)
     trigger(35);
     setTone(t);
+    setPaper(PAPERS[0]); // clear any canvas texture
+    setInkMode(t.ink);   // sync ink to the tone's natural direction
+  }, [trigger]);
+
+  // Selecting a canvas texture → set paper, auto-set inkMode from theme
+  const handleSetPaper = useCallback((p: Paper) => {
+    trigger(35);
+    setPaper(p);
+    if (p.theme === "dark") {
+      setInkMode("ink-light");
+    } else {
+      setInkMode("ink-dark");
+    }
+  }, [trigger]);
+
+  // Independent ink toggle — does NOT change background
+  const handleSetInkMode = useCallback((mode: "ink-light" | "ink-dark") => {
+    trigger(20);
+    setInkMode(mode);
   }, [trigger]);
 
   const handleSetDoodle = useCallback((d: string | null) => {
-    // Light tap for graphic selection
     trigger(20);
     setDoodle(d);
   }, [trigger]);
 
   const handleSetAlign = useCallback(() => {
-    // Two quick taps for alignment toggle
     trigger([20, 30, 20]);
     setAlign(a => a === "center" ? "left" : "center");
   }, [trigger]);
 
   const handleClear = useCallback(() => {
-    // Sharp error pattern for clearing
     trigger("error");
     setText("");
     setDoodle(null);
@@ -121,6 +127,7 @@ export function useEditor() {
     font, setFont: handleSetFont,
     paper, setPaper: handleSetPaper,
     tone, setTone: handleSetTone,
+    inkMode, setInkMode: handleSetInkMode,
     doodle, setDoodle: handleSetDoodle,
     author, setAuthor,
     align, toggleAlign: handleSetAlign,

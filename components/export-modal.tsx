@@ -21,6 +21,7 @@ interface ExportModalProps {
   font: Font;
   paper: Paper;
   tone: Tone;
+  inkMode: "ink-light" | "ink-dark";
   doodle: string | null;
   author: string;
   align: "left" | "center";
@@ -34,6 +35,7 @@ export function ExportModal({
   font,
   paper,
   tone,
+  inkMode,
   doodle,
   author,
   align,
@@ -84,7 +86,7 @@ export function ExportModal({
     }
   };
 
-  const isDark = tone.ink === "ink-light";
+  const isDark = inkMode === "ink-light";
 
   return (
     <AnimatePresence>
