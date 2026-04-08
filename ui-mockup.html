@@ -1,0 +1,1365 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>poetic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=IM+Fell+English:ital@0;1&family=Playfair+Display:ital,wght@0,400;1,400&family=Lora:ital,wght@0,400;1,400&family=Jost:wght@200;300;400&family=Italiana&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --accent: #b5651d;
+        --accent-dim: rgba(181, 101, 29, 0.15);
+        --ui-font: "Jost", sans-serif;
+        --mark-font: "Italiana", serif;
+      }
+
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background: #111;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* ── GRAIN ── */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        opacity: 0.035;
+        pointer-events: none;
+        z-index: 9998;
+      }
+
+      /* ── CANVAS ── */
+      #app {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #canvas {
+        position: absolute;
+        inset: 0;
+        transition: background 0.5s ease;
+        overflow: hidden;
+      }
+
+      /* ── BACKGROUND TONES ── */
+      .bg-void {
+        background: #0e0c0a;
+      }
+      .bg-night {
+        background: linear-gradient(
+          160deg,
+          #0f0d14 0%,
+          #1a1626 50%,
+          #0d0b12 100%
+        );
+      }
+      .bg-dusk {
+        background: linear-gradient(
+          155deg,
+          #150d05 0%,
+          #2a1508 45%,
+          #120b04 100%
+        );
+      }
+      .bg-slate {
+        background: linear-gradient(
+          155deg,
+          #0e1219 0%,
+          #182030 50%,
+          #0b0f18 100%
+        );
+      }
+      .bg-rouge {
+        background: linear-gradient(
+          155deg,
+          #180a0f 0%,
+          #2a1018 50%,
+          #140810 100%
+        );
+      }
+      .bg-sage {
+        background: linear-gradient(
+          155deg,
+          #090e0a 0%,
+          #0f1c10 50%,
+          #07100a 100%
+        );
+      }
+      .bg-paper {
+        background: #f0e8d8;
+      }
+      .bg-cream {
+        background: #ede0c4;
+      }
+      .bg-linen {
+        background: #d8ccb4;
+      }
+      .bg-parchment {
+        background: #c8b99a;
+      }
+
+      /* ── TEXT COLORS ── */
+      .ink-light {
+        color: rgba(242, 236, 224, 0.92);
+      }
+      .ink-dark {
+        color: rgba(28, 22, 16, 0.9);
+      }
+
+      /* ── WRITING AREA ── */
+      #writing-wrap {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 90px 40px 120px;
+      }
+
+      #poem {
+        width: 100%;
+        max-width: 340px;
+        background: transparent;
+        border: none;
+        outline: none;
+        resize: none;
+        text-align: center;
+        caret-color: var(--accent);
+        font-size: clamp(17px, 4.8vw, 28px);
+        line-height: 2;
+        letter-spacing: 0.02em;
+        font-style: italic;
+        color: inherit;
+        overflow: hidden;
+        transition:
+          font-family 0.3s ease,
+          font-weight 0.3s ease,
+          color 0.4s ease;
+      }
+
+      #poem::placeholder {
+        opacity: 0.2;
+        font-style: italic;
+        letter-spacing: 0.05em;
+      }
+
+      /* ── DOODLE ORNAMENT on canvas ── */
+      #doodle-ornament {
+        position: absolute;
+        bottom: 130px;
+        right: 28px;
+        width: 44px;
+        height: 44px;
+        opacity: 0.22;
+        pointer-events: none;
+        transition: opacity 0.4s;
+        filter: saturate(0) brightness(2);
+      }
+      .ink-dark #doodle-ornament {
+        filter: saturate(0) brightness(0.2);
+      }
+      #doodle-ornament img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      #doodle-ornament.hidden {
+        opacity: 0;
+      }
+
+      /* ── TOP BAR ── */
+      #top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: max(env(safe-area-inset-top, 0px), 16px) 24px 10px;
+        transition: opacity 0.4s ease;
+      }
+      #top-bar.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .wordmark {
+        font-family: var(--mark-font);
+        font-size: 20px;
+        font-weight: 400;
+        letter-spacing: 0.06em;
+        opacity: 0.45;
+        color: inherit;
+        user-select: none;
+      }
+
+      /* Typographic action — no button shape */
+      .txt-action {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: var(--ui-font);
+        font-size: 11px;
+        font-weight: 300;
+        letter-spacing: 0.12em;
+        text-transform: lowercase;
+        color: inherit;
+        opacity: 0.4;
+        transition: opacity 0.2s;
+        padding: 4px 0;
+        position: relative;
+      }
+      .txt-action::after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        height: 0.5px;
+        background: currentColor;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .txt-action:hover {
+        opacity: 0.75;
+      }
+      .txt-action:hover::after {
+        opacity: 0.4;
+      }
+
+      /* ── BOTTOM PANEL ── */
+      #bottom-panel {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 0 0 max(env(safe-area-inset-bottom, 0px), 16px);
+        transition:
+          opacity 0.4s ease,
+          transform 0.4s ease;
+      }
+      #bottom-panel.hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(6px);
+      }
+
+      /* Thin separator line */
+      .panel-rule {
+        height: 0.5px;
+        background: currentColor;
+        opacity: 0.08;
+        margin: 0 20px 14px;
+      }
+
+      /* ── FONT ROW ── */
+      #font-row {
+        display: flex;
+        gap: 0;
+        align-items: baseline;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding: 0 24px 12px;
+        -webkit-overflow-scrolling: touch;
+      }
+      #font-row::-webkit-scrollbar {
+        display: none;
+      }
+
+      .font-choice {
+        flex-shrink: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+        font-style: italic;
+        color: inherit;
+        opacity: 0.3;
+        padding: 4px 14px 4px 0;
+        letter-spacing: 0.01em;
+        transition: opacity 0.2s;
+        position: relative;
+      }
+      .font-choice::after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        width: calc(100% - 14px);
+        height: 0.5px;
+        background: var(--accent);
+        opacity: 0;
+        transition: opacity 0.25s;
+      }
+      .font-choice.active {
+        opacity: 0.95;
+      }
+      .font-choice.active::after {
+        opacity: 1;
+      }
+      .font-choice:hover {
+        opacity: 0.7;
+      }
+
+      .font-choice[data-font="cormorant"] {
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 300;
+      }
+      .font-choice[data-font="fell"] {
+        font-family: "IM Fell English", serif;
+      }
+      .font-choice[data-font="playfair"] {
+        font-family: "Playfair Display", serif;
+      }
+      .font-choice[data-font="lora"] {
+        font-family: "Lora", serif;
+      }
+
+      /* ── BG PICKER ROW ── */
+      #bg-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding: 0 24px 14px;
+        -webkit-overflow-scrolling: touch;
+      }
+      #bg-row::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* section label */
+      .row-label {
+        font-family: var(--ui-font);
+        font-size: 9px;
+        font-weight: 300;
+        letter-spacing: 0.16em;
+        text-transform: lowercase;
+        opacity: 0.3;
+        color: inherit;
+        flex-shrink: 0;
+        padding-right: 4px;
+        white-space: nowrap;
+      }
+
+      .bg-swatch {
+        width: 26px;
+        height: 26px;
+        border-radius: 3px;
+        flex-shrink: 0;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition:
+          transform 0.18s,
+          border-color 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .bg-swatch:hover {
+        transform: scale(1.12);
+      }
+      .bg-swatch.active {
+        border-color: var(--accent);
+        transform: scale(1.14);
+      }
+      .bg-swatch img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      /* color swatches */
+      .swatch-void {
+        background: #0e0c0a;
+      }
+      .swatch-night {
+        background: linear-gradient(135deg, #0f0d14, #1a1626);
+      }
+      .swatch-dusk {
+        background: linear-gradient(135deg, #150d05, #2a1508);
+      }
+      .swatch-slate {
+        background: linear-gradient(135deg, #0e1219, #182030);
+      }
+      .swatch-rouge {
+        background: linear-gradient(135deg, #180a0f, #2a1018);
+      }
+      .swatch-sage {
+        background: linear-gradient(135deg, #090e0a, #0f1c10);
+      }
+      .swatch-paper {
+        background: #f0e8d8;
+      }
+      .swatch-cream {
+        background: #ede0c4;
+      }
+      .swatch-linen {
+        background: #d8ccb4;
+      }
+      .swatch-parchment {
+        background: #c8b99a;
+      }
+
+      /* divider between tones & textures */
+      .swatch-divider {
+        width: 0.5px;
+        height: 20px;
+        background: currentColor;
+        opacity: 0.15;
+        flex-shrink: 0;
+      }
+
+      /* ── BOTTOM ACTION ROW ── */
+      #action-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+      }
+
+      /* Doodle row trigger */
+      #doodle-trigger {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: inherit;
+        opacity: 0.35;
+        transition: opacity 0.2s;
+        padding: 0;
+      }
+      #doodle-trigger:hover {
+        opacity: 0.7;
+      }
+      #doodle-trigger span {
+        font-family: var(--ui-font);
+        font-size: 11px;
+        font-weight: 300;
+        letter-spacing: 0.1em;
+        text-transform: lowercase;
+      }
+      #doodle-trigger svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* Primary action */
+      #export-trigger {
+        font-family: var(--mark-font);
+        font-size: 16px;
+        letter-spacing: 0.06em;
+        color: inherit;
+        opacity: 0.5;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        padding: 4px 0;
+        position: relative;
+      }
+      #export-trigger::after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        height: 0.5px;
+        background: var(--accent);
+        opacity: 0.7;
+      }
+      #export-trigger:hover {
+        opacity: 0.9;
+      }
+
+      /* ── DOODLE DRAWER ── */
+      #doodle-drawer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 200;
+        background: rgba(12, 10, 8, 0.96);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 0.5px solid rgba(255, 255, 255, 0.07);
+        padding: 20px 24px max(env(safe-area-inset-bottom, 0px), 24px);
+        transform: translateY(100%);
+        transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      #doodle-drawer.open {
+        transform: translateY(0);
+      }
+
+      .drawer-label {
+        font-family: var(--ui-font);
+        font-size: 10px;
+        font-weight: 300;
+        letter-spacing: 0.18em;
+        text-transform: lowercase;
+        color: rgba(242, 236, 224, 0.35);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .drawer-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: rgba(242, 236, 224, 0.35);
+        font-family: var(--ui-font);
+        font-size: 11px;
+        font-weight: 300;
+        letter-spacing: 0.1em;
+        transition: color 0.2s;
+      }
+      .drawer-close:hover {
+        color: rgba(242, 236, 224, 0.7);
+      }
+
+      #doodle-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+      }
+
+      .doodle-item {
+        width: 100%;
+        aspect-ratio: 1;
+        cursor: pointer;
+        opacity: 0.45;
+        transition:
+          opacity 0.18s,
+          transform 0.18s;
+        border-radius: 4px;
+        padding: 4px;
+        filter: saturate(0) brightness(2.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .doodle-item:hover {
+        opacity: 0.85;
+        transform: scale(1.1);
+      }
+      .doodle-item.active {
+        opacity: 1;
+        background: rgba(181, 101, 29, 0.15);
+        filter: none;
+      }
+      .doodle-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      /* ── EXPORT OVERLAY ── */
+      #export-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        background: rgba(8, 6, 4, 0.95);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        padding: 32px 24px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      #export-overlay.visible {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      /* 9:16 preview */
+      #preview-wrap {
+        position: relative;
+        width: min(200px, 48vw);
+        aspect-ratio: 9/16;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow:
+          0 40px 100px rgba(0, 0, 0, 0.9),
+          0 0 0 0.5px rgba(255, 255, 255, 0.06);
+      }
+      #preview-frame {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+        position: relative;
+      }
+      #preview-poem {
+        text-align: center;
+        font-style: italic;
+        line-height: 2;
+        letter-spacing: 0.02em;
+        word-break: break-word;
+        color: inherit;
+        position: relative;
+        z-index: 1;
+      }
+      #preview-doodle {
+        position: absolute;
+        bottom: 20px;
+        right: 14px;
+        width: 28px;
+        height: 28px;
+        opacity: 0.2;
+      }
+
+      /* Export actions — all typographic */
+      #export-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        width: 100%;
+        max-width: 220px;
+      }
+
+      .export-action {
+        font-family: var(--mark-font);
+        font-size: 17px;
+        letter-spacing: 0.05em;
+        color: rgba(242, 236, 224, 0.75);
+        background: none;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        padding: 4px 0;
+        transition: color 0.2s;
+      }
+      .export-action::after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        height: 0.5px;
+        background: var(--accent);
+        opacity: 0.7;
+      }
+      .export-action:hover {
+        color: rgba(242, 236, 224, 1);
+      }
+
+      .export-dismiss {
+        font-family: var(--ui-font);
+        font-size: 11px;
+        font-weight: 300;
+        letter-spacing: 0.12em;
+        text-transform: lowercase;
+        color: rgba(242, 236, 224, 0.25);
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+      .export-dismiss:hover {
+        color: rgba(242, 236, 224, 0.55);
+      }
+
+      /* ── TOAST ── */
+      #toast {
+        position: fixed;
+        bottom: 52px;
+        left: 50%;
+        transform: translateX(-50%) translateY(8px);
+        background: rgba(18, 14, 10, 0.92);
+        border: 0.5px solid rgba(181, 101, 29, 0.25);
+        color: rgba(242, 236, 224, 0.8);
+        font-family: "Italiana", serif;
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        padding: 9px 22px;
+        border-radius: 2px;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 2000;
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+        white-space: nowrap;
+      }
+      #toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* hidden canvas */
+      #offscreen {
+        display: none;
+      }
+
+      /* ── ANIMATIONS ── */
+      @keyframes riseIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      #top-bar {
+        animation: riseIn 0.7s ease 0.15s both;
+      }
+      #bottom-panel {
+        animation: riseIn 0.8s ease 0.35s both;
+      }
+      #writing-wrap {
+        animation: riseIn 1s ease 0.05s both;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="canvas" class="bg-night ink-light">
+        <!-- ornament -->
+        <div id="doodle-ornament" class="hidden">
+          <img id="ornament-img" src="" alt="" />
+        </div>
+
+        <!-- Writing -->
+        <div id="writing-wrap">
+          <textarea
+            id="poem"
+            rows="1"
+            spellcheck="false"
+            autocorrect="off"
+            autocomplete="off"
+            placeholder="kuch likho..."
+          ></textarea>
+        </div>
+
+        <!-- Top bar -->
+        <div id="top-bar">
+          <span class="wordmark">poetic</span>
+          <button class="txt-action" id="clear-btn">clear</button>
+        </div>
+
+        <!-- Bottom panel -->
+        <div id="bottom-panel">
+          <div class="panel-rule"></div>
+
+          <!-- Font row -->
+          <div id="font-row">
+            <button class="font-choice active" data-font="cormorant">
+              Cormorant
+            </button>
+            <button class="font-choice" data-font="fell">Fell</button>
+            <button class="font-choice" data-font="playfair">Playfair</button>
+            <button class="font-choice" data-font="lora">Lora</button>
+          </div>
+
+          <!-- BG picker -->
+          <div id="bg-row">
+            <span class="row-label">tone</span>
+            <div
+              class="bg-swatch swatch-void active"
+              data-bg="void"
+              data-ink="light"
+              title="void"
+            ></div>
+            <div
+              class="bg-swatch swatch-night"
+              data-bg="night"
+              data-ink="light"
+              title="night"
+            ></div>
+            <div
+              class="bg-swatch swatch-dusk"
+              data-bg="dusk"
+              data-ink="light"
+              title="dusk"
+            ></div>
+            <div
+              class="bg-swatch swatch-slate"
+              data-bg="slate"
+              data-ink="light"
+              title="slate"
+            ></div>
+            <div
+              class="bg-swatch swatch-rouge"
+              data-bg="rouge"
+              data-ink="light"
+              title="rouge"
+            ></div>
+            <div
+              class="bg-swatch swatch-sage"
+              data-bg="sage"
+              data-ink="light"
+              title="sage"
+            ></div>
+            <div class="swatch-divider"></div>
+            <span class="row-label">paper</span>
+            <div
+              class="bg-swatch swatch-paper"
+              data-bg="paper"
+              data-ink="dark"
+              title="paper"
+            ></div>
+            <div
+              class="bg-swatch swatch-cream"
+              data-bg="cream"
+              data-ink="dark"
+              title="cream"
+            ></div>
+            <div
+              class="bg-swatch swatch-linen"
+              data-bg="linen"
+              data-ink="dark"
+              title="linen"
+            ></div>
+            <div
+              class="bg-swatch swatch-parchment"
+              data-bg="parchment"
+              data-ink="dark"
+              title="parchment"
+            ></div>
+            <!-- texture swatches injected by JS -->
+            <div
+              class="swatch-divider"
+              id="texture-divider"
+              style="display: none"
+            ></div>
+            <span class="row-label" id="texture-label" style="display: none"
+              >texture</span
+            >
+          </div>
+
+          <!-- Action row -->
+          <div id="action-row">
+            <button id="doodle-trigger">
+              <svg
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1"
+                stroke-linecap="round"
+              >
+                <circle cx="7" cy="5" r="2.5" />
+                <path d="M3 12c0-2.2 1.8-4 4-4s4 1.8 4 4" />
+              </svg>
+              <span>ornament</span>
+            </button>
+            <button id="export-trigger">save to photos</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Doodle drawer -->
+    <div id="doodle-drawer">
+      <div class="drawer-label">
+        <span>choose an ornament</span>
+        <button class="drawer-close">done</button>
+      </div>
+      <div id="doodle-grid"></div>
+    </div>
+
+    <!-- Export overlay -->
+    <div id="export-overlay">
+      <div id="preview-wrap">
+        <div id="preview-frame">
+          <div id="preview-poem"></div>
+          <img id="preview-doodle" src="" alt="" style="display: none" />
+        </div>
+      </div>
+      <div id="export-actions">
+        <button class="export-action" id="download-btn">download</button>
+        <button class="export-dismiss" id="close-export">go back</button>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+    <canvas id="offscreen"></canvas>
+
+    <script>
+      /* ── CONFIG ── */
+      const FONTS = {
+        cormorant: { family: "'Cormorant Garamond', serif", weight: 300 },
+        fell: { family: "'IM Fell English', serif", weight: 400 },
+        playfair: { family: "'Playfair Display', serif", weight: 400 },
+        lora: { family: "'Lora', serif", weight: 400 },
+      }
+
+      const BG_CLASSES = [
+        "bg-void",
+        "bg-night",
+        "bg-dusk",
+        "bg-slate",
+        "bg-rouge",
+        "bg-sage",
+        "bg-paper",
+        "bg-cream",
+        "bg-linen",
+        "bg-parchment",
+      ]
+      const INK_CLASSES = ["ink-light", "ink-dark"]
+
+      // Texture backgrounds from /public/textures/ — add your filenames here
+      const TEXTURES = [
+        // { file: 'paper-1.jpg', ink: 'dark' },
+        // { file: 'paper-2.jpg', ink: 'dark' },
+        // { file: 'dark-stone.jpg', ink: 'light' },
+      ]
+
+      // Doodle sprites from your sheet — we'll use emoji-SVG stand-ins
+      // Replace src with actual sprite paths from doodles.png sprite sheet
+      // or individual files like /public/doodles/flower-01.png
+      const DOODLES = [
+        {
+          id: "bird",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="45" cy="50" rx="20" ry="12" fill="currentColor" opacity="0.9"/><ellipse cx="62" cy="44" rx="10" ry="7" fill="currentColor"/><path d="M60 37 Q70 30 75 35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/><ellipse cx="68" cy="43" rx="2" ry="2" fill="white"/><path d="M25 50 Q18 44 15 50 Q18 52 25 50Z" fill="currentColor"/></svg>`,
+        },
+        {
+          id: "leaf",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M45 75 Q20 55 25 30 Q35 15 55 20 Q70 35 65 55 Q58 70 45 75Z" fill="currentColor" opacity="0.85"/><path d="M45 75 Q48 50 52 28" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.5" fill="none"/></svg>`,
+        },
+        {
+          id: "flower1",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="45" cy="45" r="9" fill="currentColor"/><ellipse cx="45" cy="25" rx="7" ry="11" fill="currentColor" opacity="0.8"/><ellipse cx="45" cy="65" rx="7" ry="11" fill="currentColor" opacity="0.8"/><ellipse cx="25" cy="45" rx="11" ry="7" fill="currentColor" opacity="0.8"/><ellipse cx="65" cy="45" rx="11" ry="7" fill="currentColor" opacity="0.8"/><ellipse cx="31" cy="31" rx="7" ry="11" fill="currentColor" opacity="0.6" transform="rotate(-45 31 31)"/><ellipse cx="59" cy="59" rx="7" ry="11" fill="currentColor" opacity="0.6" transform="rotate(-45 59 59)"/><ellipse cx="59" cy="31" rx="7" ry="11" fill="currentColor" opacity="0.6" transform="rotate(45 59 31)"/><ellipse cx="31" cy="59" rx="7" ry="11" fill="currentColor" opacity="0.6" transform="rotate(45 31 59)"/><circle cx="45" cy="45" r="6" fill="white" opacity="0.9"/></svg>`,
+        },
+        {
+          id: "moon",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M58 25 A28 28 0 1 0 58 65 A18 18 0 1 1 58 25Z" fill="currentColor" opacity="0.9"/></svg>`,
+        },
+        {
+          id: "flower2",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M45 20 Q50 35 45 45 Q40 35 45 20Z" fill="currentColor" opacity="0.85"/><path d="M45 70 Q50 55 45 45 Q40 55 45 70Z" fill="currentColor" opacity="0.85"/><path d="M20 45 Q35 50 45 45 Q35 40 20 45Z" fill="currentColor" opacity="0.85"/><path d="M70 45 Q55 50 45 45 Q55 40 70 45Z" fill="currentColor" opacity="0.85"/><circle cx="45" cy="45" r="7" fill="currentColor"/><circle cx="45" cy="45" r="4" fill="white" opacity="0.8"/></svg>`,
+        },
+        {
+          id: "branch",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M45 75 Q42 55 40 35 Q38 20 42 15" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M40 35 Q30 28 24 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M41 48 Q52 40 58 33" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/><ellipse cx="24" cy="20" rx="5" ry="7" fill="currentColor" opacity="0.8"/><ellipse cx="59" cy="31" rx="5" ry="7" fill="currentColor" opacity="0.8"/><ellipse cx="42" cy="13" rx="4" ry="6" fill="currentColor" opacity="0.8"/></svg>`,
+        },
+        {
+          id: "mushroom",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="52" width="10" height="20" rx="3" fill="currentColor" opacity="0.7"/><path d="M20 52 Q20 22 45 22 Q70 22 70 52Z" fill="currentColor" opacity="0.9"/><circle cx="35" cy="40" r="5" fill="white" opacity="0.35"/><circle cx="52" cy="35" r="4" fill="white" opacity="0.35"/><circle cx="44" cy="48" r="3" fill="white" opacity="0.35"/></svg>`,
+        },
+        {
+          id: "sun",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="45" cy="45" r="14" fill="currentColor"/>${Array.from(
+            { length: 12 },
+            (_, i) => {
+              const a = (i * 30 * Math.PI) / 180,
+                x1 = 45 + 20 * Math.cos(a),
+                y1 = 45 + 20 * Math.sin(a),
+                x2 = 45 + 32 * Math.cos(a),
+                y2 = 45 + 32 * Math.sin(a)
+              return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`
+            }
+          ).join("")}</svg>`,
+        },
+        {
+          id: "feather",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M30 70 Q45 50 55 20 Q68 30 62 55 Q55 70 30 70Z" fill="currentColor" opacity="0.8"/><path d="M30 70 Q42 52 55 20" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity="0.45" fill="none"/><path d="M48 32 Q43 42 38 55" stroke="white" stroke-width="1" opacity="0.3" stroke-linecap="round" fill="none"/></svg>`,
+        },
+        {
+          id: "dahlia",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">${Array.from(
+            { length: 16 },
+            (_, i) => {
+              const a = (i * 22.5 * Math.PI) / 180,
+                cx = 45 + 22 * Math.cos(a),
+                cy = 45 + 22 * Math.sin(a)
+              return `<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="9" ry="5" fill="currentColor" opacity="0.75" transform="rotate(${(i * 22.5 + 90).toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)})"/>`
+            }
+          ).join(
+            ""
+          )}<circle cx="45" cy="45" r="10" fill="currentColor"/><circle cx="45" cy="45" r="5" fill="white" opacity="0.7"/></svg>`,
+        },
+        {
+          id: "pine",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="45,12 22,55 68,55" fill="currentColor" opacity="0.9"/><polygon points="45,30 18,68 72,68" fill="currentColor" opacity="0.75"/><rect x="40" y="68" width="10" height="12" rx="2" fill="currentColor" opacity="0.7"/></svg>`,
+        },
+        {
+          id: "tulip",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M45 55 Q32 55 30 38 Q30 22 45 20 Q60 22 60 38 Q58 55 45 55Z" fill="currentColor" opacity="0.9"/><path d="M45 55 L45 78" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M45 65 Q35 60 30 55" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>`,
+        },
+        {
+          id: "monstera",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M45 75 Q20 65 18 40 Q22 18 45 15 Q68 18 72 40 Q70 65 45 75Z" fill="currentColor" opacity="0.85"/><path d="M45 75 L45 20" stroke="white" stroke-width="1.5" opacity="0.3" fill="none"/><path d="M45 40 Q30 35 22 25" stroke="white" stroke-width="1" opacity="0.25" fill="none"/><path d="M45 50 Q60 45 68 35" stroke="white" stroke-width="1" opacity="0.25" fill="none"/><circle cx="35" cy="30" r="4" fill="#0E0C0A" opacity="0.3"/><circle cx="55" cy="28" r="3.5" fill="#0E0C0A" opacity="0.3"/></svg>`,
+        },
+        {
+          id: "rainbow",
+          svg: `<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 62 A30 30 0 0 1 75 62" stroke="currentColor" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.9"/><path d="M22 62 A23 23 0 0 1 68 62" stroke="currentColor" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.6"/><path d="M29 62 A16 16 0 0 1 61 62" stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.35"/></svg>`,
+        },
+      ]
+
+      /* ── STATE ── */
+      let currentFont = "cormorant"
+      let currentBg = "void"
+      let currentInk = "light"
+      let currentDoodle = null
+      let idleTimer = null
+
+      /* ── ELEMENTS ── */
+      const poem = document.getElementById("poem")
+      const canvas = document.getElementById("canvas")
+      const topBar = document.getElementById("top-bar")
+      const bottomPanel = document.getElementById("bottom-panel")
+      const ornament = document.getElementById("doodle-ornament")
+      const ornamentImg = document.getElementById("ornament-img")
+      const exportOverlay = document.getElementById("export-overlay")
+      const previewFrame = document.getElementById("preview-frame")
+      const previewPoem = document.getElementById("preview-poem")
+      const previewDoodle = document.getElementById("preview-doodle")
+      const doodleDrawer = document.getElementById("doodle-drawer")
+      const doodleGrid = document.getElementById("doodle-grid")
+      const offscreen = document.getElementById("offscreen")
+      const toast = document.getElementById("toast")
+
+      /* ── INIT: doodle grid ── */
+      DOODLES.forEach((d) => {
+        const el = document.createElement("div")
+        el.className = "doodle-item"
+        el.dataset.id = d.id
+        el.style.color = "#b5651d"
+        el.innerHTML = d.svg
+        el.addEventListener("click", () => selectDoodle(d.id, el))
+        doodleGrid.appendChild(el)
+      })
+
+      /* ── INIT: textures ── */
+      if (TEXTURES.length) {
+        document.getElementById("texture-divider").style.display = ""
+        document.getElementById("texture-label").style.display = ""
+        const bgRow = document.getElementById("bg-row")
+        TEXTURES.forEach((t, i) => {
+          const sw = document.createElement("div")
+          sw.className = "bg-swatch"
+          sw.dataset.bg = "texture-" + i
+          sw.dataset.ink = t.ink
+          sw.dataset.texture = t.file
+          sw.innerHTML = `<img src="/public/textures/${t.file}" alt="">`
+          bgRow.appendChild(sw)
+          sw.addEventListener("click", () => applyBg(sw))
+        })
+      }
+
+      /* ── TEXTAREA AUTO-RESIZE ── */
+      function resizePoem() {
+        poem.style.height = "auto"
+        poem.style.height = poem.scrollHeight + "px"
+      }
+      poem.addEventListener("input", resizePoem)
+      resizePoem()
+
+      /* ── APPLY FONT ── */
+      function applyFont(key) {
+        const f = FONTS[key]
+        poem.style.fontFamily = f.family
+        poem.style.fontWeight = f.weight
+        previewPoem.style.fontFamily = f.family
+        previewPoem.style.fontWeight = f.weight
+      }
+      applyFont(currentFont)
+
+      /* ── FONT CHOICES ── */
+      document.querySelectorAll(".font-choice").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".font-choice")
+            .forEach((b) => b.classList.remove("active"))
+          btn.classList.add("active")
+          currentFont = btn.dataset.font
+          applyFont(currentFont)
+          resetIdle()
+          poem.focus()
+        })
+      })
+
+      /* ── APPLY BG ── */
+      function applyBg(swatchEl) {
+        document
+          .querySelectorAll(".bg-swatch")
+          .forEach((s) => s.classList.remove("active"))
+        swatchEl.classList.add("active")
+
+        const bg = swatchEl.dataset.bg
+        const ink = swatchEl.dataset.ink
+
+        // remove all bg & ink classes
+        BG_CLASSES.forEach((c) => canvas.classList.remove(c))
+        INK_CLASSES.forEach((c) => canvas.classList.remove(c))
+
+        if (bg.startsWith("texture-")) {
+          canvas.style.backgroundImage = `url('/public/textures/${swatchEl.dataset.texture}')`
+          canvas.style.backgroundSize = "cover"
+          canvas.style.backgroundPosition = "center"
+        } else {
+          canvas.style.backgroundImage = ""
+          canvas.style.backgroundSize = ""
+          canvas.classList.add("bg-" + bg)
+        }
+
+        canvas.classList.add("ink-" + ink)
+        currentBg = bg
+        currentInk = ink
+        resetIdle()
+      }
+
+      document.querySelectorAll(".bg-swatch").forEach((sw) => {
+        sw.addEventListener("click", () => applyBg(sw))
+      })
+
+      /* ── DOODLE ── */
+      function selectDoodle(id, el) {
+        const alreadyActive = el.classList.contains("active")
+        document
+          .querySelectorAll(".doodle-item")
+          .forEach((d) => d.classList.remove("active"))
+
+        if (alreadyActive) {
+          currentDoodle = null
+          ornament.classList.add("hidden")
+          ornamentImg.src = ""
+        } else {
+          el.classList.add("active")
+          currentDoodle = id
+          const svg = DOODLES.find((d) => d.id === id).svg
+          const blob = new Blob([svg], { type: "image/svg+xml" })
+          const url = URL.createObjectURL(blob)
+          ornamentImg.src = url
+          ornament.classList.remove("hidden")
+        }
+      }
+
+      document
+        .getElementById("doodle-trigger")
+        .addEventListener("click", () => {
+          doodleDrawer.classList.add("open")
+        })
+      document.querySelector(".drawer-close").addEventListener("click", () => {
+        doodleDrawer.classList.remove("open")
+        resetIdle()
+      })
+
+      /* ── CLEAR ── */
+      document.getElementById("clear-btn").addEventListener("click", () => {
+        if (poem.value.trim()) {
+          poem.value = ""
+          resizePoem()
+          poem.focus()
+        }
+      })
+
+      /* ── IDLE CHROME ── */
+      function hideChrome() {
+        topBar.classList.add("hidden")
+        bottomPanel.classList.add("hidden")
+      }
+      function showChrome() {
+        topBar.classList.remove("hidden")
+        bottomPanel.classList.remove("hidden")
+      }
+      function resetIdle() {
+        showChrome()
+        clearTimeout(idleTimer)
+        idleTimer = setTimeout(hideChrome, 3500)
+      }
+      document.addEventListener("touchstart", resetIdle, { passive: true })
+      document.addEventListener("mousemove", resetIdle, { passive: true })
+      poem.addEventListener("input", resetIdle)
+      resetIdle()
+
+      /* ── EXPORT ── */
+      document
+        .getElementById("export-trigger")
+        .addEventListener("click", () => {
+          const text = poem.value.trim()
+          if (!text) {
+            showToast("write something first.")
+            return
+          }
+
+          previewPoem.textContent = text
+          applyFont(currentFont)
+
+          // sync preview bg
+          BG_CLASSES.forEach((c) => previewFrame.classList.remove(c))
+          INK_CLASSES.forEach((c) => previewFrame.classList.remove(c))
+          if (currentBg.startsWith("texture-")) {
+            const sw = document.querySelector(
+              `.bg-swatch[data-bg="${currentBg}"]`
+            )
+            previewFrame.style.backgroundImage = `url('/public/textures/${sw.dataset.texture}')`
+            previewFrame.style.backgroundSize = "cover"
+          } else {
+            previewFrame.style.backgroundImage = ""
+            previewFrame.classList.add("bg-" + currentBg)
+          }
+          previewFrame.classList.add("ink-" + currentInk)
+          previewPoem.style.color = ""
+
+          // font size for preview
+          const lines = text.split("\n")
+          const maxLen = Math.max(...lines.map((l) => l.length))
+          const fs = Math.max(
+            10,
+            Math.min(18, Math.floor(160 / Math.max(maxLen, 1)))
+          )
+          previewPoem.style.fontSize = fs + "px"
+
+          // doodle in preview
+          if (currentDoodle) {
+            const svg = DOODLES.find((d) => d.id === currentDoodle).svg
+            const blob = new Blob([svg], { type: "image/svg+xml" })
+            previewDoodle.src = URL.createObjectURL(blob)
+            previewDoodle.style.display = "block"
+          } else {
+            previewDoodle.style.display = "none"
+          }
+
+          exportOverlay.classList.add("visible")
+        })
+
+      document.getElementById("close-export").addEventListener("click", () => {
+        exportOverlay.classList.remove("visible")
+      })
+
+      /* ── DOWNLOAD ── */
+      document
+        .getElementById("download-btn")
+        .addEventListener("click", downloadImage)
+
+      function getCanvasBgColor() {
+        const map = {
+          void: "#0E0C0A",
+          night: "#131118",
+          dusk: "#1c1008",
+          slate: "#141820",
+          rouge: "#1a1018",
+          sage: "#0a0f0a",
+          paper: "#F0E8D8",
+          cream: "#EDE0C4",
+          linen: "#D8CCB4",
+          parchment: "#C8B99A",
+        }
+        return map[currentBg] || "#0E0C0A"
+      }
+
+      function downloadImage() {
+        const W = 1080,
+          H = 1920
+        offscreen.width = W
+        offscreen.height = H
+        const ctx = offscreen.getContext("2d")
+
+        // bg
+        ctx.fillStyle = getCanvasBgColor()
+        ctx.fillRect(0, 0, W, H)
+
+        // subtle grain
+        const id = ctx.getImageData(0, 0, W, H)
+        const d = id.data
+        for (let i = 0; i < d.length; i += 4) {
+          const n = (Math.random() - 0.5) * 8
+          d[i] = Math.min(255, Math.max(0, d[i] + n))
+          d[i + 1] = Math.min(255, Math.max(0, d[i + 1] + n))
+          d[i + 2] = Math.min(255, Math.max(0, d[i + 2] + n))
+        }
+        ctx.putImageData(id, 0, 0)
+
+        // text
+        const isLight = currentInk === "dark"
+        ctx.fillStyle = isLight
+          ? "rgba(28,22,16,0.9)"
+          : "rgba(242,236,224,0.92)"
+        if (!isLight) {
+          ctx.shadowColor = "rgba(0,0,0,0.45)"
+          ctx.shadowBlur = 20
+        }
+
+        const text = poem.value.trim()
+        const lines = text.split("\n")
+        const maxLen = Math.max(...lines.map((l) => l.length))
+        const fMap = {
+          cormorant: "Cormorant Garamond",
+          fell: "IM Fell English",
+          playfair: "Playfair Display",
+          lora: "Lora",
+        }
+        const fName = fMap[currentFont]
+        const fWt = FONTS[currentFont].weight
+        const fSize = Math.min(
+          80,
+          Math.max(32, Math.floor(820 / Math.max(maxLen, 1)))
+        )
+
+        ctx.font = `italic ${fWt} ${fSize}px "${fName}", serif`
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+
+        const lh = fSize * 2
+        const totalH = lines.length * lh
+        const startY = (H - totalH) / 2 + lh / 2
+        lines.forEach((line, i) => ctx.fillText(line, W / 2, startY + i * lh))
+        ctx.shadowBlur = 0
+
+        try {
+          const url = offscreen.toDataURL("image/png")
+          const link = document.createElement("a")
+          link.download = "poetic.png"
+          link.href = url
+          link.click()
+          exportOverlay.classList.remove("visible")
+          showToast("saved.")
+        } catch (e) {
+          showToast("long-press preview to save.")
+        }
+      }
+
+      /* ── TOAST ── */
+      function showToast(msg) {
+        toast.textContent = msg
+        toast.classList.add("show")
+        setTimeout(() => toast.classList.remove("show"), 2200)
+      }
+
+      /* ── INIT ── */
+      setTimeout(() => poem.focus(), 700)
+    </script>
+  </body>
+</html>
