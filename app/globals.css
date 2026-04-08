@@ -74,12 +74,12 @@
     --secondary-foreground: #1A1714;
     --muted: #EDE7D9;
     --muted-foreground: #8C8278;
-    --accent: #8B4513;
+    --accent: #C5A059;
     --accent-foreground: #F5F0E8;
     --destructive: #000;
     --border: #C8BFB0;
     --input: #C8BFB0;
-    --ring: #8B4513;
+    --ring: #C5A059;
     --radius: 0.5rem;
 }
 
@@ -96,31 +96,50 @@
     --secondary-foreground: #F5F0E8;
     --muted: #1A1714;
     --muted-foreground: #8C8278;
-    --accent: #8B4513;
+    --accent: #C5A059;
     --accent-foreground: #F5F0E8;
     --destructive: #000;
     --border: #1A1714;
     --input: #1A1714;
-    --ring: #8B4513;
+    --ring: #C5A059;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+    -webkit-tap-highlight-color: transparent;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    accent-color: #C5A059; /* Target modern browsers native controls */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
   body {
     @apply bg-background text-foreground;
     height: 100%;
     width: 100%;
     overflow: hidden;
     position: fixed;
-    }
+  }
+  
   html {
     @apply font-sans;
     height: 100%;
     width: 100%;
     overflow: hidden;
-    }
+  }
+
+  textarea {
+    caret-color: #C5A059 !important; /* Elegant Gold Caret */
+  }
+
+  ::selection {
+    background-color: rgba(197, 160, 89, 0.25); /* Soft Gold Selection */
+    color: inherit;
+  }
 }
 
 @layer utilities {
