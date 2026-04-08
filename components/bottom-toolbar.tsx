@@ -136,9 +136,9 @@ export function BottomToolbar({
                   </button>
                 </div>
 
-                {/* Author Input Section */}
-                <div className="px-8">
-                  <div className="relative group">
+                {/* Signature Row: author + motif */}
+                <div className="px-8 flex items-center gap-3">
+                  <div className="relative group flex-1">
                     <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none opacity-40 group-focus-within:opacity-100 group-focus-within:text-accent transition-all">
                       <HugeiconsIcon icon={UserIcon} size={15} strokeWidth={2.5} />
                       <span className="font-jost text-[10px] uppercase tracking-[0.2em] font-bold">@</span>
@@ -151,6 +151,13 @@ export function BottomToolbar({
                       className="w-full bg-transparent border-b-2 border-white/5 py-3 pl-12 outline-none font-jost text-[12px] tracking-[0.3em] uppercase placeholder:opacity-20 focus:border-accent/60 transition-all font-medium"
                     />
                   </div>
+                  <button
+                    onClick={() => { trigger(20); onDoodleToggle(); }}
+                    className="flex-shrink-0 flex items-center gap-2 font-jost text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-3 px-5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 select-none"
+                  >
+                    <HugeiconsIcon icon={PencilEdit01Icon} size={13} strokeWidth={2.5} />
+                    <span>motif</span>
+                  </button>
                 </div>
 
                 <div className="space-y-4">
@@ -165,30 +172,6 @@ export function BottomToolbar({
                     onToneSelect={onToneSelect}
                     onPaperSelect={onPaperSelect}
                   />
-
-                  <div className="flex items-center justify-between px-8 pt-2">
-                    <button 
-                      onClick={() => {
-                        trigger(20);
-                        onDoodleToggle();
-                      }}
-                      className="flex items-center gap-2 font-jost text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2 px-4 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 select-none"
-                    >
-                      <HugeiconsIcon icon={PencilEdit01Icon} size={13} strokeWidth={2.5} />
-                      <span className="mt-0.5">graphics</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        trigger("nudge");
-                        onExport();
-                      }}
-                      className="flex items-center gap-2 font-jost text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2 px-4 rounded-full bg-[#F5F0E8] text-[#1A1714] hover:bg-white active:scale-95 select-none shadow-md"
-                    >
-                      <HugeiconsIcon icon={ArrowRight01Icon} size={13} strokeWidth={2.5} />
-                      <span className="mt-0.5">export</span>
-                    </button>
-                  </div>
                 </div>
               </div>
             </motion.div>

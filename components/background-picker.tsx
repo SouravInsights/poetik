@@ -43,40 +43,46 @@ export function BackgroundPicker({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Tones Row */}
-      <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-3">
-        <span className="font-jost text-[9px] font-bold tracking-[0.2em] opacity-40 flex-shrink-0 uppercase pr-2">
+      <div className="flex items-center py-1">
+        {/* Fixed label */}
+        <span className="flex-shrink-0 font-jost text-[9px] font-bold tracking-[0.2em] opacity-40 uppercase pl-8 pr-4">
           tones
         </span>
-        {TONES.map((tone) => (
-          <button
-            key={tone.id}
-            onClick={() => {
-              trigger(35);
-              onToneSelect(tone);
-            }}
-            className={cn(
-              "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border-2 transition-all duration-500",
-              tone.class,
-              currentTone.id === tone.id
-                ? "border-[#F5F0E8] scale-[1.15] shadow-[0_0_20px_rgba(245,240,232,0.2)] ring-2 ring-[#F5F0E8] ring-offset-2 ring-offset-[#161412]"
-                : "border-white/5 hover:border-white/20"
-            )}
-          />
-        ))}
+        {/* Scrollable swatches */}
+        <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-8 py-3">
+          {TONES.map((tone) => (
+            <button
+              key={tone.id}
+              onClick={() => {
+                trigger(35);
+                onToneSelect(tone);
+              }}
+              className={cn(
+                "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border-2 transition-all duration-500",
+                tone.class,
+                currentTone.id === tone.id
+                  ? "border-[#F5F0E8] scale-[1.15] shadow-[0_0_20px_rgba(245,240,232,0.2)] ring-2 ring-[#F5F0E8] ring-offset-2 ring-offset-[#161412]"
+                  : "border-white/5 hover:border-white/20"
+              )}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Papers Row */}
-      <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-3">
-        <span className="font-jost text-[9px] font-bold tracking-[0.2em] opacity-40 flex-shrink-0 uppercase pr-2">
+      <div className="flex items-center py-1">
+        {/* Fixed label */}
+        <span className="flex-shrink-0 font-jost text-[9px] font-bold tracking-[0.2em] opacity-40 uppercase pl-8 pr-4">
           papers
         </span>
-        {classicPapers.map(renderSwatch)}
-        
-        <div className="w-[1.5px] h-4 bg-white/10 flex-shrink-0 mx-2" />
-        
-        {modernPapers.map(renderSwatch)}
+        {/* Scrollable swatches */}
+        <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-8 py-3">
+          {classicPapers.map(renderSwatch)}
+          <div className="w-[1.5px] h-5 bg-white/10 flex-shrink-0" />
+          {modernPapers.map(renderSwatch)}
+        </div>
       </div>
     </div>
   );
