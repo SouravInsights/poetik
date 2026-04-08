@@ -75,12 +75,14 @@ export function useEditor() {
   }, [text, font, paper, tone, doodle, author, align, bgOpacity]);
 
   const handleSetFont = useCallback((f: Font) => {
-    trigger("light");
+    // Sharp physical click
+    trigger(15);
     setFont(f);
   }, [trigger]);
 
   const handleSetPaper = useCallback((p: Paper) => {
-    trigger("medium");
+    // Solid tactile feedback for background swap
+    trigger(35);
     setPaper(p);
     if (p.theme === "light" && tone.ink === "ink-light") {
       setTone(TONES.find(t => t.id === "paper") || TONES[4]);
@@ -90,21 +92,25 @@ export function useEditor() {
   }, [trigger, tone]);
 
   const handleSetTone = useCallback((t: Tone) => {
-    trigger("medium");
+    // Solid 35ms pulse to match the 'Paper' selection feel (user preferred)
+    trigger(35);
     setTone(t);
   }, [trigger]);
 
   const handleSetDoodle = useCallback((d: string | null) => {
-    trigger("light");
+    // Light tap for graphic selection
+    trigger(20);
     setDoodle(d);
   }, [trigger]);
 
   const handleSetAlign = useCallback(() => {
-    trigger("medium");
+    // Two quick taps for alignment toggle
+    trigger([20, 30, 20]);
     setAlign(a => a === "center" ? "left" : "center");
   }, [trigger]);
 
   const handleClear = useCallback(() => {
+    // Sharp error pattern for clearing
     trigger("error");
     setText("");
     setDoodle(null);

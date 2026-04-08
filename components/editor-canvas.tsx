@@ -39,8 +39,9 @@ export function EditorCanvas({
   }, [text]);
 
   const handleTextChange = (val: string) => {
-    // Light tactile tick for every character to simulate typewriter/physical keys
-    trigger("light");
+    // Sharp 15ms pulse for writing. 
+    // This is a direct Vibration API call through web-haptics for maximum intensity.
+    trigger(15);
     setText(val);
   };
 

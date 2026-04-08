@@ -33,7 +33,7 @@ export function TopBar({ visible, onClear, align, onAlignToggle, tone }: TopBarP
         <div className={cn("h-4 w-[1px] opacity-10 hidden sm:block", isDark ? "bg-white" : "bg-black")} />
         <button
           onClick={() => {
-            trigger("selection");
+            trigger(20);
             onAlignToggle();
           }}
           className={cn(

@@ -59,7 +59,7 @@ export function BottomToolbar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => {
-              trigger("selection");
+              trigger(10);
               onOpenToggle(false);
             }}
             className="fixed inset-0 z-[90] bg-black/10 backdrop-blur-[2px]"
@@ -81,7 +81,7 @@ export function BottomToolbar({
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
               onClick={() => {
-                trigger("selection");
+                trigger(20);
                 onOpenToggle(true);
               }}
               className={cn(
@@ -107,7 +107,10 @@ export function BottomToolbar({
                 <div className="flex items-center justify-between px-8">
                   <span className="font-jost text-[10px] uppercase tracking-[0.4em] opacity-40 font-bold">editing shelf</span>
                   <button 
-                    onClick={() => onOpenToggle(false)}
+                    onClick={() => {
+                      trigger(10);
+                      onOpenToggle(false);
+                    }}
                     className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors"
                     aria-label="Close tools"
                   >
@@ -148,7 +151,7 @@ export function BottomToolbar({
                   <div className="flex items-center justify-between px-8 pt-2">
                     <button 
                       onClick={() => {
-                        trigger("selection");
+                        trigger(20);
                         onDoodleToggle();
                       }}
                       className="flex items-center gap-4 transition-all py-2 group"
@@ -161,7 +164,7 @@ export function BottomToolbar({
 
                     <button
                       onClick={() => {
-                        trigger("medium");
+                        trigger("nudge");
                         onExport();
                       }}
                       className="flex items-center gap-5 py-2 group transition-all"
