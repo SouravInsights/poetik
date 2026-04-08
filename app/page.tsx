@@ -9,33 +9,18 @@ import { DoodleDrawer } from "@/components/doodle-drawer";
 
 export default function PoetikPage() {
   const {
-    text,
-    setText,
-    font,
-    setFont,
-    paper,
-    setPaper,
-    tone,
-    setTone,
-    doodle,
-    setDoodle,
-    doodleColor,
-    setDoodleColor,
-    author,
-    setAuthor,
-    align,
-    toggleAlign,
-    bgOpacity,
-    setBgOpacity,
-    isExporting,
-    setIsExporting,
-    isDoodleDrawerOpen,
-    setIsDoodleDrawerOpen,
-    isToolbarOpen,
-    setIsToolbarOpen,
-    uiVisible,
-    dynamicPapers,
-    dynamicDoodles,
+    text, setText,
+    font, setFont,
+    paper, setPaper,
+    tone, setTone,
+    doodle, setDoodle,
+    author, setAuthor,
+    align, toggleAlign,
+    bgOpacity, setBgOpacity,
+    isExporting, setIsExporting,
+    isDoodleDrawerOpen, setIsDoodleDrawerOpen,
+    isToolbarOpen, setIsToolbarOpen,
+    uiVisible, dynamicPapers, dynamicDoodles,
     handleClear,
   } = useEditor();
 
@@ -48,7 +33,6 @@ export default function PoetikPage() {
         paper={paper}
         tone={tone}
         doodle={doodle}
-        doodleColor={doodleColor}
         author={author}
         align={align}
         bgOpacity={bgOpacity}
@@ -84,8 +68,6 @@ export default function PoetikPage() {
         onClose={() => setIsDoodleDrawerOpen(false)}
         currentDoodle={doodle}
         onSelect={setDoodle}
-        currentDoodleColor={doodleColor}
-        onColorSelect={setDoodleColor}
         tone={tone}
         dynamicDoodles={dynamicDoodles}
       />
@@ -98,7 +80,6 @@ export default function PoetikPage() {
         paper={paper}
         tone={tone}
         doodle={doodle}
-        doodleColor={doodleColor}
         author={author}
         align={align}
         bgOpacity={bgOpacity}

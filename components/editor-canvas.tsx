@@ -11,7 +11,6 @@ interface EditorCanvasProps {
   paper: Paper;
   tone: Tone;
   doodle: string | null;
-  doodleColor: string;
   author: string;
   align: "left" | "center";
   bgOpacity: number;
@@ -24,7 +23,6 @@ export function EditorCanvas({
   paper,
   tone,
   doodle,
-  doodleColor,
   author,
   align,
   bgOpacity,
@@ -52,7 +50,6 @@ export function EditorCanvas({
         opacity: bgOpacity,
       }}
     >
-      {/* Background Overlay for UI contrast */}
       <div 
         className={cn(
           "absolute inset-0 transition-opacity duration-1000",
@@ -61,7 +58,6 @@ export function EditorCanvas({
         )} 
       />
 
-      {/* Writing Area */}
       <div className={cn(
         "absolute inset-0 flex flex-col items-center justify-center px-8 pb-[140px] pt-[80px]"
       )}>
@@ -85,28 +81,21 @@ export function EditorCanvas({
         />
       </div>
 
-      {/* Brand/Signature Block (Detached) */}
       {(doodle || author) && (
         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 transition-all duration-700 pointer-events-none">
           {doodle && (
             <div 
-              className="w-10 h-10 opacity-30"
-              style={{
-                WebkitMaskImage: `url(/doodles/${doodle})`,
-                maskImage: `url(/doodles/${doodle})`,
-                WebkitMaskSize: 'contain',
-                maskSize: 'contain',
-                WebkitMaskRepeat: 'no-repeat',
-                maskRepeat: 'no-repeat',
-                WebkitMaskPosition: 'center',
-                maskPosition: 'center',
-                backgroundColor: doodleColor
-              }}
-            />
+              className={cn(
+                "w-10 h-10 opacity-40 transition-all duration-700",
+                isDark ? "invert brightness-200" : "brightness-0"
+              )}
+            >
+              <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
+            </div>
           )}
           {author && (
             <span className={cn(
-              "font-jost text-[9px] tracking-[0.3em] uppercase opacity-30",
+              "font-jost text-[9px] tracking-[0.3em] uppercase opacity-30 mt-1",
               isDark ? "text-white" : "text-black"
             )}>
               {author.startsWith('@') ? author : `@${author}`}

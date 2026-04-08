@@ -11,7 +11,6 @@ export function useEditor() {
   const [paper, setPaper] = useState<Paper>(PAPERS[0]);
   const [tone, setTone] = useState<Tone>(TONES[0]);
   const [doodle, setDoodle] = useState<string | null>(null);
-  const [doodleColor, setDoodleColor] = useState<string>("#FFFFFF");
   const [author, setAuthor] = useState<string>("");
   const [align, setAlign] = useState<"left" | "center">("center");
   const [bgOpacity, setBgOpacity] = useState(1);
@@ -20,7 +19,6 @@ export function useEditor() {
   const [isToolbarOpen, setIsToolbarOpen] = useState(false);
   const [uiVisible, setUiVisible] = useState(true);
 
-  // Dynamic assets
   const [dynamicPapers, setDynamicPapers] = useState<Paper[]>(PAPERS);
   const [dynamicDoodles, setDynamicDoodles] = useState<string[]>([]);
 
@@ -29,31 +27,18 @@ export function useEditor() {
       try {
         const res = await fetch("/api/assets");
         const data = await res.json();
-        
         const newPapers: Paper[] = [
-          PAPERS[0], // Keep basic Void
-          ...data.papers.map((p: { name: string, path: string, category: string }) => ({
+          PAPERS[0],
+          ...data.papers.map((p: any) => ({
             id: p.name,
             path: p.path,
             type: "image" as const,
             label: p.name.split('.')[0],
-            // Detect theme based on filename/category or default to light
-            theme: (p.path.includes('modern') && ['2', '11'].includes(p.name.split('.')[0])) ? 'dark' : 'light'
+            theme: (p.path.includes('modern') && ['11'].includes(p.name.split('.')[0])) ? 'dark' : 'light'
           }))
         ];
-        
         setDynamicPapers(newPapers);
         setDynamicDoodles(data.doodles);
-
-        // Recover state from localStorage after fetching papers to match by ID
-        const saved = localStorage.getItem("poetik-state");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed.paper) {
-            const found = newPapers.find(p => p.id === parsed.paper.id);
-            if (found) setPaper(found);
-          }
-        }
       } catch (e) {
         console.error("Failed to fetch assets", e);
       }
@@ -61,7 +46,6 @@ export function useEditor() {
     fetchAssets();
   }, []);
 
-  // Auto-save to localStorage
   useEffect(() => {
     const saved = localStorage.getItem("poetik-state");
     if (saved) {
@@ -77,50 +61,18 @@ export function useEditor() {
           if (found) setTone(found);
         }
         if (parsed.doodle) setDoodle(parsed.doodle);
-        if (parsed.doodleColor) setDoodleColor(parsed.doodleColor);
         if (parsed.author) setAuthor(parsed.author);
         if (parsed.align) setAlign(parsed.align);
         if (parsed.bgOpacity !== undefined) setBgOpacity(parsed.bgOpacity);
-      } catch (e) {
-        console.error("Failed to load state", e);
-      }
+      } catch (e) {}
     }
   }, []);
 
   useEffect(() => {
     localStorage.setItem("poetik-state", JSON.stringify({ 
-      text, font, paper, tone, doodle, doodleColor, align, bgOpacity 
+      text, font, paper, tone, doodle, author, align, bgOpacity 
     }));
-  }, [text, font, paper, tone, doodle, align, bgOpacity]);
-
-  // UI transparency logic
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    const hideUi = () => {
-      // Don't auto-hide if drawer/toolbar is open or exporting
-      if (!isDoodleDrawerOpen && !isExporting && !isToolbarOpen) {
-        setUiVisible(false);
-      }
-    };
-    const resetTimer = () => {
-      setUiVisible(true);
-      clearTimeout(timer);
-      timer = setTimeout(hideUi, 4000); // 4s instead of 3s
-    };
-
-    window.addEventListener("touchstart", resetTimer);
-    window.addEventListener("mousemove", resetTimer);
-    window.addEventListener("keydown", resetTimer);
-
-    timer = setTimeout(hideUi, 4000);
-
-    return () => {
-      window.removeEventListener("touchstart", resetTimer);
-      window.removeEventListener("mousemove", resetTimer);
-      window.removeEventListener("keydown", resetTimer);
-      clearTimeout(timer);
-    };
-  }, [isDoodleDrawerOpen, isExporting]);
+  }, [text, font, paper, tone, doodle, author, align, bgOpacity]);
 
   const handleSetFont = useCallback((f: Font) => {
     trigger("selection");
@@ -130,14 +82,10 @@ export function useEditor() {
   const handleSetPaper = useCallback((p: Paper) => {
     trigger("medium");
     setPaper(p);
-    
-    // Auto-switch tone if it clashes with paper theme
     if (p.theme === "light" && tone.ink === "ink-light") {
-      const lightTone = TONES.find(t => t.id === "paper") || TONES[4];
-      setTone(lightTone);
+      setTone(TONES.find(t => t.id === "paper") || TONES[4]);
     } else if (p.theme === "dark" && tone.ink === "ink-dark") {
-      const darkTone = TONES.find(t => t.id === "void") || TONES[0];
-      setTone(darkTone);
+      setTone(TONES.find(t => t.id === "void") || TONES[0]);
     }
   }, [trigger, tone]);
 
@@ -157,40 +105,24 @@ export function useEditor() {
   }, [trigger]);
 
   const handleClear = useCallback(() => {
-    if (confirm("Clear all text?")) {
-      trigger("error");
-      setText("");
-    }
+    trigger("error");
+    setText("");
+    setDoodle(null);
   }, [trigger]);
 
   return {
-    text,
-    setText,
-    font,
-    setFont: handleSetFont,
-    paper,
-    setPaper: handleSetPaper,
-    tone,
-    setTone: handleSetTone,
-    doodle,
-    setDoodle: handleSetDoodle,
-    doodleColor,
-    setDoodleColor,
-    author,
-    setAuthor,
-    align,
-    toggleAlign: handleSetAlign,
-    bgOpacity,
-    setBgOpacity,
-    isExporting,
-    setIsExporting,
-    isDoodleDrawerOpen,
-    setIsDoodleDrawerOpen,
-    isToolbarOpen,
-    setIsToolbarOpen,
-    uiVisible,
-    dynamicPapers,
-    dynamicDoodles,
+    text, setText,
+    font, setFont: handleSetFont,
+    paper, setPaper: handleSetPaper,
+    tone, setTone: handleSetTone,
+    doodle, setDoodle: handleSetDoodle,
+    author, setAuthor,
+    align, toggleAlign: handleSetAlign,
+    bgOpacity, setBgOpacity,
+    isExporting, setIsExporting,
+    isDoodleDrawerOpen, setIsDoodleDrawerOpen,
+    isToolbarOpen, setIsToolbarOpen,
+    uiVisible, dynamicPapers, dynamicDoodles,
     handleClear,
   };
 }

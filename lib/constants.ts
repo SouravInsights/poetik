@@ -84,22 +84,4 @@ export const DOODLES: string[] = [
   "sun-6.svg", "sun-12.svg",
 ];
 
-export const DARK_DOODLE_COLORS = [
-  "#FFFFFF", // Default
-  "#FFA617", // Orange
-  "#84E600", // Lime
-  "#FFD800", // Yellow
-  "#C678FF", // Lavender
-  "#FF79D7", // Pink
-  "#59C9DF", // Cyan
-];
 
-export const LIGHT_DOODLE_COLORS = [
-  "#1A1A1A", // Default (Dark)
-  "#E65100", // Deep Orange
-  "#2E7D32", // Forest Green
-  "#1565C0", // Royal Blue
-  "#7B1FA2", // Deep Purple
-  "#C2185B", // Deep Pink
-  "#00838F", // Dark Teal
-];
