@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Font, Paper, Tone } from "@/lib/constants";
-import { toPng } from "html-to-image";
+import { toJpeg } from "html-to-image";
 import { motion, AnimatePresence } from "motion/react";
 import { useWebHaptics } from "web-haptics/react";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -45,12 +45,13 @@ export function ExportModal({
     
     try {
       // Small delay to ensure UI updates
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 400));
       
-      const dataUrl = await toPng(exportRef.current, {
+      const dataUrl = await toJpeg(exportRef.current, {
         cacheBust: true,
         width: 1080,
         height: 1920,
+        quality: 0.98, // Visually lossless, but still ~80% smaller than PNG
         style: {
           transform: "scale(1)",
           transformOrigin: "top left",
@@ -58,7 +59,7 @@ export function ExportModal({
       });
       
       const link = document.createElement("a");
-      link.download = `poetik-${Date.now()}.png`;
+      link.download = `poetik-${Date.now()}.jpg`;
       link.href = dataUrl;
       link.click();
       
