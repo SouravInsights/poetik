@@ -44,27 +44,60 @@ export function EditorCanvas({
   const [isFocused, setIsFocused] = useState(false);
 
   // --- Cinematic Audio Engine ---
-  const [playRain, { stop: stopRain }] = useSound('/sounds/rain-ambient-cinematic.mp3', { 
+  const [playRain, { stop: stopRain, sound: rainSound }] = useSound('/sounds/rain-ambient-cinematic.mp3', { 
     loop: true, 
     volume: 0.6 
   });
-  const [playFireplace, { stop: stopFireplace }] = useSound('/sounds/campfire-crackling.mp3', { 
+  const [playFireplace, { stop: stopFireplace, sound: fireplaceSound }] = useSound('/sounds/campfire-crackling.mp3', { 
     loop: true, 
     volume: 0.7 
   });
 
   useEffect(() => {
-    if (atmosphere === "rain") playRain();
-    else stopRain();
+    // 1. Play Rain exclusively
+    if (atmosphere === "rain") {
+      stopFireplace();
+      if (fireplaceSound) {
+        fireplaceSound.stop();
+      }
+      if (rainSound) {
+        rainSound.stop(); // Clear any ongoing fades
+        rainSound.volume(0.6); // RESTORE volume from any past fades!
+      }
+      playRain();
+    } 
+    // 2. Play Fireplace exclusively
+    else if (atmosphere === "fireplace") {
+      stopRain();
+      if (rainSound) {
+        rainSound.stop();
+      }
+      if (fireplaceSound) {
+        fireplaceSound.stop(); // Clear fades
+        fireplaceSound.volume(0.7); // RESTORE volume
+      }
+      playFireplace();
+    } 
+    // 3. Absolute Silence Mode (Double-tap stop to kill async orphans gracefully)
+    else {
+      stopRain();
+      if (rainSound) {
+        rainSound.fade(0.6, 0, 800); // Premium fade out on stop
+        setTimeout(() => rainSound.stop(), 800);
+      }
 
-    if (atmosphere === "fireplace") playFireplace();
-    else stopFireplace();
+      stopFireplace();
+      if (fireplaceSound) {
+        fireplaceSound.fade(0.7, 0, 800);
+        setTimeout(() => fireplaceSound.stop(), 800);
+      }
+    }
 
     return () => {
       stopRain();
       stopFireplace();
     };
-  }, [atmosphere, playRain, stopRain, playFireplace, stopFireplace]);
+  }, [atmosphere, playRain, stopRain, rainSound, playFireplace, stopFireplace, fireplaceSound]);
 
   // Clean, separated Parallax logic
   const { bgX, bgY } = useParallax();
