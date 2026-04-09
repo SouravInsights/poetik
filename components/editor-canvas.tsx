@@ -6,6 +6,7 @@ import { Font, Paper, Tone } from "@/lib/constants";
 import { useWebHaptics } from "web-haptics/react";
 import { AnimatePresence, motion } from "motion/react";
 import { getEraseAnimationPhysics } from "@/lib/erase-animations";
+import { useParallax } from "@/hooks/use-parallax";
 
 interface EditorCanvasProps {
   text: string;
@@ -38,6 +39,9 @@ export function EditorCanvas({
   const { trigger } = useWebHaptics();
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
+
+  // Clean, separated Parallax logic
+  const { bgX, bgY } = useParallax();
   const [variant, setVariant] = useState<1 | 2 | 3>(1); // Random physics variant
   
   // Randomize the wipe effect every time the user hits clear!
@@ -86,6 +90,9 @@ export function EditorCanvas({
           )}
           style={{
             backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined,
+            x: bgX,
+            y: bgY,
+            scale: 1.05, // Safely upscales so edges don't show when parallax shifts
           }}
         >
           <div 
