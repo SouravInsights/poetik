@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Font, Paper, Tone } from "@/lib/constants";
 import { useWebHaptics } from "web-haptics/react";
@@ -32,6 +32,8 @@ export function EditorCanvas({
 }: EditorCanvasProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { trigger } = useWebHaptics();
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -40,9 +42,18 @@ export function EditorCanvas({
     }
   }, [text]);
 
+  const handleSelectionChange = () => {
+    if (textareaRef.current) {
+      const textBeforeCursor = text.slice(0, textareaRef.current.selectionStart || 0);
+      const lineIndex = textBeforeCursor.split('\n').length - 1;
+      setActiveIndex(lineIndex);
+    }
+  };
+
   const handleTextChange = (val: string) => {
     trigger(15);
     setText(val);
+    setTimeout(handleSelectionChange, 0); // Sync active index after render
   };
 
   const isDark = inkMode === "ink-light"; // dark background = light ink
@@ -68,24 +79,62 @@ export function EditorCanvas({
       />
 
       <div className="absolute inset-0 flex flex-col items-center justify-center px-8 pb-[90px] pt-[80px]">
-        <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={(e) => handleTextChange(e.target.value)}
-          spellCheck={false}
-          autoComplete="off"
-          autoCorrect="off"
-          placeholder="arz kiya hai..."
-          className={cn(
-            "w-full bg-transparent border-none outline-none resize-none transition-all duration-300",
-            "text-[clamp(26px,7.5vw,52px)] leading-[1.6] tracking-[0.01em] italic",
-            "placeholder:opacity-20 placeholder:text-current",
-            align === "center" ? "text-center" : "text-left",
-            font.class
-          )}
-          style={{ fontFamily: `var(${font.variable})` }}
-          rows={1}
-        />
+        <div className="relative w-full max-w-[800px]">
+          {/* Ghost Div: Visually renders the poetry with Focus 'Fade' Mode */}
+          <div
+            className={cn(
+              "absolute top-0 left-0 w-full whitespace-pre-wrap pointer-events-none transition-all duration-300",
+              "text-[clamp(26px,7.5vw,52px)] leading-[1.6] tracking-[0.01em] italic",
+              align === "center" ? "text-center" : "text-left",
+              font.class
+            )}
+            style={{ fontFamily: `var(${font.variable})` }}
+          >
+            {text === "" ? (
+              <span className="opacity-20">arz kiya hai...</span>
+            ) : (
+              text.split('\n').map((line, i, arr) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "transition-opacity duration-1000",
+                    isFocused && i !== activeIndex ? "opacity-30" : "opacity-100"
+                  )}
+                >
+                  {line}
+                  {i !== arr.length - 1 && <br />}
+                </span>
+              ))
+            )}
+          </div>
+
+          {/* Invisible Textarea: Handles exact cursor positioning & native typing */}
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={(e) => handleTextChange(e.target.value)}
+            onSelect={handleSelectionChange}
+            onFocus={() => { setIsFocused(true); handleSelectionChange(); }}
+            onBlur={() => setIsFocused(false)}
+            onKeyDown={handleSelectionChange}
+            onClick={handleSelectionChange}
+            spellCheck={false}
+            autoComplete="off"
+            autoCorrect="off"
+            className={cn(
+              "w-full bg-transparent border-none outline-none resize-none relative z-10 transition-all duration-300",
+              "text-[clamp(26px,7.5vw,52px)] leading-[1.6] tracking-[0.01em] italic",
+              align === "center" ? "text-center" : "text-left",
+              font.class
+            )}
+            style={{ 
+              fontFamily: `var(${font.variable})`,
+              color: 'transparent',
+              caretColor: isDark ? '#f2ece0' : '#1a1714' 
+            }}
+            rows={1}
+          />
+        </div>
       </div>
 
       {(doodle || author) && (
