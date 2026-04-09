@@ -7,6 +7,7 @@ import { useWebHaptics } from "web-haptics/react";
 import { AnimatePresence, motion } from "motion/react";
 import { getEraseAnimationPhysics } from "@/lib/erase-animations";
 import { useParallax } from "@/hooks/use-parallax";
+import useSound from "use-sound";
 
 interface EditorCanvasProps {
   text: string;
@@ -19,6 +20,7 @@ interface EditorCanvasProps {
   author: string;
   align: "left" | "center";
   bgOpacity: number;
+  atmosphere: "none" | "rain" | "fireplace";
   isClearing?: boolean;
 }
 
@@ -33,12 +35,36 @@ export function EditorCanvas({
   author,
   align,
   bgOpacity,
+  atmosphere,
   isClearing,
 }: EditorCanvasProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { trigger } = useWebHaptics();
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
+
+  // --- Cinematic Audio Engine ---
+  const [playRain, { stop: stopRain }] = useSound('/sounds/rain-ambient-cinematic.mp3', { 
+    loop: true, 
+    volume: 0.6 
+  });
+  const [playFireplace, { stop: stopFireplace }] = useSound('/sounds/campfire-crackling.mp3', { 
+    loop: true, 
+    volume: 0.7 
+  });
+
+  useEffect(() => {
+    if (atmosphere === "rain") playRain();
+    else stopRain();
+
+    if (atmosphere === "fireplace") playFireplace();
+    else stopFireplace();
+
+    return () => {
+      stopRain();
+      stopFireplace();
+    };
+  }, [atmosphere, playRain, stopRain, playFireplace, stopFireplace]);
 
   // Clean, separated Parallax logic
   const { bgX, bgY } = useParallax();
@@ -103,6 +129,35 @@ export function EditorCanvas({
             )} 
           />
         </motion.div>
+      </AnimatePresence>
+
+      {/* Atmospheric Subliminal Lighting (Does not Parallax, sits on the lens) */}
+      <AnimatePresence>
+        {atmosphere === "rain" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 2.5, ease: "easeInOut" }}
+            className="absolute inset-0 z-[5] pointer-events-none"
+            style={{
+              background: "radial-gradient(ellipse at 50% 40%, transparent 20%, rgba(15, 23, 42, 0.7) 120%)"
+            }}
+          />
+        )}
+        {atmosphere === "fireplace" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 3, ease: "easeInOut" }}
+            className="absolute inset-0 z-[5] pointer-events-none"
+            style={{
+              // Radiates a pronounced, powerful cabin amber glow from the absolute bottom of the screen!
+              background: "radial-gradient(ellipse 120% 90% at 50% 110%, rgba(255, 120, 40, 0.25) 0%, transparent 70%), radial-gradient(ellipse at 50% -20%, transparent 40%, rgba(15, 5, 0, 0.8) 120%)"
+            }}
+          />
+        )}
       </AnimatePresence>
 
       <div className={cn(

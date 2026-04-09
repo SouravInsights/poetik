@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useWebHaptics } from "web-haptics/react";
+import Image from "next/image";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { TextAlignCenterIcon, TextAlignLeft01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { Logo } from "./logo";
@@ -12,9 +13,11 @@ interface TopBarProps {
   align: "left" | "center";
   onAlignToggle: () => void;
   inkMode: "ink-light" | "ink-dark";
+  atmosphere: "none" | "rain" | "fireplace";
+  onAtmosphereToggle: () => void;
 }
 
-export function TopBar({ visible, onClear, align, onAlignToggle, inkMode }: TopBarProps) {
+export function TopBar({ visible, onClear, align, onAlignToggle, inkMode, atmosphere, onAtmosphereToggle }: TopBarProps) {
   const { trigger } = useWebHaptics();
   const isDark = inkMode === "ink-light";
 
@@ -36,7 +39,7 @@ export function TopBar({ visible, onClear, align, onAlignToggle, inkMode }: TopB
             onAlignToggle();
           }}
           className={cn(
-            "flex items-center gap-2 font-jost text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2.5 px-4 sm:px-5 rounded-full backdrop-blur-xl border select-none shadow-md",
+            "flex items-center gap-2 shrink-0 font-jost text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2.5 px-4 sm:px-5 rounded-full backdrop-blur-xl border select-none shadow-md",
             isDark 
               ? "bg-white/[0.12] border-white/[0.15] text-white hover:bg-white/[0.25]" 
               : "bg-black/[0.08] border-black/[0.15] text-black hover:bg-black/[0.15]"
@@ -49,6 +52,37 @@ export function TopBar({ visible, onClear, align, onAlignToggle, inkMode }: TopB
           />
           <span className="mt-0.5 hidden sm:inline">{align}</span>
         </button>
+
+        {/* --- Explicit Atmosphere Pill --- */}
+        <button
+          onClick={() => {
+            trigger(25);
+            onAtmosphereToggle();
+          }}
+          className={cn(
+            "flex items-center gap-2 shrink-0 font-jost text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase transition-all h-9 sm:h-10 px-4 rounded-full backdrop-blur-xl border select-none",
+            atmosphere !== "none"
+              ? (isDark ? "bg-white/[0.15] border-white/[0.25] text-white shadow-lg" : "bg-black/[0.1] border-black/[0.2] text-black shadow-sm")
+              : (isDark ? "bg-white/[0.12] border-white/[0.15] text-white hover:bg-white/[0.25]" : "bg-black/[0.08] border-black/[0.15] text-black hover:bg-black/[0.15]")
+          )}
+        >
+          {atmosphere === "none" ? (
+             // Short 4-letter generic label prevents layout overflow on extremely narrow mobile devices
+            <span className="mt-[1px]">Mood</span>
+          ) : (
+            <>
+              <Image 
+                src={atmosphere === "rain" ? "/icons/cloud-with-rain-3d.png" : "/icons/fire-3d.png"} 
+                alt={atmosphere} 
+                width={20}
+                height={20}
+                priority
+                className="w-4 h-4 sm:w-5 sm:h-5 object-contain" 
+              />
+              <span className="mt-[1px] hidden sm:inline">{atmosphere === "fireplace" ? "Campfire" : atmosphere}</span>
+            </>
+          )}
+        </button>
       </div>
       <button
         onClick={() => {
@@ -56,7 +90,7 @@ export function TopBar({ visible, onClear, align, onAlignToggle, inkMode }: TopB
           onClear();
         }}
         className={cn(
-          "flex items-center gap-2 font-jost text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2.5 px-4 sm:px-5 rounded-full backdrop-blur-xl border select-none shadow-md",
+          "flex items-center gap-2 shrink-0 font-jost text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2.5 px-3 sm:px-5 rounded-full backdrop-blur-xl border select-none shadow-md",
           "bg-red-500/15 text-red-500 hover:bg-red-500/25 border-red-500/25"
         )}
       >

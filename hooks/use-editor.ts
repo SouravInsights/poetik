@@ -21,6 +21,7 @@ export function useEditor() {
   const [author, setAuthor] = useState<string>("");
   const [align, setAlign] = useState<"left" | "center">("center");
   const [bgOpacity, setBgOpacity] = useState(1);
+  const [atmosphere, setAtmosphere] = useState<"none" | "rain" | "fireplace">("none");
   const [isExporting, setIsExporting] = useState(false);
   const [isDoodleDrawerOpen, setIsDoodleDrawerOpen] = useState(false);
   const [isToolbarOpen, setIsToolbarOpen] = useState(false);
@@ -75,15 +76,16 @@ export function useEditor() {
         if (parsed.author) setAuthor(parsed.author);
         if (parsed.align) setAlign(parsed.align);
         if (parsed.bgOpacity !== undefined) setBgOpacity(parsed.bgOpacity);
+        if (parsed.atmosphere) setAtmosphere(parsed.atmosphere);
       } catch (e) {}
     }
   }, []);
 
   useEffect(() => {
     localStorage.setItem("poetik-state", JSON.stringify({
-      text, font, paper, tone, inkMode, doodle, author, align, bgOpacity
+      text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, atmosphere
     }));
-  }, [text, font, paper, tone, inkMode, doodle, author, align, bgOpacity]);
+  }, [text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, atmosphere]);
 
   const handleSetFont = useCallback((f: Font) => {
     trigger(15);
@@ -139,6 +141,11 @@ export function useEditor() {
     }, 2800); // Extended fully to 2.8 seconds to allow hyper-slow luxurious animations
   }, [trigger, text, doodle]);
 
+  const handleSetAtmosphere = useCallback((mode: "none" | "rain" | "fireplace") => {
+    trigger([20, 40]);
+    setAtmosphere(mode);
+  }, [trigger]);
+
   return {
     text, setText,
     font, setFont: handleSetFont,
@@ -155,5 +162,6 @@ export function useEditor() {
     uiVisible, dynamicPapers, dynamicDoodles,
     handleClear,
     isClearing,
+    atmosphere, setAtmosphere: handleSetAtmosphere,
   };
 }

@@ -28,6 +28,7 @@ export default function PoetikPage() {
     uiVisible, dynamicPapers, dynamicDoodles,
     handleClear,
     isClearing,
+    atmosphere, setAtmosphere, // NEW: Subliminal Audio-Video state
   } = useEditor();
 
   return (
@@ -47,6 +48,7 @@ export default function PoetikPage() {
         author={author}
         align={align}
         bgOpacity={bgOpacity}
+        atmosphere={atmosphere} // Pass to canvas to orchestrate audio and lighting
         isClearing={isClearing}
       />
 
@@ -56,6 +58,12 @@ export default function PoetikPage() {
         align={align}
         onAlignToggle={toggleAlign}
         inkMode={inkMode}
+        atmosphere={atmosphere}
+        onAtmosphereToggle={() => {
+          if (atmosphere === "none") setAtmosphere("rain");
+          else if (atmosphere === "rain") setAtmosphere("fireplace");
+          else setAtmosphere("none");
+        }}
       />
 
       <BottomToolbar
