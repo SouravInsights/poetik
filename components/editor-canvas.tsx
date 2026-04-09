@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Font, Paper, Tone } from "@/lib/constants";
 import { useWebHaptics } from "web-haptics/react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { getEraseAnimationPhysics } from "@/lib/erase-animations";
 
 interface EditorCanvasProps {
@@ -71,28 +71,35 @@ export function EditorCanvas({
   const isDark = inkMode === "ink-light";
 
   return (
-    <div
-      className={cn(
-        "absolute inset-0 transition-all duration-700 ease-in-out grain",
-        paper.type === "image" ? "bg-cover bg-center" : tone.class,
-        inkMode
-      )}
-      style={{
-        backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined,
-        opacity: bgOpacity,
-      }}
-    >
-      <div 
-        className={cn(
-          "absolute inset-0 transition-opacity duration-1000",
-           paper.type === "image" ? "opacity-20" : "opacity-0",
-           isDark ? "bg-black" : "bg-white"
-        )} 
-      />
-
+    <div className={cn("absolute inset-0", inkMode)}>
+      {/* Background Layer with Liquid Crossfade */}
+      <AnimatePresence>
+        <motion.div
+          key={`bg-${paper.type === "image" ? paper.id : tone.id}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: bgOpacity }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+          className={cn(
+            "absolute inset-0 grain",
+            paper.type === "image" ? "bg-cover bg-center" : tone.class
+          )}
+          style={{
+            backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined,
+          }}
+        >
+          <div 
+            className={cn(
+              "absolute inset-0 transition-opacity duration-1000",
+               paper.type === "image" ? "opacity-20" : "opacity-0",
+               isDark ? "bg-black" : "bg-white"
+            )} 
+          />
+        </motion.div>
+      </AnimatePresence>
 
       <div className={cn(
-        "absolute inset-0 flex flex-col items-center justify-center px-8 pb-[90px] pt-[80px]",
+        "absolute inset-0 flex flex-col items-center justify-center px-8 pb-[90px] pt-[80px] z-10",
         isClearing && "pointer-events-none"
       )}>
         <div className="relative w-full max-w-[800px]">
@@ -184,7 +191,7 @@ export function EditorCanvas({
 
       {(doodle || author) && (
         <div className={cn(
-          "absolute bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none",
+          "absolute bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none z-10",
           isClearing ? "transition-all duration-300 scale-95 blur-[8px] opacity-0 rotate-2" : "transition-all duration-700 opacity-100 scale-100 blur-0 rotate-0"
         )}>
           {doodle && (
