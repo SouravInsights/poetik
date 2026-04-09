@@ -1,13 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { useEditor } from "@/hooks/use-editor";
 import { EditorCanvas } from "@/components/editor-canvas";
 import { TopBar } from "@/components/top-bar";
 import { BottomToolbar } from "@/components/bottom-toolbar";
 import { ExportModal } from "@/components/export-modal";
 import { DoodleDrawer } from "@/components/doodle-drawer";
+import { BootSequence } from "@/components/boot-sequence";
+import { AnimatePresence } from "motion/react";
 
 export default function PoetikPage() {
+  const [isBooting, setIsBooting] = useState(true);
   const {
     text, setText,
     font, setFont,
@@ -28,6 +32,10 @@ export default function PoetikPage() {
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-[#0D0B09]">
+      <AnimatePresence>
+        {isBooting && <BootSequence onComplete={() => setIsBooting(false)} />}
+      </AnimatePresence>
+
       <EditorCanvas
         text={text}
         setText={setText}
@@ -43,7 +51,7 @@ export default function PoetikPage() {
       />
 
       <TopBar 
-        visible={uiVisible && !isDoodleDrawerOpen} 
+        visible={uiVisible && !isDoodleDrawerOpen && !isBooting} 
         onClear={handleClear} 
         align={align}
         onAlignToggle={toggleAlign}
@@ -66,7 +74,7 @@ export default function PoetikPage() {
         onInkModeChange={setInkMode}
         onExport={() => setIsExporting(true)}
         onDoodleToggle={() => setIsDoodleDrawerOpen(true)}
-        uiVisible={uiVisible}
+        uiVisible={uiVisible && !isBooting}
       />
 
       <DoodleDrawer
