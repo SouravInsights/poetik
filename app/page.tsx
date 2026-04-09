@@ -23,6 +23,7 @@ export default function PoetikPage() {
     isToolbarOpen, setIsToolbarOpen,
     uiVisible, dynamicPapers, dynamicDoodles,
     handleClear,
+    isClearing,
   } = useEditor();
 
   return (
@@ -38,6 +39,7 @@ export default function PoetikPage() {
         author={author}
         align={align}
         bgOpacity={bgOpacity}
+        isClearing={isClearing}
       />
 
       <TopBar 

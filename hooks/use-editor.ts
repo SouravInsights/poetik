@@ -25,6 +25,7 @@ export function useEditor() {
   const [isDoodleDrawerOpen, setIsDoodleDrawerOpen] = useState(false);
   const [isToolbarOpen, setIsToolbarOpen] = useState(false);
   const [uiVisible, setUiVisible] = useState(true);
+  const [isClearing, setIsClearing] = useState(false);
 
   const [dynamicPapers, setDynamicPapers] = useState<Paper[]>(PAPERS);
   const [dynamicDoodles, setDynamicDoodles] = useState<string[]>([]);
@@ -125,10 +126,18 @@ export function useEditor() {
   }, [trigger]);
 
   const handleClear = useCallback(() => {
-    trigger("error");
-    setText("");
-    setDoodle(null);
-  }, [trigger]);
+    if (!text && !doodle) return;
+    
+    // Intense, erratic haptic sequence mimicking physical paper crumpling
+    trigger([30, 40, 20, 50, 40, 60, 30, 80]); 
+    setIsClearing(true);
+    
+    setTimeout(() => {
+      setText("");
+      setDoodle(null);
+      setIsClearing(false);
+    }, 2800); // Extended fully to 2.8 seconds to allow hyper-slow luxurious animations
+  }, [trigger, text, doodle]);
 
   return {
     text, setText,
@@ -145,5 +154,6 @@ export function useEditor() {
     isToolbarOpen, setIsToolbarOpen,
     uiVisible, dynamicPapers, dynamicDoodles,
     handleClear,
+    isClearing,
   };
 }
