@@ -36,6 +36,15 @@ export function useEditor() {
       try {
         const res = await fetch("/api/assets");
         const data = await res.json();
+        
+        const videoPapers: Paper[] = (data.videos || []).map((v: any) => ({
+          id: v.name,
+          path: v.path,
+          type: "video" as const,
+          label: `Video ${v.name.split('.')[0]}`,
+          theme: "dark" // Default to dark theme for videos for better contrast with light ink
+        }));
+
         const newPapers: Paper[] = [
           PAPERS[0],
           ...data.papers.map((p: any) => ({
@@ -44,7 +53,8 @@ export function useEditor() {
             type: "image" as const,
             label: p.name.split('.')[0],
             theme: (p.path.includes('modern') && ['11'].includes(p.name.split('.')[0])) ? 'dark' : 'light'
-          }))
+          })),
+          ...videoPapers
         ];
         setDynamicPapers(newPapers);
         setDynamicDoodles(data.doodles);

@@ -103,8 +103,9 @@ export function ExportModal({
             <div 
               ref={exportRef}
               className={cn(
-                "w-full h-full relative flex flex-col items-center justify-center px-[120px] grain",
-                paper.type === "image" ? "bg-cover bg-center" : tone.class,
+                "w-full h-full relative flex flex-col items-center justify-center px-[120px] grain overflow-hidden",
+                paper.type === "image" ? "bg-cover bg-center" : 
+                paper.type === "video" ? "" : tone.class,
                 inkMode
               )}
               style={{ 
@@ -112,7 +113,14 @@ export function ExportModal({
                 opacity: bgOpacity 
               }}
             >
-              <div className={cn("absolute inset-0 transition-opacity", paper.type === "image" ? "opacity-20" : "opacity-0", isDark ? "bg-black" : "bg-white")} />
+              {paper.type === "video" && (
+                <video 
+                  src={paper.path} 
+                  className="absolute inset-0 w-full h-full object-cover" 
+                  crossOrigin="anonymous"
+                />
+              )}
+              <div className={cn("absolute inset-0 transition-opacity", (paper.type === "image" || paper.type === "video") ? "opacity-20" : "opacity-0", isDark ? "bg-black" : "bg-white")} />
               <div 
                 className={cn("italic leading-[1.6] tracking-[0.03em] whitespace-pre-wrap break-words w-full", align === "center" ? "text-center" : "text-left", font.class)}
                 style={{ fontFamily: `var(${font.variable})`, fontSize: "80px" }}
@@ -153,8 +161,11 @@ export function ExportModal({
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="relative w-[min(280px,65vw)] aspect-[9/16] rounded-[24px] overflow-hidden shadow-[0_32px_96px_-16px_rgba(0,0,0,0.8)] ring-1 ring-white/10" 
           >
-            <div className={cn("w-full h-full relative flex flex-col items-center justify-center px-8 grain", paper.type === "image" ? "bg-cover bg-center" : tone.class, inkMode )} style={{ backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined, opacity: bgOpacity }} >
-              <div className={cn("absolute inset-0", paper.type === "image" ? "opacity-20" : "opacity-0", isDark ? "bg-black" : "bg-white")} />
+            <div className={cn("w-full h-full relative flex flex-col items-center justify-center px-8 grain", paper.type === "image" ? "bg-cover bg-center" : paper.type === "video" ? "" : tone.class, inkMode )} style={{ backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined, opacity: bgOpacity }} >
+              {paper.type === "video" && (
+                <video src={paper.path} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
+              )}
+              <div className={cn("absolute inset-0", (paper.type === "image" || paper.type === "video") ? "opacity-20" : "opacity-0", isDark ? "bg-black" : "bg-white")} />
               <div className={cn("italic leading-[1.6] tracking-[0.03em] text-[18px] whitespace-pre-wrap w-full z-10", align === "center" ? "text-center" : "text-left", font.class)} style={{ fontFamily: `var(${font.variable})` }} >
                 {text}
               </div>

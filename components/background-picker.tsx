@@ -25,13 +25,16 @@ export function BackgroundPicker({
   onInkModeChange,
 }: BackgroundPickerProps) {
   const { trigger } = useWebHaptics();
-  const isCanvasActive = currentPaper.type === "image";
-  // Default to texture — richer, curated option
-  const [bgTab, setBgTab] = useState<"solid" | "texture">(isCanvasActive ? "texture" : "texture");
+  const isCanvasActive = currentPaper.type === "image" || currentPaper.type === "video";
+  // Default to cinematic if active, else texture
+  const [bgTab, setBgTab] = useState<"solid" | "texture" | "cinematic">(
+    currentPaper.type === "video" ? "cinematic" : "texture"
+  );
 
   // Modern backgrounds first, then paper textures
   const modernPapers = dynamicPapers.filter(p => p.type === "image" && p.path?.includes("/modern-backgrounds/"));
   const classicPapers = dynamicPapers.filter(p => p.type === "image" && p.path?.includes("/papers/"));
+  const videoPapers = dynamicPapers.filter(p => p.type === "video");
   const canvasPapers = [...modernPapers, ...classicPapers];
 
   return (
@@ -44,6 +47,17 @@ export function BackgroundPicker({
             background
           </span>
           <div className="flex items-center gap-0 bg-white/5 rounded-full p-0.5 border border-white/5">
+            <button
+              onClick={() => { trigger(10); setBgTab("cinematic"); }}
+              className={cn(
+                "font-jost text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-full transition-all",
+                bgTab === "cinematic"
+                  ? "bg-white/15 text-white"
+                  : "text-white/30 hover:text-white/60"
+              )}
+            >
+              cinematic
+            </button>
             <button
               onClick={() => { trigger(10); setBgTab("texture"); }}
               className={cn(
@@ -71,14 +85,29 @@ export function BackgroundPicker({
 
         {/* py-4 gives enough room for ring-offset to breathe on all sides */}
         <div className="flex gap-4 items-center overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 py-4">
-          {bgTab === "texture" ? (
+          {bgTab === "cinematic" ? (
+            videoPapers.map((paper) => (
+              <button
+                key={paper.id}
+                onClick={() => { trigger(35); onPaperSelect(paper); }}
+                className={cn(
+                  "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border transition-all duration-500 overflow-hidden bg-white/5",
+                  currentPaper.id === paper.id
+                    ? "border-[#F5F0E8] scale-[1.12] ring-2 ring-[#F5F0E8] ring-offset-[5px] ring-offset-[#161412]"
+                    : "border-white/10 hover:border-white/30"
+                )}
+              >
+                <video src={paper.path} className="w-full h-full object-cover" muted playsInline />
+              </button>
+            ))
+          ) : bgTab === "texture" ? (
             canvasPapers.map((paper) => (
               <button
                 key={paper.id}
                 onClick={() => { trigger(35); onPaperSelect(paper); }}
                 className={cn(
                   "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border transition-all duration-500 overflow-hidden bg-white/5",
-                  isCanvasActive && currentPaper.id === paper.id
+                  currentPaper.id === paper.id
                     ? "border-[#F5F0E8] scale-[1.12] ring-2 ring-[#F5F0E8] ring-offset-[5px] ring-offset-[#161412]"
                     : "border-white/10 hover:border-white/30"
                 )}

@@ -9,7 +9,7 @@ export interface Paper {
   id: string;
   path?: string;
   color?: string;
-  type: "color" | "image";
+  type: "color" | "image" | "video";
   label: string;
   theme?: "light" | "dark";
 }

@@ -136,28 +136,39 @@ export function EditorCanvas({
   return (
     <div className={cn("absolute inset-0", inkMode)}>
       {/* Background Layer with Liquid Crossfade */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         <motion.div
-          key={`bg-${paper.type === "image" ? paper.id : tone.id}`}
+          key={`bg-${paper.id}-${paper.type}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: bgOpacity }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
+          transition={{ duration: 1.2, ease: "easeInOut" }}
           className={cn(
-            "absolute inset-0 grain",
-            paper.type === "image" ? "bg-cover bg-center" : tone.class
+            "absolute inset-0 grain overflow-hidden",
+            paper.type === "image" ? "bg-cover bg-center" : 
+            paper.type === "video" ? "" : tone.class
           )}
           style={{
             backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined,
             x: bgX,
             y: bgY,
-            scale: 1.05, // Safely upscales so edges don't show when parallax shifts
+            scale: 1.1, // Increased scale for safe parallax drift on videos
           }}
         >
+          {paper.type === "video" && (
+            <video
+              src={paper.path}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
           <div 
             className={cn(
               "absolute inset-0 transition-opacity duration-1000",
-               paper.type === "image" ? "opacity-20" : "opacity-0",
+               (paper.type === "image" || paper.type === "video") ? "opacity-20" : "opacity-0",
                isDark ? "bg-black" : "bg-white"
             )} 
           />
