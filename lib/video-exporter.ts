@@ -204,9 +204,27 @@ export async function exportPoetryVideo(
 
     // Step 7: The compositing loop — fires 24 times per second.
     const interval = setInterval(() => {
-      // LAYER 1: Copy the current video frame pixel-by-pixel onto the canvas.
-      // This is a direct GPU blit — no quality loss, same as the original video.
-      ctx.drawImage(video, 0, 0, WIDTH, HEIGHT);
+      // LAYER 1: Draw the video frame with object-fit: cover behavior.
+      // The naive ctx.drawImage(video, 0, 0, WIDTH, HEIGHT) would STRETCH the
+      // video to fill the canvas regardless of its original shape — exactly what
+      // causes the squeeze. If the source video is 16:9 landscape and the canvas
+      // is 9:16 portrait, a naive draw squashes it horizontally.
+      //
+      // Instead, we replicate how CSS object-fit: cover works:
+      //   1. Scale the video UP uniformly until it is large enough to COVER
+      //      the full canvas in both dimensions (like zooming in on a photo to fill a frame)
+      //   2. Center-crop — trim the sides/top/bottom that spill outside the canvas
+      //
+      // This means we only draw a SUBSET of the source video (sx, sy, sWidth, sHeight)
+      // and that subset fills the full destination canvas (0, 0, WIDTH, HEIGHT).
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      const scale = Math.max(WIDTH / vw, HEIGHT / vh); // scale factor so video covers canvas
+      const drawW = vw * scale;
+      const drawH = vh * scale;
+      const offsetX = (WIDTH - drawW) / 2;   // negative offset centers the wider dimension
+      const offsetY = (HEIGHT - drawH) / 2;
+      ctx.drawImage(video, offsetX, offsetY, drawW, drawH);
 
       // LAYER 2: Stamp the pre-captured text PNG on top, at full canvas size.
       // Since the overlay is transparent everywhere except the text/doodle/author,
