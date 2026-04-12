@@ -91,13 +91,21 @@ export function BackgroundPicker({
                 key={paper.id}
                 onClick={() => { trigger(35); onPaperSelect(paper); }}
                 className={cn(
-                  "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border transition-all duration-500 overflow-hidden bg-white/5",
+                  "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border transition-all duration-500 overflow-hidden bg-white/5 relative group",
                   currentPaper.id === paper.id
                     ? "border-[#F5F0E8] scale-[1.12] ring-2 ring-[#F5F0E8] ring-offset-[5px] ring-offset-[#161412]"
                     : "border-white/10 hover:border-white/30"
                 )}
               >
-                <video src={paper.path} className="w-full h-full object-cover" muted playsInline />
+                <video 
+                  src={paper.path} 
+                  className="absolute inset-0 w-full h-full object-cover" 
+                  muted 
+                  playsInline 
+                  preload="metadata"
+                  autoPlay={currentPaper.id === paper.id}
+                />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
               </button>
             ))
           ) : bgTab === "texture" ? (

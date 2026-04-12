@@ -136,13 +136,13 @@ export function EditorCanvas({
   return (
     <div className={cn("absolute inset-0", inkMode)}>
       {/* Background Layer with Liquid Crossfade */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         <motion.div
           key={`bg-${paper.id}-${paper.type}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: bgOpacity }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.2, ease: "easeInOut" }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
           className={cn(
             "absolute inset-0 grain overflow-hidden",
             paper.type === "image" ? "bg-cover bg-center" : 
