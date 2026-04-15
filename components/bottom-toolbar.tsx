@@ -75,7 +75,7 @@ export function BottomToolbar({
           !uiVisible && !isOpen && "translate-y-full opacity-0"
         )}
       >
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {!isOpen ? (
             <motion.div
               key="peek-button"
@@ -117,7 +117,7 @@ export function BottomToolbar({
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="w-full bg-[#161412]/98 backdrop-blur-3xl border-t border-white/10 shadow-2xl rounded-t-[32px] overflow-hidden"
+              className="w-full bg-[#161412] border-t border-white/10 shadow-2xl rounded-t-[32px] overflow-hidden"
             >
               <div className="pt-6 pb-[max(env(safe-area-inset-bottom),20px)] text-[#F5F0E8] space-y-5">
                 {/* Header / Dismiss */}

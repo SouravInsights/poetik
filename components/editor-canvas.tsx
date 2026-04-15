@@ -110,6 +110,45 @@ export function EditorCanvas({
     }
   }, [isClearing]);
 
+  // Posterbridge: when a new video is selected, show the cached poster frame
+  // immediately so there's no black flash while the new src buffers.
+  // posterCache is the same module-level Map used in background-picker.tsx.
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [posterBridge, setPosterBridge] = useState<string | null>(null);
+  const [videoReady, setVideoReady] = useState(false);
+  const prevVideoSrc = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (paper.type !== "video" || !paper.path) {
+      setVideoReady(false);
+      setPosterBridge(null);
+      prevVideoSrc.current = null;
+      return;
+    }
+
+    const src = paper.path;
+    if (src === prevVideoSrc.current) return; // Same video, no-op
+    prevVideoSrc.current = src;
+
+    // Show cached poster immediately as a bridge frame
+    const cached = (window as any).__posterCache?.get?.(src) ?? null;
+    if (cached) setPosterBridge(cached);
+    setVideoReady(false);
+
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    vid.src = src;
+    vid.load();
+
+    const onReady = () => {
+      vid.play().catch(() => {});
+      setVideoReady(true);
+    };
+    vid.addEventListener("canplay", onReady, { once: true });
+    return () => vid.removeEventListener("canplay", onReady);
+  }, [paper.path, paper.type]);
+
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -135,7 +174,7 @@ export function EditorCanvas({
 
   return (
     <div className={cn("absolute inset-0", inkMode)}>
-      {/* Background Layer with Liquid Crossfade */}
+      {/* Background Layer */}
       <AnimatePresence>
         <motion.div
           key={`bg-${paper.id}-${paper.type}`}
@@ -145,35 +184,49 @@ export function EditorCanvas({
           transition={{ duration: 0.8, ease: "easeInOut" }}
           className={cn(
             "absolute inset-0 grain overflow-hidden",
-            paper.type === "image" ? "bg-cover bg-center" : 
+            paper.type === "image" ? "bg-cover bg-center" :
             paper.type === "video" ? "" : tone.class
           )}
           style={{
             backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined,
             x: bgX,
             y: bgY,
-            scale: 1.1, // Increased scale for safe parallax drift on videos
+            scale: 1.1,
           }}
         >
-          {paper.type === "video" && (
-            <video
-              src={paper.path}
-              autoPlay
-              loop
-              muted
-              playsInline
+          {/* Persistent video element — src is swapped imperatively, never unmounted */}
+          <video
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            crossOrigin="anonymous"
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
+              paper.type === "video" ? "block" : "hidden",
+              videoReady ? "opacity-100" : "opacity-0"
+            )}
+          />
+          {/* Poster bridge — shows cached thumbnail while new video buffers */}
+          {paper.type === "video" && posterBridge && !videoReady && (
+            <img
+              src={posterBridge}
+              alt=""
               className="absolute inset-0 w-full h-full object-cover"
+              aria-hidden
             />
           )}
-          <div 
+          <div
             className={cn(
               "absolute inset-0 transition-opacity duration-1000",
-               (paper.type === "image" || paper.type === "video") ? "opacity-20" : "opacity-0",
-               isDark ? "bg-black" : "bg-white"
-            )} 
+              (paper.type === "image" || paper.type === "video") ? "opacity-20" : "opacity-0",
+              isDark ? "bg-black" : "bg-white"
+            )}
           />
         </motion.div>
       </AnimatePresence>
+
 
       {/* Atmospheric Subliminal Lighting (Does not Parallax, sits on the lens) */}
       <AnimatePresence>

@@ -6,74 +6,122 @@ import { cn } from "@/lib/utils";
 import { useWebHaptics } from "web-haptics/react";
 
 // ---------------------------------------------------------------------------
-// Hook: generate a static poster frame for a video URL using one shared
-// off-screen <video> element. Thumbnails are cached in a module-level Map
-// so they survive tab switches and re-renders.
+// Module-level cache — survives tab switches and re-renders.
 // ---------------------------------------------------------------------------
-const posterCache = new Map<string, string>(); // url → dataURL
+const posterCache = new Map<string, string>(); // url → data URL
 
-function useVideoPoster(src: string | undefined): string | null {
+// Expose to other components (e.g. editor-canvas poster bridge) without coupling modules
+if (typeof window !== "undefined") {
+  (window as any).__posterCache = posterCache;
+}
+
+
+// ---------------------------------------------------------------------------
+// Concurrency limiter — at most 4 video metadata fetches at the same time.
+// Without this, all visible swatches race to load simultaneously the moment
+// the toolbar opens, saturating the browser's network + decode pipeline.
+// ---------------------------------------------------------------------------
+const MAX_CONCURRENT = 4;
+let activeCaptures = 0;
+const captureQueue: Array<() => void> = [];
+
+function runNext() {
+  if (activeCaptures >= MAX_CONCURRENT || captureQueue.length === 0) return;
+  const next = captureQueue.shift()!;
+  activeCaptures++;
+  next();
+}
+
+function enqueueCapture(fn: () => void): () => void {
+  captureQueue.push(fn);
+  runNext();
+  // Returns a cancel function so the effect cleanup can remove from queue
+  return () => {
+    const idx = captureQueue.indexOf(fn);
+    if (idx !== -1) captureQueue.splice(idx, 1);
+  };
+}
+
+
+// ---------------------------------------------------------------------------
+// Hook: capture a single poster frame for a video.
+// Only runs when `enabled` is true — so we can gate it behind visibility.
+// ---------------------------------------------------------------------------
+function useVideoPoster(src: string | undefined, enabled: boolean): string | null {
   const [poster, setPoster] = useState<string | null>(
     src ? (posterCache.get(src) ?? null) : null
   );
 
   useEffect(() => {
-    if (!src) return;
+    if (!enabled || !src) return;
     if (posterCache.has(src)) {
       setPoster(posterCache.get(src)!);
       return;
     }
 
     let cancelled = false;
-    const video = document.createElement("video");
-    // crossOrigin="anonymous" is required for R2 (cross-origin).
-    // Your R2 bucket must have CORS configured (Allow-Origin: *) for this to work.
-    video.crossOrigin = "anonymous";
-    video.muted = true;
-    video.playsInline = true;
-    video.preload = "metadata";
-    video.src = src;
 
-    const capture = () => {
-      if (cancelled) return;
-      try {
-        const canvas = document.createElement("canvas");
-        canvas.width = 80;
-        canvas.height = 80;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-        ctx.drawImage(video, 0, 0, 80, 80);
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-        posterCache.set(src, dataUrl);
-        setPoster(dataUrl);
-      } catch (err) {
-        // Most likely a CORS error — R2 bucket needs Access-Control-Allow-Origin: *
-        console.warn("[VideoSwatch] Poster capture failed (check R2 CORS config):", err);
-      } finally {
-        video.src = "";
+    const doCapture = () => {
+      if (cancelled) {
+        activeCaptures--;
+        runNext();
+        return;
       }
+
+      const video = document.createElement("video");
+      video.crossOrigin = "anonymous";
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = "metadata";
+      video.src = src;
+
+      const capture = () => {
+        if (cancelled) { video.src = ""; activeCaptures--; runNext(); return; }
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = 80;
+          canvas.height = 80;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(video, 0, 0, 80, 80);
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+            posterCache.set(src, dataUrl);
+            if (!cancelled) setPoster(dataUrl);
+          }
+        } catch (err) {
+          console.warn("[VideoSwatch] Poster capture failed (check R2 CORS config):", err);
+        } finally {
+          video.src = "";
+          activeCaptures--;
+          runNext();
+        }
+      };
+
+      video.addEventListener("loadedmetadata", () => {
+        if (!cancelled) video.currentTime = 0.1;
+      }, { once: true });
+      video.addEventListener("seeked", capture, { once: true });
+      video.addEventListener("error", () => {
+        video.src = "";
+        activeCaptures--;
+        runNext();
+      }, { once: true });
+      video.load();
     };
 
-    // Seek to 0.1s so the browser has a decoded frame to draw.
-    // Listening to 'seeked' is more reliable than 'loadeddata' for this purpose.
-    video.addEventListener("loadedmetadata", () => {
-      if (!cancelled) video.currentTime = 0.1;
-    }, { once: true });
-    video.addEventListener("seeked", capture, { once: true });
-    video.load();
+    const cancelFromQueue = enqueueCapture(doCapture);
 
     return () => {
       cancelled = true;
-      video.src = "";
+      cancelFromQueue();
     };
-  }, [src]);
+  }, [src, enabled]);
 
   return poster;
 }
 
-
 // ---------------------------------------------------------------------------
-// Single video thumbnail swatch
+// VideoSwatch — only starts the poster capture when scrolled into view.
 // ---------------------------------------------------------------------------
 function VideoSwatch({
   paper,
@@ -84,10 +132,28 @@ function VideoSwatch({
   isSelected: boolean;
   onClick: () => void;
 }) {
-  const poster = useVideoPoster(paper.path);
+  const ref = useRef<HTMLButtonElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  // Only kick off the network fetch once this swatch is actually on screen.
+  // IntersectionObserver fires synchronously on mount for already-visible elements,
+  // so the first ~8 visible swatches start immediately — the rest wait their turn.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const poster = useVideoPoster(paper.path, visible);
 
   return (
     <button
+      ref={ref}
       onClick={onClick}
       className={cn(
         "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border transition-all duration-300 overflow-hidden bg-white/5 relative group",
@@ -97,7 +163,6 @@ function VideoSwatch({
       )}
     >
       {poster ? (
-        /* Static image — zero buffering overhead */
         <img
           src={poster}
           alt=""
@@ -105,7 +170,6 @@ function VideoSwatch({
           draggable={false}
         />
       ) : (
-        /* Skeleton shimmer while the poster is being captured */
         <div className="absolute inset-0 bg-white/5 animate-pulse rounded-full" />
       )}
       <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
