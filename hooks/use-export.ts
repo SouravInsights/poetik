@@ -180,7 +180,19 @@ export function useExport({ isOpen, paper }: UseExportOptions) {
       setExportState("done");
       setTimeout(() => setExportState("idle"), 3000);
     } catch (err) {
-      console.error("Video export failed", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      const isCors = msg.includes("tainted") || msg.includes("insecure") || msg.includes("cross-origin") || msg.includes("CORS");
+      if (isCors) {
+        console.error(
+          "Video export failed — CORS error.\n" +
+          "The video is served from a cross-origin URL (R2 CDN) but the bucket is missing CORS headers.\n" +
+          "Fix: Go to Cloudflare R2 → ambient-assets → Settings → CORS Policy and add:\n" +
+          JSON.stringify([{ AllowedOrigins: ["*"], AllowedMethods: ["GET", "HEAD"], AllowedHeaders: ["*"], MaxAgeSeconds: 3600 }], null, 2),
+          err
+        );
+      } else {
+        console.error("Video export failed:", msg, err);
+      }
       setExportState("error");
       setTimeout(() => setExportState("idle"), 3000);
     }

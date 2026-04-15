@@ -72,11 +72,13 @@ const FPS = 24;       // 24fps = cinematic. 30fps is TV. 24fps feels more "film"
 function loadVideo(src: string): Promise<HTMLVideoElement> {
   return new Promise((resolve, reject) => {
     const video = document.createElement("video");
+    // crossOrigin="anonymous" is required now that videos are served from the
+    // cross-origin Cloudflare R2 CDN. Without it, ctx.drawImage(video) taints
+    // the canvas and the MediaRecorder export produces a blank output.
+    // R2 must also respond with Access-Control-Allow-Origin: * (or the app origin)
+    // for this to work — configure CORS on the R2 bucket if you haven't already.
+    video.crossOrigin = "anonymous";
     video.src = src;
-    // NOTE: We intentionally do NOT set crossOrigin="anonymous" here.
-    // That header actually BREAKS things when used with same-origin files
-    // (files hosted on the same domain). It only helps with cross-domain files,
-    // and setting it unnecessarily triggers CORS preflight that can fail.
     video.muted = true;      // Must be muted or browsers block autoplay
     video.playsInline = true;
     video.loop = true;       // Loop so it never ends mid-export

@@ -87,6 +87,11 @@ export async function GET() {
       papers: [...papers, ...modern],
       videos,
       doodles,
+    }, {
+      headers: {
+        // Cache for 5 min in browser, 10 min at CDN — videos/doodles rarely change
+        "Cache-Control": "public, max-age=300, s-maxage=600, stale-while-revalidate=3600",
+      },
     });
   } catch (error) {
     return Response.json({ papers: [], videos: [], doodles: [] });
