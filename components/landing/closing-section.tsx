@@ -16,21 +16,7 @@ export function ClosingSection() {
         justifyContent: "space-between",
       }}
     >
-      {/* Section header */}
-      <div
-        style={{
-          borderBottom: "1px solid rgba(245,240,232,0.06)",
-          padding: "clamp(24px, 4vw, 48px) clamp(28px, 7vw, 100px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "24px",
-        }}
-      >
-        <span style={{ fontFamily: "var(--font-jost)", fontSize: "9px", letterSpacing: "0.5em", textTransform: "uppercase", color: "#8C8278" }}>
-          07 — Begin
-        </span>
-      </div>
+
 
       {/* Grain */}
       <div
