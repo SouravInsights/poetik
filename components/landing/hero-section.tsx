@@ -45,11 +45,10 @@ export function HeroSection() {
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          opacity: 0.28,
-          filter: "grayscale(30%) contrast(1.05)",
+          opacity: 0.85, // Much brighter
         }}
       >
-        <source src="/bg-videos/2.mp4" type="video/mp4" />
+        <source src="https://pub-a2400708ea4441fd9bc815d8295f7417.r2.dev/bg-videos/14.mp4" type="video/mp4" />
       </video>
 
       {/* Dark gradient — heavier at top and bottom, light in center */}
@@ -58,7 +57,7 @@ export function HeroSection() {
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(to bottom, rgba(13,11,9,0.85) 0%, rgba(13,11,9,0.1) 35%, rgba(13,11,9,0.1) 65%, rgba(13,11,9,0.95) 100%)",
+            "linear-gradient(to bottom, rgba(13,11,9,0.5) 0%, transparent 20%, transparent 70%, rgba(13,11,9,0.95) 100%)",
           zIndex: 1,
         }}
       />
