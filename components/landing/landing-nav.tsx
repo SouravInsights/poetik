@@ -15,7 +15,8 @@ export function LandingNav() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "20px clamp(28px, 7vw, 100px)",
-        // No background — the hero video shows through
+        mixBlendMode: "difference", // Dynamically inverts against light/dark sections
+        color: "#fff"
       }}
     >
       <Link
@@ -32,7 +33,7 @@ export function LandingNav() {
             fontFamily: "var(--font-italiana)",
             fontSize: "16px",
             letterSpacing: "0.28em",
-            color: "rgba(245,240,232,0.7)",
+            color: "#fff",
             textTransform: "uppercase",
           }}
         >
@@ -43,7 +44,7 @@ export function LandingNav() {
             width: "4px",
             height: "4px",
             borderRadius: "50%",
-            background: "rgba(245,240,232,0.7)",
+            background: "#fff",
             display: "inline-block",
             marginBottom: "3px",
             marginLeft: "2px",
@@ -52,7 +53,7 @@ export function LandingNav() {
       </Link>
 
       {/* Ghost text link — editorial, no border fill */}
-      <Link href="/" className="ghost-link">
+      <Link href="/" className="ghost-link" style={{ color: "rgba(255,255,255,0.85)" }}>
         Open app ↗
       </Link>
     </nav>
