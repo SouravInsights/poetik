@@ -3,36 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-const rotatingLines = [
-  { line: "हज़ारों ख़्वाहिशें ऐसी कि हर ख़्वाहिश पे दम निकले", author: "Mirza Ghalib" },
-  { line: "iqraar karna bhi wafa ka ek roop hai", author: "Faiz Ahmad Faiz" },
-  { line: "A poem begins as a lump in the throat.", author: "Robert Frost" },
-  { line: "The poet is a liar who always speaks the truth.", author: "Jean Cocteau" },
-  { line: "رنج کی کاشت کریں گے تو شادمانی کویا ملے گی", author: "Faiz Ahmad Faiz" },
+// Scrolling mood words that run across the bottom of the hero
+const moodWords = [
+  "longing", "grief", "yearning", "silence", "love", "wistfulness",
+  "इश्क़", "ग़म", "तड़प", "سکوت", "آرزو", "درد",
+  "waiting", "belonging", "loss", "tenderness", "nostalgia", "longing",
+  "grief", "yearning", "silence", "love", "wistfulness",
 ];
 
 export function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [lineIdx, setLineIdx] = useState(0);
-  const [visible, setVisible] = useState(true);
-  const [hasScrolled, setHasScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Rotate quotes
   useEffect(() => {
-    const interval = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setLineIdx((i) => (i + 1) % rotatingLines.length);
-        setVisible(true);
-      }, 700);
-    }, 4500);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Scroll cue appearance
-  useEffect(() => {
-    const timer = setTimeout(() => setHasScrolled(true), 3000);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setMounted(true), 100);
+    return () => clearTimeout(t);
   }, []);
 
   return (
@@ -40,16 +25,14 @@ export function HeroSection() {
       style={{
         position: "relative",
         height: "100svh",
-        minHeight: "600px",
+        minHeight: "640px",
         background: "#0D0B09",
+        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
       }}
     >
-      {/* Cinematic video background */}
+      {/* Full-bleed cinematic video */}
       <video
         ref={videoRef}
         autoPlay
@@ -62,14 +45,25 @@ export function HeroSection() {
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          opacity: 0.35,
-          filter: "grayscale(20%)",
+          opacity: 0.28,
+          filter: "grayscale(30%) contrast(1.05)",
         }}
       >
         <source src="/bg-videos/2.mp4" type="video/mp4" />
       </video>
 
-      {/* Grain overlay */}
+      {/* Dark gradient — heavier at top and bottom, light in center */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(to bottom, rgba(13,11,9,0.85) 0%, rgba(13,11,9,0.1) 35%, rgba(13,11,9,0.1) 65%, rgba(13,11,9,0.95) 100%)",
+          zIndex: 1,
+        }}
+      />
+
+      {/* Grain */}
       <div
         style={{
           position: "absolute",
@@ -82,176 +76,143 @@ export function HeroSection() {
         }}
       />
 
-      {/* Dark vignette */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(13,11,9,0.8) 100%)",
-          zIndex: 1,
-        }}
-      />
-
-      {/* Content */}
+      {/* ── Main editorial content ── */}
       <div
         style={{
           position: "relative",
           zIndex: 3,
+          flex: 1,
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
-          padding: "0 24px",
-          gap: "48px",
+          justifyContent: "flex-end",
+          padding: "0 clamp(28px, 7vw, 100px) clamp(56px, 10vh, 120px)",
         }}
       >
-        {/* Wordmark */}
+        {/* Massive wordmark — left-aligned, takes up the frame */}
         <div
           style={{
-            animation: "fadeInUp 1.2s ease-out both",
+            overflow: "hidden",
+            marginBottom: "clamp(20px, 4vh, 48px)",
           }}
         >
-          <span
+          <h1
             style={{
               fontFamily: "var(--font-italiana)",
-              fontSize: "clamp(36px, 8vw, 72px)",
-              letterSpacing: "0.3em",
+              fontSize: "clamp(72px, 17vw, 220px)",
+              letterSpacing: "0.08em",
+              lineHeight: 0.9,
               color: "#F5F0E8",
               textTransform: "uppercase",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
+              margin: 0,
+              opacity: mounted ? 1 : 0,
+              transform: mounted ? "translateY(0)" : "translateY(60px)",
+              transition: "opacity 1.4s cubic-bezier(0.16,1,0.3,1), transform 1.4s cubic-bezier(0.16,1,0.3,1)",
+              willChange: "transform",
             }}
           >
             poetik
             <span
               style={{
-                width: "8px",
-                height: "8px",
+                display: "inline-block",
+                width: "clamp(8px, 1.5vw, 18px)",
+                height: "clamp(8px, 1.5vw, 18px)",
                 borderRadius: "50%",
                 background: "#F5F0E8",
-                display: "inline-block",
-                marginBottom: "6px",
-                marginLeft: "2px",
+                verticalAlign: "middle",
+                marginLeft: "0.06em",
+                marginBottom: "0.12em",
               }}
             />
-          </span>
+          </h1>
         </div>
 
-        {/* Rotating line of poetry */}
+        {/* Bottom row: tagline left + CTA right */}
         <div
           style={{
-            height: "80px",
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "12px",
-            animation: "fadeInUp 1.2s 0.3s ease-out both",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+            gap: "24px",
+            flexWrap: "wrap",
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(20px)",
+            transition: "opacity 1.2s 0.4s cubic-bezier(0.16,1,0.3,1), transform 1.2s 0.4s cubic-bezier(0.16,1,0.3,1)",
           }}
         >
-          <p
-            style={{
-              fontFamily: "var(--font-cormorant)",
-              fontSize: "clamp(18px, 4vw, 28px)",
-              fontStyle: "italic",
-              color: "#EDE7D9",
-              maxWidth: "680px",
-              lineHeight: 1.7,
-              letterSpacing: "0.01em",
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(6px)",
-              transition: "opacity 0.7s ease, transform 0.7s ease",
-            }}
-          >
-            {rotatingLines[lineIdx].line}
-          </p>
-          <span
-            style={{
-              fontFamily: "var(--font-jost)",
-              fontSize: "10px",
-              letterSpacing: "0.35em",
-              textTransform: "uppercase",
-              color: "#F5F0E8",
-              opacity: visible ? 0.3 : 0,
-              transition: "opacity 0.7s ease",
-            }}
-          >
-            {rotatingLines[lineIdx].author}
-          </span>
-        </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {/* Thin accent line */}
+            <div
+              style={{
+                width: "32px",
+                height: "1px",
+                background: "rgba(245,240,232,0.3)",
+                transformOrigin: "left",
+                animation: mounted ? "lineGrow 0.8s 0.8s cubic-bezier(0.16,1,0.3,1) both" : "none",
+              }}
+            />
+            <p
+              style={{
+                fontFamily: "var(--font-cormorant)",
+                fontSize: "clamp(16px, 2.2vw, 22px)",
+                fontStyle: "italic",
+                color: "rgba(237, 231, 217, 0.65)",
+                lineHeight: 1.5,
+                letterSpacing: "0.02em",
+                maxWidth: "380px",
+                margin: 0,
+              }}
+            >
+              A quiet room for shayars and poets.
+              <br />Not a tool. A feeling.
+            </p>
+          </div>
 
-        {/* CTA */}
-        <div style={{ animation: "fadeInUp 1.2s 0.6s ease-out both" }}>
-          <Link
-            href="/"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              fontFamily: "var(--font-jost)",
-              fontSize: "11px",
-              fontWeight: 700,
-              letterSpacing: "0.3em",
-              textTransform: "uppercase",
-              color: "#F5F0E8",
-              background: "rgba(139, 69, 19, 0.85)",
-              border: "1px solid rgba(139, 69, 19, 0.5)",
-              borderRadius: "100px",
-              padding: "14px 36px",
-              textDecoration: "none",
-              backdropFilter: "blur(12px)",
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.background = "rgba(139, 69, 19, 1)";
-              (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-1px)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.background = "rgba(139, 69, 19, 0.85)";
-              (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)";
-            }}
-          >
+          {/* Ghost CTA — no orange, no filled button */}
+          <Link href="/" className="ghost-link">
             Begin writing
+            <span style={{ fontSize: "14px", letterSpacing: 0, fontWeight: 300 }}>↗</span>
           </Link>
         </div>
       </div>
 
-      {/* Scroll cue */}
+      {/* ── Scrolling mood words strip ── */}
       <div
         style={{
-          position: "absolute",
-          bottom: "40px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 3,
-          opacity: hasScrolled ? 0.4 : 0,
-          transition: "opacity 1.5s ease",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "8px",
+          position: "relative",
+          zIndex: 4,
+          borderTop: "1px solid rgba(245,240,232,0.05)",
+          padding: "14px 0",
+          overflow: "hidden",
+          background: "rgba(13,11,9,0.4)",
+          backdropFilter: "blur(4px)",
         }}
       >
-        <div
-          style={{
-            width: "1px",
-            height: "40px",
-            background: "linear-gradient(to bottom, transparent, #F5F0E8)",
-            animation: "scrollPulse 2s ease-in-out infinite",
-          }}
-        />
+        <div className="marquee-track" aria-hidden>
+          {[...moodWords, ...moodWords].map((word, i) => (
+            <span
+              key={i}
+              style={{
+                fontFamily: "var(--font-jost)",
+                fontSize: "9px",
+                fontWeight: 300,
+                letterSpacing: "0.4em",
+                textTransform: "uppercase",
+                color: "rgba(245,240,232,0.2)",
+                padding: "0 clamp(16px, 3vw, 36px)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {word}
+              <span style={{ marginLeft: "clamp(16px, 3vw, 36px)", opacity: 0.3 }}>·</span>
+            </span>
+          ))}
+        </div>
       </div>
 
       <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scrollPulse {
-          0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
-          50% { opacity: 1; transform: scaleY(1.1); }
+        @keyframes lineGrow {
+          from { transform: scaleX(0); opacity: 0; }
+          to   { transform: scaleX(1); opacity: 1; }
         }
       `}</style>
     </section>
