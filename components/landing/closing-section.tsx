@@ -16,7 +16,28 @@ export function ClosingSection() {
         justifyContent: "space-between",
       }}
     >
+      {/* Ambient closing video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          opacity: 0.25,
+          filter: "grayscale(80%)",
+          zIndex: 0,
+        }}
+      >
+        <source src="https://pub-a2400708ea4441fd9bc815d8295f7417.r2.dev/bg-videos/12.mp4" type="video/mp4" />
+      </video>
 
+      {/* Dark gradient to blend the video seamlessly into the black footer */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(13,11,9,1) 0%, rgba(13,11,9,0.4) 100%)", zIndex: 0 }} />
 
       {/* Grain */}
       <div
@@ -130,6 +151,48 @@ export function ClosingSection() {
               >
                 Made for people who feel in verses
               </span>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Traditional utility sub-footer */}
+        <Reveal delay={300}>
+          <div
+            style={{
+              marginTop: "clamp(48px, 8vh, 80px)",
+              paddingTop: "24px",
+              borderTop: "1px solid rgba(245,240,232,0.06)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "24px",
+            }}
+          >
+            <span style={{ fontFamily: "var(--font-jost)", fontSize: "9px", color: "rgba(245,240,232,0.3)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+              © {new Date().getFullYear()} Poetik
+            </span>
+
+            <div style={{ display: "flex", gap: "24px" }}>
+              {["X (Twitter)", "Instagram", "Privacy", "Terms"].map((link, i) => (
+                <Link
+                  key={i}
+                  href="#"
+                  style={{
+                    fontFamily: "var(--font-jost)",
+                    fontSize: "9px",
+                    color: "rgba(245,240,232,0.3)",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                    textDecoration: "none",
+                    transition: "color 0.2s ease"
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(245,240,232,0.8)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,240,232,0.3)")}
+                >
+                  {link}
+                </Link>
+              ))}
             </div>
           </div>
         </Reveal>
