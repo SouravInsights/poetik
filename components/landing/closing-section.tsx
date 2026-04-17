@@ -28,7 +28,7 @@ export function ClosingSection() {
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          opacity: 0.25,
+          opacity: 0.15,
           filter: "grayscale(80%)",
           zIndex: 0,
         }}
@@ -37,7 +37,7 @@ export function ClosingSection() {
       </video>
 
       {/* Dark gradient to blend the video seamlessly into the black footer */}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(13,11,9,1) 0%, rgba(13,11,9,0.4) 100%)", zIndex: 0 }} />
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(13,11,9,1) 0%, rgba(13,11,9,0.7) 100%)", zIndex: 0 }} />
 
       {/* Grain */}
       <div
@@ -83,7 +83,7 @@ export function ClosingSection() {
                 fontFamily: "var(--font-fell)",
                 fontSize: "clamp(20px, 3.5vw, 40px)",
                 fontStyle: "italic",
-                color: "rgba(237,231,217,0.6)",
+                color: "rgba(237,231,217,0.9)",
                 lineHeight: 1.75,
                 letterSpacing: "0.01em",
                 margin: "0 0 16px",
@@ -91,7 +91,7 @@ export function ClosingSection() {
             >
               "A poet is someone who notices — and is enormously taken by things that somebody else would walk by."
             </p>
-            <span style={{ fontFamily: "var(--font-jost)", fontSize: "9px", letterSpacing: "0.4em", textTransform: "uppercase", color: "rgba(245,240,232,0.2)" }}>
+            <span style={{ fontFamily: "var(--font-jost)", fontSize: "9px", letterSpacing: "0.4em", textTransform: "uppercase", color: "rgba(245,240,232,0.6)" }}>
               James Dickey
             </span>
           </div>
@@ -146,7 +146,7 @@ export function ClosingSection() {
                   fontSize: "9px",
                   fontWeight: 300,
                   letterSpacing: "0.2em",
-                  color: "rgba(245,240,232,0.15)",
+                  color: "rgba(245,240,232,0.45)",
                 }}
               >
                 Made for people who feel in verses
@@ -169,7 +169,7 @@ export function ClosingSection() {
               gap: "24px",
             }}
           >
-            <span style={{ fontFamily: "var(--font-jost)", fontSize: "9px", color: "rgba(245,240,232,0.3)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+            <span style={{ fontFamily: "var(--font-jost)", fontSize: "9px", color: "rgba(245,240,232,0.6)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
               © {new Date().getFullYear()} Poetik
             </span>
 
@@ -181,14 +181,14 @@ export function ClosingSection() {
                   style={{
                     fontFamily: "var(--font-jost)",
                     fontSize: "9px",
-                    color: "rgba(245,240,232,0.3)",
+                    color: "rgba(245,240,232,0.6)",
                     letterSpacing: "0.15em",
                     textTransform: "uppercase",
                     textDecoration: "none",
                     transition: "color 0.2s ease"
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(245,240,232,0.8)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,240,232,0.3)")}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(245,240,232,0.95)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,240,232,0.6)")}
                 >
                   {link}
                 </Link>
