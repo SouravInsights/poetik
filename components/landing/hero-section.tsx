@@ -3,12 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-// Scrolling mood words that run across the bottom of the hero
-const moodWords = [
-  "longing", "grief", "yearning", "silence", "love", "wistfulness",
-  "इश्क़", "ग़म", "तड़प", "سکوت", "آرزو", "درد",
-  "waiting", "belonging", "loss", "tenderness", "nostalgia", "longing",
-  "grief", "yearning", "silence", "love", "wistfulness",
+// Poetic dedications — an Apple/Nike style tribute to the user
+const dedications = [
+  "FOR THE UNSENT DRAFTS",
+  "FOR THE 3 AM THOUGHTS",
+  "FOR THE WORDS YOU COULDN'T SAY ALOUD",
+  "FOR THE FEELINGS THAT LINGER",
+  "FOR THE QUIET MOMENTS",
+  "FOR THE INK ON NAPKINS",
+  "FOR THE HEAVY HEARTS",
+  "FOR THOSE WHO FEEL IN VERSES",
 ];
 
 export function HeroSection() {
@@ -182,26 +186,26 @@ export function HeroSection() {
           borderTop: "1px solid rgba(245,240,232,0.05)",
           padding: "14px 0",
           overflow: "hidden",
-          background: "rgba(13,11,9,0.4)",
-          backdropFilter: "blur(4px)",
+          background: "rgba(13,11,9,0.75)",
+          backdropFilter: "blur(8px)",
         }}
       >
         <div className="marquee-track" aria-hidden>
-          {[...moodWords, ...moodWords].map((word, i) => (
+          {[...dedications, ...dedications].map((phrase, i) => (
             <span
               key={i}
               style={{
                 fontFamily: "var(--font-jost)",
-                fontSize: "9px",
-                fontWeight: 300,
+                fontSize: "11px",
+                fontWeight: 500,
                 letterSpacing: "0.4em",
                 textTransform: "uppercase",
-                color: "rgba(245,240,232,0.2)",
+                color: "rgba(245,240,232,0.85)",
                 padding: "0 clamp(16px, 3vw, 36px)",
                 whiteSpace: "nowrap",
               }}
             >
-              {word}
+              {phrase}
               <span style={{ marginLeft: "clamp(16px, 3vw, 36px)", opacity: 0.3 }}>·</span>
             </span>
           ))}
