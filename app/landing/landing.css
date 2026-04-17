@@ -1,0 +1,32 @@
+/* Landing page — scroll reveal animations */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Override the editor's body:fixed/overflow:hidden for landing pages */
+.landing-root {
+  position: relative !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+  width: 100% !important;
+  /* Allow the landing to scroll within the fixed body */
+  height: 100vh;
+}
+
+/* Scrollbar hidden but functional in landing */
+.landing-root::-webkit-scrollbar {
+  display: none;
+}
+.landing-root {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
