@@ -159,4 +159,91 @@
   .ink-dark {
     color: rgba(28, 22, 16, 0.9);
   }
+
+  /* ================================================
+     LANDING PAGE SYSTEM
+     ================================================ */
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .reveal-on-scroll.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Marquee animation */
+  @keyframes marqueeLeft {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marqueeLeft 28s linear infinite;
+  }
+  .marquee-track:hover {
+    animation-play-state: paused;
+  }
+
+  /* Ghost link — the anti-button */
+  .ghost-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-jost);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: rgba(245, 240, 232, 0.75);
+    text-decoration: none;
+    position: relative;
+    padding-bottom: 3px;
+    transition: color 0.3s ease;
+  }
+  .ghost-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(245, 240, 232, 0.25);
+    transform-origin: left;
+    transition: background 0.3s ease;
+  }
+  .ghost-link:hover {
+    color: rgba(245, 240, 232, 1);
+  }
+  .ghost-link:hover::after {
+    background: rgba(245, 240, 232, 0.6);
+  }
+
+  .ghost-link-dark {
+    color: rgba(26, 23, 20, 0.55);
+  }
+  .ghost-link-dark::after {
+    background: rgba(26, 23, 20, 0.2);
+  }
+  .ghost-link-dark:hover {
+    color: rgba(26, 23, 20, 0.9);
+  }
+  .ghost-link-dark:hover::after {
+    background: rgba(26, 23, 20, 0.5);
+  }
+}
+
+/* Body scroll override for landing */
+body:has(.landing-page-active) {
+  overflow: auto !important;
+  position: relative !important;
+  height: auto !important;
+}
+html:has(.landing-page-active) {
+  overflow: auto !important;
+  height: auto !important;
 }

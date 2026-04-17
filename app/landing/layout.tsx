@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import "./landing.css";
 import { ScrollUnlock } from "@/components/landing/scroll-unlock";
 
 export const metadata: Metadata = {

@@ -49,7 +49,7 @@ export function PlaygroundDemo() {
         <div
           style={{
             width: "100%",
-            maxWidth: "1100px",
+            maxWidth: "440px",
             margin: "0 auto",
             // Classic macOS window styling but modern and glassmorphic
             background: "rgba(13, 11, 9, 0.8)",
