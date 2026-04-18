@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { preload } from "react-dom";
 
 // Poetic dedications — an Apple/Nike style tribute to the user
 const dedications = [
@@ -18,6 +19,10 @@ const dedications = [
 export function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [mounted, setMounted] = useState(false);
+
+  // Preload establishes a high-priority network connection to Cloudflare R2
+  // the exact millisecond React begins evaluating, bypassing standard DOM waits.
+  preload("https://pub-a2400708ea4441fd9bc815d8295f7417.r2.dev/bg-videos/14.mp4", { as: "video" });
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
@@ -43,6 +48,7 @@ export function HeroSection() {
         loop
         muted
         playsInline
+        poster="/bg-videos/14-poster.webp"
         style={{
           position: "absolute",
           inset: 0,
@@ -50,6 +56,7 @@ export function HeroSection() {
           height: "100%",
           objectFit: "cover",
           opacity: 0.85, // Much brighter
+          backgroundColor: "#0D0B09", // Soft dark fallback while poster/video loads
         }}
       >
         <source src="https://pub-a2400708ea4441fd9bc815d8295f7417.r2.dev/bg-videos/14.mp4" type="video/mp4" />
