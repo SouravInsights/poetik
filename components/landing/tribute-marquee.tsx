@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { LazyVideo } from "./lazy-video";
 
 // A curated list of profound poetic lines from all-time greats
 const classicPoems = [
@@ -104,18 +105,10 @@ export function TributeMarquee() {
               >
                 {/* Background Image/Video */}
                 {videoAsset && (
-                  <video
+                  <LazyVideo
                     src={videoAsset.path}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
+                    className="lazy-video-container"
                     style={{
-                      position: "absolute",
-                      inset: 0,
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
                       filter: poem.ink === "dark" ? "brightness(1.2)" : "brightness(0.6) contrast(1.1)",
                     }}
                   />
