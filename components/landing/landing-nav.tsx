@@ -52,10 +52,21 @@ export function LandingNav() {
         />
       </Link>
 
-      {/* Ghost text link — editorial, no border fill */}
-      <Link href="/" className="ghost-link" style={{ color: "rgba(255,255,255,0.85)" }}>
-        Open app ↗
-      </Link>
+      <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
+        <Link href="/playground" style={{ 
+          fontFamily: "var(--font-jost)", 
+          fontSize: "11px", 
+          textTransform: "uppercase", 
+          letterSpacing: "0.2em", 
+          color: "rgba(255,255,255,0.6)",
+          textDecoration: "none"
+        }} className="hover:text-white transition-colors">
+          Brand Atelier
+        </Link>
+        <Link href="/" className="ghost-link" style={{ color: "rgba(255,255,255,0.85)" }}>
+          Open app ↗
+        </Link>
+      </div>
     </nav>
   );
 }
