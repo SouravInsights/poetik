@@ -50,6 +50,19 @@ export const FONTS: Font[] = [
   },
 ];
 
+const R2_BASE_URL = process.env.NEXT_PUBLIC_R2_URL ?? "";
+
+// Default background for a fresh session: the cinematic video, poster-bridged
+// so there's no black flash while it buffers. Matches the landing hero's video.
+export const DEFAULT_PAPER: Paper = {
+  id: "14.mp4",
+  path: `${R2_BASE_URL}/bg-videos/14.mp4`,
+  poster: `${R2_BASE_URL}/bg-videos/14-poster.webp`,
+  type: "video",
+  label: "Video 14",
+  theme: "dark",
+};
+
 export const PAPERS: Paper[] = [
   { id: "void", color: "#0D0B09", type: "color", label: "Void", theme: "dark" },
   { id: "paper-1", path: "/papers/paper-1.jpg", type: "image", label: "Paper 1", theme: "light" },
