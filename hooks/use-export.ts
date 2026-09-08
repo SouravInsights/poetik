@@ -52,7 +52,7 @@
 
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { toJpeg } from "html-to-image";
 import { useWebHaptics } from "web-haptics/react";
 import { exportPoetryVideo, withTimeout } from "@/lib/video-exporter";
@@ -74,6 +74,14 @@ export function useExport({ isOpen, paper }: UseExportOptions) {
   const [exportState, setExportState] = useState<ExportState>("idle");
   const [durationSecs, setDurationSecs] = useState(10); // Default: 10 seconds
   const [progress, setProgress] = useState(0);          // 0–100, used during video encoding
+  const [errorMsg, setErrorMsg] = useState<string | null>(null); // context-specific error copy
+
+  // Lets the user (or the tab-hide guard) cancel an in-flight video encode.
+  const abortRef = useRef<AbortController | null>(null);
+  const cancelExport = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+  }, []);
 
   // Quick computed values the UI needs
   const isVideoBackground = paper.type === "video";
@@ -84,8 +92,26 @@ export function useExport({ isOpen, paper }: UseExportOptions) {
     if (isOpen) {
       setExportState("idle");
       setProgress(0);
+      setErrorMsg(null);
     }
   }, [isOpen]);
+
+  // Background throttling during a video encode silently corrupts output:
+  // setInterval drops to ~1Hz in hidden tabs, so frames go sparse while
+  // MediaRecorder keeps wall-clock time. Abort immediately with copy that
+  // tells the user WHY, rather than handing them a broken file.
+  useEffect(() => {
+    if (exportState !== "encoding") return;
+    const onHide = () => {
+      if (document.visibilityState !== "hidden") return;
+      setErrorMsg("keep this tab visible while exporting");
+      setExportState("error");
+      setTimeout(() => setExportState("idle"), 3500);
+      cancelExport();
+    };
+    document.addEventListener("visibilitychange", onHide);
+    return () => document.removeEventListener("visibilitychange", onHide);
+  }, [exportState, cancelExport]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // JPEG IMAGE EXPORT
@@ -158,13 +184,19 @@ export function useExport({ isOpen, paper }: UseExportOptions) {
     if (!paper.path || !overlayRef.current || exportState !== "idle") return;
     setExportState("encoding");
     setProgress(0);
+    setErrorMsg(null);
     trigger("medium");
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
       const blob = await exportPoetryVideo({
         videoSrc: paper.path,
         overlayEl: overlayRef.current,
         durationSecs,
         onProgress: setProgress, // Called every frame with a 0–100 value
+        signal: controller.signal,
       });
 
       // Determine file extension from the codec that was selected
@@ -189,6 +221,12 @@ export function useExport({ isOpen, paper }: UseExportOptions) {
       setExportState("done");
       setTimeout(() => setExportState("idle"), 3000);
     } catch (err) {
+      // User-cancelled or tab-hide abort — NOT an error to flash. (The
+      // tab-hide path already staged its own error state + message.)
+      if (err instanceof DOMException && err.name === "AbortError") {
+        setExportState(current => (current === "error" ? current : "idle"));
+        return;
+      }
       const msg = err instanceof Error ? err.message : String(err);
       const isCors = msg.includes("tainted") || msg.includes("insecure") || msg.includes("cross-origin") || msg.includes("CORS");
       if (isCors) {
@@ -204,6 +242,8 @@ export function useExport({ isOpen, paper }: UseExportOptions) {
       }
       setExportState("error");
       setTimeout(() => setExportState("idle"), 3000);
+    } finally {
+      abortRef.current = null;
     }
   };
 
@@ -218,7 +258,7 @@ export function useExport({ isOpen, paper }: UseExportOptions) {
     if (exportState === "encoding") return progress === 0 ? "preparing…" : `exporting... ${progress}%`;
     if (exportState === "saving") return "saving...";
     if (exportState === "done") return "saved to your device ✦";
-    if (exportState === "error") return "something went wrong — try again";
+    if (exportState === "error") return errorMsg ?? "something went wrong — try again";
     return isVideoBackground ? "ready to export" : "ready to share";
   })();
 
@@ -233,5 +273,6 @@ export function useExport({ isOpen, paper }: UseExportOptions) {
     isBusy,
     statusLabel,
     handleExport,
+    cancelExport,
   };
 }

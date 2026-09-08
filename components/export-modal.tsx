@@ -10,6 +10,7 @@ import {
   ArrowLeft01Icon, 
   CheckmarkCircle02Icon, 
   Alert02Icon,
+  Cancel01Icon,
   Loading03Icon 
 } from "@hugeicons/core-free-icons";
 import { useExport } from "@/hooks/use-export";
@@ -55,6 +56,7 @@ export function ExportModal({
     isBusy,
     statusLabel,
     handleExport,
+    cancelExport,
   } = useExport({ isOpen, paper });
 
   // Prevent body scroll while modal is open
@@ -241,14 +243,26 @@ export function ExportModal({
               </AnimatePresence>
             </button>
 
-            <button 
-              disabled={isBusy} 
-              onClick={onClose} 
-              className="flex items-center gap-2 font-jost text-[11px] uppercase tracking-[0.3em] opacity-40 hover:opacity-100 transition-all py-2 disabled:opacity-0"
-            >
-              <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
-              <span>back to editor</span>
-            </button>
+            {/* A 30s encode with no way out is a hostage situation — offer an
+                explicit cancel instead of just disabling the exit */}
+            {exportState === "encoding" ? (
+              <button
+                onClick={cancelExport}
+                className="flex items-center gap-2 py-2 font-jost text-[11px] tracking-[0.3em] uppercase opacity-60 transition-all hover:opacity-100"
+              >
+                <HugeiconsIcon icon={Cancel01Icon} size={14} />
+                <span>cancel export</span>
+              </button>
+            ) : (
+              <button 
+                disabled={isBusy} 
+                onClick={onClose} 
+                className="flex items-center gap-2 font-jost text-[11px] uppercase tracking-[0.3em] opacity-40 hover:opacity-100 transition-all py-2 disabled:opacity-0"
+              >
+                <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
+                <span>back to editor</span>
+              </button>
+            )}
           </motion.div>
         </motion.div>
       )}

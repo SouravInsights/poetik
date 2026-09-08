@@ -53,6 +53,7 @@ export interface VideoExportOptions {
   overlayEl: HTMLElement; // The hidden HTML element containing the styled poem text/doodle/author
   durationSecs: number;   // How long the output video should be (5–30 seconds, user-controlled)
   onProgress?: (pct: number) => void; // Called every frame so the UI can show a progress bar
+  signal?: AbortSignal;   // Aborting rejects with AbortError and frees all resources
 }
 
 const WIDTH = 1080;   // Portrait 9:16 — perfect for Instagram Reels, TikTok, Stories
@@ -155,6 +156,7 @@ function loadVideo(src: string): Promise<HTMLVideoElement> {
 export async function exportPoetryVideo(
   opts: VideoExportOptions
 ): Promise<Blob> {
+  if (opts.signal?.aborted) throw new DOMException("Aborted", "AbortError");
   // Step 1: Snapshot the poem text overlay as a transparent PNG.
   // html-to-image renders the div using the browser's own renderer — so
   // all your Tailwind classes, Google Fonts, opacity, letter-spacing
@@ -223,7 +225,22 @@ export async function exportPoetryVideo(
 
   return new Promise((resolve, reject) => {
     const startedAt = performance.now();
+
+    const onAbort = () => {
+      clearInterval(interval);
+      opts.signal?.removeEventListener("abort", onAbort);
+      // Detach every handler before stopping so nothing resolves after reject
+      recorder.ondataavailable = null;
+      recorder.onstop = null;
+      recorder.onerror = null;
+      try { recorder.stop(); } catch { /* recorder may already be idle */ }
+      video.pause();
+      overlayBitmap.close();
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+
     recorder.onstop = () => {
+      opts.signal?.removeEventListener("abort", onAbort);
       // Recording is done. Clean up resources.
       video.pause();
       overlayBitmap.close(); // Free GPU memory — important on mobile!
@@ -232,6 +249,8 @@ export async function exportPoetryVideo(
     };
     recorder.onerror = reject;
     recorder.start();
+
+    opts.signal?.addEventListener("abort", onAbort, { once: true });
 
     // Step 7: The compositing loop — fires 24 times per second.
     const interval = setInterval(() => {
