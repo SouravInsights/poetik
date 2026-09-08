@@ -9,6 +9,7 @@ import {
   Download01Icon, 
   ArrowLeft01Icon, 
   CheckmarkCircle02Icon, 
+  Alert02Icon,
   Loading03Icon 
 } from "@hugeicons/core-free-icons";
 import { useExport } from "@/hooks/use-export";
@@ -205,10 +206,11 @@ export function ExportModal({
               onClick={handleExport} 
               className={cn( 
                 "group relative flex items-center justify-center gap-3 px-10 py-5 font-italiana text-lg tracking-[0.1em] rounded-full transition-all shadow-2xl w-full max-w-[320px] overflow-hidden", 
-                exportState === "done"
-                  ? "bg-green-500 text-white" 
-                  : exportState === "error"
-                  ? "bg-red-500/80 text-white"
+                // Monochrome status (palette rule: no greens/reds). Success and
+                // error are carried by icon + label, not hue — same doctrine as
+                // the clear button.
+                exportState === "error"
+                  ? "bg-transparent border border-[#f2ece0]/40 text-[#f2ece0]"
                   : "bg-[#f2ece0] text-black hover:scale-105 active:scale-95 disabled:opacity-60 disabled:scale-100 disabled:cursor-not-allowed"
               )} 
             >
@@ -222,6 +224,13 @@ export function ExportModal({
                   <motion.div key="done" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2">
                     <HugeiconsIcon icon={CheckmarkCircle02Icon} size={20} />
                     <span>saved to device</span>
+                  </motion.div>
+                ) : exportState === "error" ? (
+                  // Previously error fell through to the idle label ("save as…")
+                  // on a red background — state said one thing, words another.
+                  <motion.div key="error" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2">
+                    <HugeiconsIcon icon={Alert02Icon} size={20} />
+                    <span>export failed — try again</span>
                   </motion.div>
                 ) : (
                   <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
