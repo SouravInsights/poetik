@@ -132,6 +132,13 @@ export function useEditor() {
     setInkMode(mode);
   }, [trigger]);
 
+  // A handle is a single token: strip a user-typed leading @ (the UI renders
+  // its own — otherwise "@sam" shows as "@ @sam" in the input) and all
+  // whitespace, and cap the length so it can never break the composition.
+  const handleSetAuthor = useCallback((val: string) => {
+    setAuthor(val.replace(/^@+/, "").replace(/\s+/g, "").slice(0, 30));
+  }, []);
+
   const handleSetDoodle = useCallback((d: string | null) => {
     trigger(20);
     setDoodle(d);
@@ -168,7 +175,7 @@ export function useEditor() {
     tone, setTone: handleSetTone,
     inkMode, setInkMode: handleSetInkMode,
     doodle, setDoodle: handleSetDoodle,
-    author, setAuthor,
+    author, setAuthor: handleSetAuthor,
     align, toggleAlign: handleSetAlign,
     bgOpacity, setBgOpacity,
     isExporting, setIsExporting,
