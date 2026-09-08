@@ -130,8 +130,9 @@ export function EditorCanvas({
     if (src === prevVideoSrc.current) return; // Same video, no-op
     prevVideoSrc.current = src;
 
-    // Show cached poster immediately as a bridge frame
-    const cached = (window as any).__posterCache?.get?.(src) ?? null;
+    // Show a poster immediately as a bridge frame — prefer the pre-generated
+    // API poster, fall back to whatever the picker captured client-side.
+    const cached = paper.poster ?? (window as any).__posterCache?.get?.(src) ?? null;
     if (cached) setPosterBridge(cached);
     setVideoReady(false);
 
@@ -147,7 +148,7 @@ export function EditorCanvas({
     };
     vid.addEventListener("canplay", onReady, { once: true });
     return () => vid.removeEventListener("canplay", onReady);
-  }, [paper.path, paper.type]);
+  }, [paper.path, paper.type, paper.poster]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -192,6 +193,9 @@ export function EditorCanvas({
             x: bgX,
             y: bgY,
             scale: 1.1,
+            // Composite this full-screen layer once — otherwise every sheet
+            // animation frame can force a repaint of a *playing video* region.
+            willChange: "transform",
           }}
         >
           {/* Persistent video element — src is swapped imperatively, never unmounted */}
@@ -275,9 +279,18 @@ export function EditorCanvas({
             {text === "" ? (
               <motion.span 
                 initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                animate={{ opacity: 0.2, y: 0, filter: "blur(0px)" }}
+                // 0.2 over video was illegible — 0.45 keeps the placeholder
+                // clearly quieter than typed text but readable on any background.
+                animate={{ opacity: 0.45, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.4, ease: "easeOut" }} // Lightning fast arrival (no artificial delay needed because 2.8s clear already passed)
-                className="inline-block"
+                className="inline-block select-none"
+                // Soft ambient shadow lifts the text off moving footage —
+                // dark glow on dark ink mode, warm glow on light.
+                style={{
+                  textShadow: isDark
+                    ? "0 1px 14px rgba(13, 11, 9, 0.5)"
+                    : "0 1px 12px rgba(245, 240, 232, 0.4)",
+                }}
               >
                 arz kiya hai...
               </motion.span>

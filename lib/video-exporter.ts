@@ -49,7 +49,7 @@
 import { toPng } from "html-to-image";
 
 export interface VideoExportOptions {
-  videoSrc: string;       // Path to the background video file (e.g. /bg-videos/1.mp4)
+  videoSrc: string;       // R2 URL of the background video (…/bg-videos/1.mp4)
   overlayEl: HTMLElement; // The hidden HTML element containing the styled poem text/doodle/author
   durationSecs: number;   // How long the output video should be (5–30 seconds, user-controlled)
   onProgress?: (pct: number) => void; // Called every frame so the UI can show a progress bar

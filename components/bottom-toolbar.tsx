@@ -63,6 +63,9 @@ export function BottomToolbar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            // Fades out just ahead of the sheet's accelerated exit, so the
+            // backdrop never outlives what it was dimming.
+            transition={{ duration: 0.22, ease: "easeOut" }}
             onClick={() => { trigger(10); onOpenToggle(false); }}
             className="fixed inset-0 z-[90] bg-black/10 backdrop-blur-[2px]"
           />
@@ -75,15 +78,27 @@ export function BottomToolbar({
           !uiVisible && !isOpen && "translate-y-full opacity-0"
         )}
       >
-        <AnimatePresence>
+        {/* mode="wait" sequences the two states instead of overlapping them:
+            the sheet fully exits BEFORE the pill even mounts — nothing else is
+            animating during the sheet's final frames. The old overlap stacked a
+            blur-over-video entrance on top of the exit and read as stutter. */}
+        <AnimatePresence mode="wait">
           {!isOpen ? (
             <motion.div
               key="peek-button"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
+              initial={{ y: 14, opacity: 0 }}
+              animate={{
+                y: 0,
+                opacity: 1,
+                // Entering element → decelerate (the mirror of the exit curve).
+                transition: { duration: 0.22, ease: "easeOut" },
+              }}
+              // Leaving element → accelerate away, quickly.
+              exit={{ y: 14, opacity: 0, transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } }}
               className={cn(
-                "flex items-center gap-0 rounded-t-[20px] overflow-hidden border-t border-x backdrop-blur-3xl shadow-lg",
+                // backdrop-blur-3xl (64px) over a playing video is very
+                // expensive to composite — xl (24px) reads nearly identical.
+                "flex items-center gap-0 rounded-t-[20px] overflow-hidden border-t border-x backdrop-blur-xl shadow-lg",
                 isDark
                   ? "bg-white/[0.12] border-white/10"
                   : "bg-black/[0.12] border-black/10"
@@ -115,9 +130,17 @@ export function BottomToolbar({
               key="toolbar-panel"
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="w-full bg-[#161412] border-t border-white/10 shadow-2xl rounded-t-[32px] overflow-hidden"
+              // Exit doctrine (Material / iOS sheets): leaving elements
+              // ACCELERATE off-screen, they never decelerate to a stop inside
+              // the viewport. An ease-out (or spring tail) means the last ~10%
+              // of the close crawls — that lingering sliver is exactly what
+              // reads as unpolished. The sheet exits with momentum instead.
+              exit={{ y: "100%", transition: { duration: 0.25, ease: [0.4, 0, 1, 1] } }}
+              transition={{ type: "spring", damping: 32, stiffness: 320 }}
+              // Promote to its own composited layer — the sheet (with its many
+              // decoded swatch images) then moves as one GPU texture instead
+              // of being repainted every frame over the playing video.
+              className="w-full bg-[#161412] border-t border-white/10 shadow-2xl rounded-t-[32px] overflow-hidden will-change-transform"
             >
               <div className="pt-6 pb-[max(env(safe-area-inset-bottom),20px)] text-[#F5F0E8] space-y-5">
                 {/* Header / Dismiss */}

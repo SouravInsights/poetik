@@ -35,4 +35,6 @@ pnpm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# large media — served from Cloudflare R2, not committed to git
+# large media — videos live in Cloudflare R2 (single source of truth);
+# video-pipeline/ holds local originals + optimized outputs from scripts/optimize-videos.mjs
+/video-pipeline/

@@ -12,6 +12,8 @@ export interface Paper {
   type: "color" | "image" | "video";
   label: string;
   theme?: "light" | "dark";
+  /** Pre-generated thumbnail for video papers (served as a plain image). */
+  poster?: string;
 }
 
 export interface Tone {
@@ -47,6 +49,19 @@ export const FONTS: Font[] = [
     label: "Lora",
   },
 ];
+
+const R2_BASE_URL = process.env.NEXT_PUBLIC_R2_URL ?? "";
+
+// Default background for a fresh session: the cinematic video, poster-bridged
+// so there's no black flash while it buffers. Matches the landing hero's video.
+export const DEFAULT_PAPER: Paper = {
+  id: "14.mp4",
+  path: `${R2_BASE_URL}/bg-videos/14.mp4`,
+  poster: `${R2_BASE_URL}/bg-videos/14-poster.webp`,
+  type: "video",
+  label: "Video 14",
+  theme: "dark",
+};
 
 export const PAPERS: Paper[] = [
   { id: "void", color: "#0D0B09", type: "color", label: "Void", theme: "dark" },

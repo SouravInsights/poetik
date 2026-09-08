@@ -1,22 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { FONTS, PAPERS, TONES, Font, Paper, Tone } from "@/lib/constants";
+import { FONTS, PAPERS, TONES, DEFAULT_PAPER, Font, Paper, Tone } from "@/lib/constants";
 import { useWebHaptics } from "web-haptics/react";
 
 export function useEditor() {
   const { trigger } = useWebHaptics();
   const [text, setText] = useState("");
   const [font, setFont] = useState<Font>(FONTS[0]);
-  const [paper, setPaper] = useState<Paper>({
-    id: "10.webp",
-    path: "/modern-backgrounds/10.webp",
-    type: "image",
-    label: "10",
-    theme: "light"
-  });
+  // Fresh sessions start on the default cinematic video (dark → light ink).
+  // Saved sessions overwrite these in the localStorage restore effect below.
+  const [paper, setPaper] = useState<Paper>(DEFAULT_PAPER);
   const [tone, setTone] = useState<Tone>(TONES[0]);
-  const [inkMode, setInkMode] = useState<"ink-light" | "ink-dark">("ink-dark");
+  const [inkMode, setInkMode] = useState<"ink-light" | "ink-dark">("ink-light");
   const [doodle, setDoodle] = useState<string | null>(null);
   const [author, setAuthor] = useState<string>("");
   const [align, setAlign] = useState<"left" | "center">("center");
@@ -40,6 +36,7 @@ export function useEditor() {
         const videoPapers: Paper[] = (data.videos || []).map((v: any) => ({
           id: v.name,
           path: v.path,
+          poster: v.poster,
           type: "video" as const,
           label: `Video ${v.name.split('.')[0]}`,
           theme: "dark" // Default to dark theme for videos for better contrast with light ink

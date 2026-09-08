@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { preload } from "react-dom";
 import { useEditor } from "@/hooks/use-editor";
+import { DEFAULT_PAPER } from "@/lib/constants";
 import { EditorCanvas } from "@/components/editor-canvas";
 import { TopBar } from "@/components/top-bar";
 import { BottomToolbar } from "@/components/bottom-toolbar";
@@ -9,6 +11,14 @@ import { ExportModal } from "@/components/export-modal";
 import { DoodleDrawer } from "@/components/doodle-drawer";
 import { BootSequence } from "@/components/boot-sequence";
 import { AnimatePresence } from "motion/react";
+
+// Start fetching the default cinematic assets the exact millisecond React
+// begins evaluating — mirroring the landing hero. The poster is tiny so we
+// preload it always; the video only for fresh sessions (returning users get
+// their saved background back, so warming 14.mp4 would be wasted bytes).
+if (DEFAULT_PAPER.poster) preload(DEFAULT_PAPER.poster, { as: "image" });
+const hasSavedState = typeof window !== "undefined" && !!localStorage.getItem("poetik-state");
+if (!hasSavedState && DEFAULT_PAPER.path) preload(DEFAULT_PAPER.path, { as: "video" });
 
 export default function PoetikPage() {
   const [isBooting, setIsBooting] = useState(true);
