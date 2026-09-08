@@ -48,7 +48,7 @@ export function HeroSection() {
         loop
         muted
         playsInline
-        poster="/bg-videos/14-poster.webp"
+        poster="https://pub-a2400708ea4441fd9bc815d8295f7417.r2.dev/bg-videos/14-poster.webp"
         style={{
           position: "absolute",
           inset: 0,

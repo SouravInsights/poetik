@@ -26,6 +26,11 @@
  *   brew install ffmpeg                        # one-time
  *   node scripts/optimize-videos.mjs           # download originals + transcode locally
  *   node scripts/optimize-videos.mjs --upload  # the same, then push results to R2
+ *
+ * NOTE: --upload needs an R2 API token with **Object Read & Write** on the
+ * bucket (R2 dashboard → Manage R2 API Tokens). A read-only token gets you
+ * AccessDenied on every upload — downloads/transcodes are still cached, so
+ * just swap the token and re-run the same command to do the uploads.
  */
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
