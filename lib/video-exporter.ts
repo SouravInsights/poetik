@@ -82,8 +82,22 @@ function loadVideo(src: string): Promise<HTMLVideoElement> {
     video.muted = true;      // Must be muted or browsers block autoplay
     video.playsInline = true;
     video.loop = true;       // Loop so it never ends mid-export
-    video.oncanplaythrough = () => resolve(video);
-    video.onerror = reject;
+    video.preload = "auto";
+    // 'canplaythrough' is aspirational and Safari often never fires it —
+    // which stranded exports on an eternal "encoding 0%" spinner. 'canplay'
+    // is the reliable readiness signal, and a hard timeout guarantees the
+    // user gets an error state instead of a hang.
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error("Background video took too long to load (15s)"));
+    }, 15000);
+    const cleanup = () => {
+      clearTimeout(timer);
+      video.oncanplay = null;
+      video.onerror = null;
+    };
+    video.oncanplay = () => { cleanup(); resolve(video); };
+    video.onerror = () => { cleanup(); reject(new Error("Failed to load the background video")); };
     video.load();
   });
 }
