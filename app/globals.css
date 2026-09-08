@@ -132,10 +132,6 @@
     overflow: hidden;
   }
 
-  textarea {
-    caret-color: #C5A059 !important; /* Elegant Gold Caret */
-  }
-
   ::selection {
     background-color: rgba(197, 160, 89, 0.25); /* Soft Gold Selection */
     color: inherit;

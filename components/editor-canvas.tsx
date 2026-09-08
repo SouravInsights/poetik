@@ -279,9 +279,18 @@ export function EditorCanvas({
             {text === "" ? (
               <motion.span 
                 initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                animate={{ opacity: 0.2, y: 0, filter: "blur(0px)" }}
+                // 0.2 over video was illegible — 0.45 keeps the placeholder
+                // clearly quieter than typed text but readable on any background.
+                animate={{ opacity: 0.45, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.4, ease: "easeOut" }} // Lightning fast arrival (no artificial delay needed because 2.8s clear already passed)
-                className="inline-block"
+                className="inline-block select-none"
+                // Soft ambient shadow lifts the text off moving footage —
+                // dark glow on dark ink mode, warm glow on light.
+                style={{
+                  textShadow: isDark
+                    ? "0 1px 14px rgba(13, 11, 9, 0.5)"
+                    : "0 1px 12px rgba(245, 240, 232, 0.4)",
+                }}
               >
                 arz kiya hai...
               </motion.span>
