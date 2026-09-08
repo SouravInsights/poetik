@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Font, Paper, Tone } from "@/lib/constants";
 import { motion, AnimatePresence } from "motion/react";
@@ -59,6 +59,17 @@ export function ExportModal({
     cancelExport,
   } = useExport({ isOpen, paper });
 
+  // Two live decoders + a 1080x1920 recording canvas is a thermal/jank storm
+  // on phones — freeze the modal's preview video while the exporter records
+  // its own copy of the same source.
+  const previewVideoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = previewVideoRef.current;
+    if (!v) return;
+    if (isBusy) v.pause();
+    else v.play().catch(() => {});
+  }, [isBusy]);
+
   // Prevent body scroll while modal is open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "unset";
@@ -110,7 +121,7 @@ export function ExportModal({
               style={{ backgroundImage: paper.type === "image" ? `url(${paper.path})` : undefined, opacity: bgOpacity }}
             >
               {paper.type === "video" && (
-                <video src={paper.path} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
+                <video ref={previewVideoRef} src={paper.path} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
               )}
               <div className={cn("absolute inset-0", (paper.type === "image" || paper.type === "video") ? "opacity-20" : "opacity-0", isDark ? "bg-black" : "bg-white")} />
               <div
