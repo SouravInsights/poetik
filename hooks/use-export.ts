@@ -55,7 +55,7 @@
 import { useRef, useState, useEffect } from "react";
 import { toJpeg } from "html-to-image";
 import { useWebHaptics } from "web-haptics/react";
-import { exportPoetryVideo } from "@/lib/video-exporter";
+import { exportPoetryVideo, withTimeout } from "@/lib/video-exporter";
 import { Paper } from "@/lib/constants";
 
 export type ExportState = "idle" | "saving" | "encoding" | "done" | "error";
@@ -107,14 +107,21 @@ export function useExport({ isOpen, paper }: UseExportOptions) {
     setExportState("saving");
     trigger("medium");
     try {
-      await new Promise(r => setTimeout(r, 600));
-      const dataUrl = await toJpeg(exportRef.current, {
-        cacheBust: true,      // Adds a random query param so cached images don't interfere
-        width: 1080,
-        height: 1920,
-        quality: 0.98,        // 98% JPEG quality — near-lossless, keeps file size reasonable
-        style: { transform: "scale(1)", transformOrigin: "top left" },
-      });
+      // Deterministic instead of a blind 600ms wait: capture only once the
+      // real fonts are loaded (cached fonts resolve instantly, so this is
+      // usually FASTER too — worst case was a fallback-font export).
+      await document.fonts.ready;
+      const dataUrl = await withTimeout(
+        toJpeg(exportRef.current, {
+          cacheBust: true,    // Adds a random query param so cached images don't interfere
+          width: 1080,
+          height: 1920,
+          quality: 0.98,      // 98% JPEG quality — near-lossless, keeps file size reasonable
+          style: { transform: "scale(1)", transformOrigin: "top left" },
+        }),
+        12000,
+        "Image capture (font fetch)"
+      );
       const link = document.createElement("a");
       link.download = `poetik-${Date.now()}.jpg`; // Unique filename using current timestamp
       link.href = dataUrl;
