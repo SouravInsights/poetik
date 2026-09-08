@@ -172,9 +172,11 @@ export function useExport({ isOpen, paper }: UseExportOptions) {
       link.href = url;
       link.click();
 
-      // Revoke immediately after — this frees the memory used by the blob URL.
-      // If you don't do this, the browser keeps that Blob in RAM until the page is closed.
-      URL.revokeObjectURL(url);
+      // Do NOT revoke synchronously: iOS Safari resolves the blob URL
+      // asynchronously when the download begins, so an instant revoke kills
+      // the download before it starts (silent failure on the primary
+      // platform). A short grace window keeps it alive, then frees memory.
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
 
       trigger("success");
       setExportState("done");
