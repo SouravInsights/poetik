@@ -259,7 +259,9 @@ export function BottomToolbar({
                       value={author}
                       onChange={(e) => onAuthorChange(e.target.value)}
                       placeholder="USERNAME"
-                      className="w-full border-b-2 border-white/5 bg-transparent py-3 pl-12 font-jost text-[12px] font-medium tracking-[0.3em] uppercase transition-all outline-none placeholder:opacity-20 focus:border-accent/60"
+                      // 16px minimum on inputs: any smaller and iOS Safari
+                      // force-zooms the whole viewport on focus.
+                      className="w-full border-b-2 border-white/5 bg-transparent py-3 pl-12 font-jost text-[16px] font-medium tracking-[0.3em] uppercase transition-all outline-none placeholder:opacity-20 focus:border-accent/60"
                     />
                   </div>
                   <button

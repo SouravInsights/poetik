@@ -21,6 +21,10 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  // Chrome/Android: shrink the layout (not just the visual viewport) when the
+  // software keyboard opens, so the fixed bottom sheet rides above it instead
+  // of hiding behind it while typing the @handle.
+  interactiveWidget: 'resizes-content',
 };
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
