@@ -74,12 +74,13 @@
     --secondary-foreground: #1A1714;
     --muted: #EDE7D9;
     --muted-foreground: #8C8278;
-    --accent: #C5A059;
+    /* The accent IS the ink — the system is fully monochrome (gold retired) */
+    --accent: #1A1714;
     --accent-foreground: #F5F0E8;
     --destructive: #000;
     --border: #C8BFB0;
     --input: #C8BFB0;
-    --ring: #C5A059;
+    --ring: #1A1714;
     --radius: 0.5rem;
 }
 
@@ -96,12 +97,13 @@
     --secondary-foreground: #F5F0E8;
     --muted: #1A1714;
     --muted-foreground: #8C8278;
-    --accent: #C5A059;
-    --accent-foreground: #F5F0E8;
+    /* The accent IS the ink (cream) — the system is fully monochrome */
+    --accent: #F5F0E8;
+    --accent-foreground: #0D0B09;
     --destructive: #000;
     --border: #1A1714;
     --input: #1A1714;
-    --ring: #C5A059;
+    --ring: #F5F0E8;
 }
 
 @layer base {
@@ -110,7 +112,7 @@
     -webkit-tap-highlight-color: transparent;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    accent-color: #C5A059; /* Target modern browsers native controls */
+    accent-color: currentColor; /* native controls inherit the local ink */
   }
   
   *::-webkit-scrollbar {
