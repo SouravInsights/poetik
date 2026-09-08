@@ -132,10 +132,23 @@
     overflow: hidden;
   }
 
+  /* Selection follows the ink — never a fixed accent. color-mix(currentColor)
+     keeps it monochrome-adaptive everywhere text has a real color. */
   ::selection {
-    background-color: rgba(197, 160, 89, 0.25); /* Soft Gold Selection */
+    background-color: color-mix(in srgb, currentColor 22%, transparent);
     color: inherit;
   }
+
+  /* The canvas textarea renders TRANSPARENT text over a ghost layer, so its
+     currentColor is transparent and color-mix would yield an invisible
+     selection there — scope explicit ink washes per mode instead. */
+  .ink-light ::selection { background-color: rgba(242, 236, 224, 0.22); }
+  .ink-dark ::selection { background-color: rgba(28, 22, 16, 0.18); }
+
+  /* Caret follows the ink, never the gold accent — a previous global
+     `caret-color: #C5A059 !important` hijacked the canvas's intent. */
+  .ink-light textarea { caret-color: #f2ece0; }
+  .ink-dark textarea { caret-color: #1a1714; }
 }
 
 @layer utilities {
