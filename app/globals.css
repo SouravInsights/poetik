@@ -151,6 +151,35 @@
      `caret-color: #C5A059 !important` hijacked the canvas's intent. */
   .ink-light textarea { caret-color: #f2ece0; }
   .ink-dark textarea { caret-color: #1a1714; }
+
+  /* Range inputs (export duration slider) use appearance-none for the track
+     but nothing ever styled the thumb — it was effectively invisible. */
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background: #f2ece0;
+    border: none;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    margin-top: -6px; /* center the 14px thumb on the 2px track */
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background: #f2ece0;
+    border: none;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+  }
+  input[type="range"]::-moz-range-track {
+    height: 2px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.1);
+  }
 }
 
 @layer utilities {

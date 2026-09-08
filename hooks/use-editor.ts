@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { FONTS, PAPERS, TONES, DEFAULT_PAPER, Font, Paper, Tone } from "@/lib/constants";
 import { useWebHaptics } from "web-haptics/react";
 
@@ -22,10 +22,33 @@ export function useEditor() {
   const [isDoodleDrawerOpen, setIsDoodleDrawerOpen] = useState(false);
   const [isToolbarOpen, setIsToolbarOpen] = useState(false);
   const [uiVisible, setUiVisible] = useState(true);
+
+  // "The poem never competes with UI" (design.md): chrome dissolves while
+  // writing and reappears on blur or after a short typing idle. Previously
+  // uiVisible existed but was never driven — the feature was dead code.
+  const uiIdleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleCanvasFocusChange = useCallback((focused: boolean) => {
+    if (uiIdleTimer.current) clearTimeout(uiIdleTimer.current);
+    setUiVisible(!focused);
+  }, []);
+
+  const setTextAndDissolve = useCallback((val: string) => {
+    setText(val);
+    setUiVisible(false);
+    if (uiIdleTimer.current) clearTimeout(uiIdleTimer.current);
+    uiIdleTimer.current = setTimeout(() => setUiVisible(true), 3000);
+  }, []);
   const [isClearing, setIsClearing] = useState(false);
 
   const [dynamicPapers, setDynamicPapers] = useState<Paper[]>(PAPERS);
   const [dynamicDoodles, setDynamicDoodles] = useState<string[]>([]);
+
+  // Save effect must never run before restore has committed — otherwise the
+  // mount flush writes the INITIAL (empty) state over the saved one, and in
+  // dev StrictMode's double-mount makes that clobber permanent (this is what
+  // made the author handle / draft appear to reset on reload).
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     async function fetchAssets() {
@@ -86,13 +109,15 @@ export function useEditor() {
         if (parsed.atmosphere) setAtmosphere(parsed.atmosphere);
       } catch (e) {}
     }
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
     localStorage.setItem("poetik-state", JSON.stringify({
       text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, atmosphere
     }));
-  }, [text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, atmosphere]);
+  }, [hydrated, text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, atmosphere]);
 
   const handleSetFont = useCallback((f: Font) => {
     trigger(15);
@@ -124,6 +149,13 @@ export function useEditor() {
     setInkMode(mode);
   }, [trigger]);
 
+  // A handle is a single token: strip a user-typed leading @ (the UI renders
+  // its own — otherwise "@sam" shows as "@ @sam" in the input) and all
+  // whitespace, and cap the length so it can never break the composition.
+  const handleSetAuthor = useCallback((val: string) => {
+    setAuthor(val.replace(/^@+/, "").replace(/\s+/g, "").slice(0, 30));
+  }, []);
+
   const handleSetDoodle = useCallback((d: string | null) => {
     trigger(20);
     setDoodle(d);
@@ -154,13 +186,14 @@ export function useEditor() {
   }, [trigger]);
 
   return {
-    text, setText,
+    text, setText: setTextAndDissolve,
+    onCanvasFocusChange: handleCanvasFocusChange,
     font, setFont: handleSetFont,
     paper, setPaper: handleSetPaper,
     tone, setTone: handleSetTone,
     inkMode, setInkMode: handleSetInkMode,
     doodle, setDoodle: handleSetDoodle,
-    author, setAuthor,
+    author, setAuthor: handleSetAuthor,
     align, toggleAlign: handleSetAlign,
     bgOpacity, setBgOpacity,
     isExporting, setIsExporting,
