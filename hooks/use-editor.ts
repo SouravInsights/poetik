@@ -27,6 +27,12 @@ export function useEditor() {
   const [dynamicPapers, setDynamicPapers] = useState<Paper[]>(PAPERS);
   const [dynamicDoodles, setDynamicDoodles] = useState<string[]>([]);
 
+  // Save effect must never run before restore has committed — otherwise the
+  // mount flush writes the INITIAL (empty) state over the saved one, and in
+  // dev StrictMode's double-mount makes that clobber permanent (this is what
+  // made the author handle / draft appear to reset on reload).
+  const [hydrated, setHydrated] = useState(false);
+
   useEffect(() => {
     async function fetchAssets() {
       try {
@@ -86,13 +92,15 @@ export function useEditor() {
         if (parsed.atmosphere) setAtmosphere(parsed.atmosphere);
       } catch (e) {}
     }
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
     localStorage.setItem("poetik-state", JSON.stringify({
       text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, atmosphere
     }));
-  }, [text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, atmosphere]);
+  }, [hydrated, text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, atmosphere]);
 
   const handleSetFont = useCallback((f: Font) => {
     trigger(15);
