@@ -89,9 +89,16 @@ export function TopBar({ visible, onClear, align, onAlignToggle, inkMode, atmosp
           trigger("error");
           onClear();
         }}
+        // Same glass pill language as the align/mood pills — full ink
+        // contrast instead of red-on-blurred-video (which is off-palette per
+        // design.md and illegible at 9px). The destructive affordance lives
+        // in the bin icon; the confirmation lives in the crumple animation +
+        // error haptic, which are far stronger signals than chrome color.
         className={cn(
           "flex items-center gap-2 shrink-0 font-jost text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase transition-all py-2.5 px-3 sm:px-5 rounded-full backdrop-blur-xl border select-none shadow-md",
-          "bg-red-500/15 text-red-500 hover:bg-red-500/25 border-red-500/25"
+          isDark
+            ? "bg-white/[0.12] border-white/[0.15] text-white hover:bg-white/[0.25]"
+            : "bg-black/[0.08] border-black/[0.15] text-black hover:bg-black/[0.15]"
         )}
       >
         <HugeiconsIcon icon={Delete02Icon} size={12} strokeWidth={2.5} />
