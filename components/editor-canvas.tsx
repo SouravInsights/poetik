@@ -193,6 +193,9 @@ export function EditorCanvas({
             x: bgX,
             y: bgY,
             scale: 1.1,
+            // Composite this full-screen layer once — otherwise every sheet
+            // animation frame can force a repaint of a *playing video* region.
+            willChange: "transform",
           }}
         >
           {/* Persistent video element — src is swapped imperatively, never unmounted */}
