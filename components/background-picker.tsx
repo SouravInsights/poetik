@@ -17,6 +17,35 @@ if (typeof window !== "undefined") {
 
 
 // ---------------------------------------------------------------------------
+// Warm pool — hidden preloading video elements that pull a hovered swatch's
+// file into the browser HTTP cache. By the time the user clicks, the canvas
+// video element resolves from disk cache instead of the network.
+// ---------------------------------------------------------------------------
+const WARM_POOL_MAX = 3;
+const warmPool = new Map<string, HTMLVideoElement>();
+
+function warmVideo(src: string | undefined) {
+  if (!src || typeof window === "undefined" || warmPool.has(src)) return;
+
+  const vid = document.createElement("video");
+  vid.crossOrigin = "anonymous"; // match editor-canvas so the cache entry is reusable
+  vid.muted = true;
+  vid.preload = "auto";
+  vid.src = src;
+  vid.load();
+  warmPool.set(src, vid);
+
+  // Map preserves insertion order — evict the oldest entry beyond the cap.
+  while (warmPool.size > WARM_POOL_MAX) {
+    const oldestKey = warmPool.keys().next().value as string;
+    const oldest = warmPool.get(oldestKey);
+    oldest?.removeAttribute("src");
+    oldest?.load(); // release the network/decode resources
+    warmPool.delete(oldestKey);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Concurrency limiter — at most 4 video metadata fetches at the same time.
 // Without this, all visible swatches race to load simultaneously the moment
 // the toolbar opens, saturating the browser's network + decode pipeline.
@@ -135,6 +164,19 @@ function VideoSwatch({
   const ref = useRef<HTMLButtonElement>(null);
   const [visible, setVisible] = useState(false);
 
+  // Prefer the pre-generated API poster — zero video bytes downloaded.
+  // Only fall back to frame capture for videos that don't have one yet.
+  const capturedPoster = useVideoPoster(paper.path, visible && !paper.poster);
+  const poster = paper.poster ?? capturedPoster;
+
+  // Hand the poster to the editor-canvas bridge so the fullscreen swap
+  // never flashes black while the first frames buffer.
+  useEffect(() => {
+    if (paper.poster && paper.path && !posterCache.has(paper.path)) {
+      posterCache.set(paper.path, paper.poster);
+    }
+  }, [paper.poster, paper.path]);
+
   // Only kick off the network fetch once this swatch is actually on screen.
   // IntersectionObserver fires synchronously on mount for already-visible elements,
   // so the first ~8 visible swatches start immediately — the rest wait their turn.
@@ -149,12 +191,12 @@ function VideoSwatch({
     return () => observer.disconnect();
   }, []);
 
-  const poster = useVideoPoster(paper.path, visible);
-
   return (
     <button
       ref={ref}
       onClick={onClick}
+      onMouseEnter={() => warmVideo(paper.path)}
+      onTouchStart={() => warmVideo(paper.path)}
       className={cn(
         "w-10 h-10 rounded-full flex-shrink-0 cursor-pointer border transition-all duration-300 overflow-hidden bg-white/5 relative group",
         isSelected
@@ -166,6 +208,8 @@ function VideoSwatch({
         <img
           src={poster}
           alt=""
+          // API posters are tiny (~10KB) — eager beats observer overhead here.
+          loading={paper.poster ? "eager" : "lazy"}
           className="absolute inset-0 w-full h-full object-cover"
           draggable={false}
         />

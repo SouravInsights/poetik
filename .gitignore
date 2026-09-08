@@ -36,3 +36,5 @@ pnpm-debug.log*
 next-env.d.ts
 
 # large media — served from Cloudflare R2, not committed to git
+/public/bg-videos/
+/video-pipeline/

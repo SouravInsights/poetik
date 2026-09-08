@@ -130,8 +130,9 @@ export function EditorCanvas({
     if (src === prevVideoSrc.current) return; // Same video, no-op
     prevVideoSrc.current = src;
 
-    // Show cached poster immediately as a bridge frame
-    const cached = (window as any).__posterCache?.get?.(src) ?? null;
+    // Show a poster immediately as a bridge frame — prefer the pre-generated
+    // API poster, fall back to whatever the picker captured client-side.
+    const cached = paper.poster ?? (window as any).__posterCache?.get?.(src) ?? null;
     if (cached) setPosterBridge(cached);
     setVideoReady(false);
 
@@ -147,7 +148,7 @@ export function EditorCanvas({
     };
     vid.addEventListener("canplay", onReady, { once: true });
     return () => vid.removeEventListener("canplay", onReady);
-  }, [paper.path, paper.type]);
+  }, [paper.path, paper.type, paper.poster]);
 
   useEffect(() => {
     if (textareaRef.current) {

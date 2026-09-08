@@ -20,7 +20,23 @@ function getR2Client() {
   });
 }
 
-async function listR2Videos(): Promise<{ name: string; path: string; category: string }[]> {
+interface R2Video {
+  name: string;
+  path: string;
+  category: string;
+  poster?: string;
+}
+
+// Posters are pre-generated at upload time by scripts/optimize-videos.mjs and
+// stored next to the videos as `<base>-poster.webp`. Serving them as plain
+// images means the picker never has to download video bytes to render a swatch.
+function posterFor(baseName: string, keys: Set<string>, prefix: string): string | undefined {
+  const key = `${prefix}${baseName}-poster.webp`;
+  if (!keys.has(key)) return undefined;
+  return R2_BASE_URL ? `${R2_BASE_URL}/${key}` : `/${key}`;
+}
+
+async function listR2Videos(): Promise<R2Video[]> {
   const client = getR2Client();
   const bucket = process.env.R2_BUCKET_NAME ?? "ambient-assets";
 
@@ -28,9 +44,15 @@ async function listR2Videos(): Promise<{ name: string; path: string; category: s
   if (!client) {
     const localDir = join(process.cwd(), "public", "bg-videos");
     if (!fs.existsSync(localDir)) return [];
+    const localKeys = new Set(fs.readdirSync(localDir).map(f => `bg-videos/${f}`));
     return fs.readdirSync(localDir)
       .filter(f => /\.(mp4|mov|webm)$/i.test(f))
-      .map(name => ({ name, path: `/bg-videos/${name}`, category: "bg-videos" }));
+      .map(name => ({
+        name,
+        path: `/bg-videos/${name}`,
+        category: "bg-videos",
+        poster: posterFor(name.replace(/\.[^.]+$/, ""), localKeys, "bg-videos/"),
+      }));
   }
 
   const command = new ListObjectsV2Command({
@@ -39,10 +61,9 @@ async function listR2Videos(): Promise<{ name: string; path: string; category: s
   });
 
   const response = await client.send(command);
-  const objects = response.Contents ?? [];
+  const keys = new Set((response.Contents ?? []).map(obj => obj.Key!));
 
-  return objects
-    .map(obj => obj.Key!)
+  return [...keys]
     .filter(key => /\.(mp4|mov|webm)$/i.test(key))
     .map(key => {
       const name = key.split("/").pop()!;
@@ -50,6 +71,7 @@ async function listR2Videos(): Promise<{ name: string; path: string; category: s
         name,
         path: R2_BASE_URL ? `${R2_BASE_URL}/${key}` : `/bg-videos/${name}`,
         category: "bg-videos",
+        poster: posterFor(name.replace(/\.[^.]+$/, ""), keys, "bg-videos/"),
       };
     })
     .sort((a, b) => {

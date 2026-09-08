@@ -12,6 +12,8 @@ export interface Paper {
   type: "color" | "image" | "video";
   label: string;
   theme?: "light" | "dark";
+  /** Pre-generated thumbnail for video papers (served as a plain image). */
+  poster?: string;
 }
 
 export interface Tone {

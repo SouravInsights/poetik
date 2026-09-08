@@ -40,6 +40,7 @@ export function useEditor() {
         const videoPapers: Paper[] = (data.videos || []).map((v: any) => ({
           id: v.name,
           path: v.path,
+          poster: v.poster,
           type: "video" as const,
           label: `Video ${v.name.split('.')[0]}`,
           theme: "dark" // Default to dark theme for videos for better contrast with light ink
