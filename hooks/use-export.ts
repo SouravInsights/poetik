@@ -206,7 +206,9 @@ export function useExport({ isOpen, paper }: UseExportOptions) {
 
   // Human-readable label shown above the export button in the UI
   const statusLabel = (() => {
-    if (exportState === "encoding") return `exporting... ${progress}%`;
+    // progress is 0 during overlay-capture + video-load (can be a second or
+    // two on mobile) — say so, or the phase reads as frozen
+    if (exportState === "encoding") return progress === 0 ? "preparing…" : `exporting... ${progress}%`;
     if (exportState === "saving") return "saving...";
     if (exportState === "done") return "saved to your device ✦";
     if (exportState === "error") return "something went wrong — try again";

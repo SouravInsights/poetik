@@ -59,6 +59,16 @@ const WIDTH = 1080;   // Portrait 9:16 — perfect for Instagram Reels, TikTok, 
 const HEIGHT = 1920;
 const FPS = 24;       // 24fps = cinematic. 30fps is TV. 24fps feels more "film".
 
+/** Rejects a hanging promise after `ms` — font/CSS fetches can stall offline. */
+export function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out`)), ms)
+    ),
+  ]);
+}
+
 /**
  * loadVideo()
  *
@@ -132,9 +142,10 @@ function loadVideo(src: string): Promise<HTMLVideoElement> {
  * 7. A setInterval fires 24 times per second. Each tick:
  *    - Draws the current video frame onto the canvas (Layer 1)
  *    - Draws the pre-captured text overlay on top (Layer 2)
- *    - Counts how many frames we've drawn so far
+ *    - Reports progress by elapsed wall-clock time
  *
- * 8. When frameCount reaches our target (durationSecs × 24 frames/sec),
+ * 8. When elapsed time reaches the chosen duration (wall-clock, so the
+ *    output length is honest even if the main thread dropped some ticks),
  *    we stop the interval and tell MediaRecorder to finalize.
  *
  * 9. MediaRecorder fires onstop, we collect all the chunks into a single
@@ -148,15 +159,19 @@ export async function exportPoetryVideo(
   // html-to-image renders the div using the browser's own renderer — so
   // all your Tailwind classes, Google Fonts, opacity, letter-spacing
   // are all preserved perfectly in the PNG output.
-  const overlayDataUrl = await toPng(opts.overlayEl, {
-    cacheBust: true,
-    width: WIDTH,
-    height: HEIGHT,
-    pixelRatio: 1, // 1:1 pixel density — no Retina scaling, we want exact 1080x1920
-    style: {
-      background: "transparent", // Force transparent background so only text shows
-    },
-  });
+  const overlayDataUrl = await withTimeout(
+    toPng(opts.overlayEl, {
+      cacheBust: true,
+      width: WIDTH,
+      height: HEIGHT,
+      pixelRatio: 1, // 1:1 pixel density — no Retina scaling, we want exact 1080x1920
+      style: {
+        background: "transparent", // Force transparent background so only text shows
+      },
+    }),
+    12000,
+    "Text overlay capture (font fetch)"
+  );
 
   // Step 2: Convert the PNG data URL → Blob → ImageBitmap (GPU-resident image).
   // ImageBitmap is faster than a regular Image() because it's pre-decoded
@@ -177,8 +192,7 @@ export async function exportPoetryVideo(
     willReadFrequently: false, // We only write pixels, never read them back (keeps GPU path active)
   })!;
 
-  const totalFrames = opts.durationSecs * FPS;
-  let frameCount = 0;
+  const durationMs = opts.durationSecs * 1000;
 
   // Step 5: Pick the best available video codec for this browser.
   // - MP4/AVC1 (H.264): Best compatibility. Works on Instagram, iMessage, everywhere.
@@ -208,6 +222,7 @@ export async function exportPoetryVideo(
   recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
 
   return new Promise((resolve, reject) => {
+    const startedAt = performance.now();
     recorder.onstop = () => {
       // Recording is done. Clean up resources.
       video.pause();
@@ -247,11 +262,17 @@ export async function exportPoetryVideo(
       // this blends cleanly over the video background.
       ctx.drawImage(overlayBitmap, 0, 0, WIDTH, HEIGHT);
 
-      frameCount++;
-      opts.onProgress?.(Math.round((frameCount / totalFrames) * 100));
+      // Stop on WALL-CLOCK time, not frame count: setInterval ticks slip
+      // when the main thread is busy drawing 1080x1920, and frame-counting
+      // then stretches a "10s" export to 13s+. MediaRecorder timestamps by
+      // real time, so matching elapsed time keeps the output duration honest
+      // even if a few draw ticks coalesce.
+      const elapsed = performance.now() - startedAt;
+      opts.onProgress?.(Math.min(99, Math.round((elapsed / durationMs) * 100)));
 
-      if (frameCount >= totalFrames) {
+      if (elapsed >= durationMs) {
         clearInterval(interval);
+        opts.onProgress?.(100);
         recorder.stop(); // Tells MediaRecorder to finalize and fire onstop
       }
     }, 1000 / FPS); // 1000ms / 24 = ~41.6ms per frame
