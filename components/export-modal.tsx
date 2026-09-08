@@ -188,7 +188,6 @@ export function ExportModal({
                   value={durationSecs}
                   onChange={(e) => setDurationSecs(Number(e.target.value))}
                   className="w-full h-[2px] bg-white/10 rounded-full appearance-none cursor-pointer"
-                  style={{ accentColor: "#f2ece0" }}
                 />
                 <div className="flex justify-between w-full">
                   {[5, 10, 15, 20, 25, 30].map(v => (
