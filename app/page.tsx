@@ -39,7 +39,12 @@ export default function PoetikPage() {
     handleClear,
     isClearing,
     atmosphere, setAtmosphere, // NEW: Subliminal Audio-Video state
+    onCanvasFocusChange,
   } = useEditor();
+
+  // Chrome dissolves while writing (the hook drives uiVisible), but must
+  // always stay put while a drawer is open, during boot, and mid clear-wipe.
+  const chromeVisible = (uiVisible || isToolbarOpen || isDoodleDrawerOpen) && !isBooting && !isClearing;
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-[#0D0B09]">
@@ -60,10 +65,11 @@ export default function PoetikPage() {
         bgOpacity={bgOpacity}
         atmosphere={atmosphere} // Pass to canvas to orchestrate audio and lighting
         isClearing={isClearing}
+        onFocusChange={onCanvasFocusChange}
       />
 
       <TopBar 
-        visible={uiVisible && !isDoodleDrawerOpen && !isBooting} 
+        visible={chromeVisible && !isDoodleDrawerOpen} 
         onClear={handleClear} 
         align={align}
         onAlignToggle={toggleAlign}
@@ -92,7 +98,7 @@ export default function PoetikPage() {
         onInkModeChange={setInkMode}
         onExport={() => setIsExporting(true)}
         onDoodleToggle={() => setIsDoodleDrawerOpen(true)}
-        uiVisible={uiVisible && !isBooting}
+        uiVisible={chromeVisible}
       />
 
       <DoodleDrawer

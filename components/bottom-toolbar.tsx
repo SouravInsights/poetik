@@ -74,8 +74,10 @@ export function BottomToolbar({
 
       <div
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-[100] flex flex-col items-center",
-          !uiVisible && !isOpen && "translate-y-full opacity-0"
+          // The wrapper needs its own transition — without it the dissolve
+          // while writing snaps instead of gliding (TopBar already had one).
+          "fixed bottom-0 left-0 right-0 z-[100] flex flex-col items-center transition-all duration-500 ease-in-out",
+          !uiVisible && !isOpen && "translate-y-full opacity-0 pointer-events-none"
         )}
       >
         {/* mode="wait" sequences the two states instead of overlapping them:

@@ -22,6 +22,8 @@ interface EditorCanvasProps {
   bgOpacity: number;
   atmosphere: "none" | "rain" | "fireplace";
   isClearing?: boolean;
+  /** Reports textarea focus so the page can dissolve chrome while writing. */
+  onFocusChange?: (focused: boolean) => void;
 }
 
 export function EditorCanvas({
@@ -37,6 +39,7 @@ export function EditorCanvas({
   bgOpacity,
   atmosphere,
   isClearing,
+  onFocusChange,
 }: EditorCanvasProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { trigger } = useWebHaptics();
@@ -337,8 +340,8 @@ export function EditorCanvas({
             value={text}
             onChange={(e) => handleTextChange(e.target.value)}
             onSelect={handleSelectionChange}
-            onFocus={() => { setIsFocused(true); handleSelectionChange(); }}
-            onBlur={() => setIsFocused(false)}
+            onFocus={() => { setIsFocused(true); handleSelectionChange(); onFocusChange?.(true); }}
+            onBlur={() => { setIsFocused(false); onFocusChange?.(false); }}
             onKeyDown={handleSelectionChange}
             onClick={handleSelectionChange}
             spellCheck={false}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { FONTS, PAPERS, TONES, DEFAULT_PAPER, Font, Paper, Tone } from "@/lib/constants";
 import { useWebHaptics } from "web-haptics/react";
 
@@ -22,6 +22,23 @@ export function useEditor() {
   const [isDoodleDrawerOpen, setIsDoodleDrawerOpen] = useState(false);
   const [isToolbarOpen, setIsToolbarOpen] = useState(false);
   const [uiVisible, setUiVisible] = useState(true);
+
+  // "The poem never competes with UI" (design.md): chrome dissolves while
+  // writing and reappears on blur or after a short typing idle. Previously
+  // uiVisible existed but was never driven — the feature was dead code.
+  const uiIdleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleCanvasFocusChange = useCallback((focused: boolean) => {
+    if (uiIdleTimer.current) clearTimeout(uiIdleTimer.current);
+    setUiVisible(!focused);
+  }, []);
+
+  const setTextAndDissolve = useCallback((val: string) => {
+    setText(val);
+    setUiVisible(false);
+    if (uiIdleTimer.current) clearTimeout(uiIdleTimer.current);
+    uiIdleTimer.current = setTimeout(() => setUiVisible(true), 3000);
+  }, []);
   const [isClearing, setIsClearing] = useState(false);
 
   const [dynamicPapers, setDynamicPapers] = useState<Paper[]>(PAPERS);
@@ -169,7 +186,8 @@ export function useEditor() {
   }, [trigger]);
 
   return {
-    text, setText,
+    text, setText: setTextAndDissolve,
+    onCanvasFocusChange: handleCanvasFocusChange,
     font, setFont: handleSetFont,
     paper, setPaper: handleSetPaper,
     tone, setTone: handleSetTone,
