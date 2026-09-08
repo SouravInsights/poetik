@@ -32,6 +32,8 @@ interface BottomToolbarProps {
   onExport: () => void;
   onDoodleToggle: () => void;
   uiVisible: boolean;
+  /** False when the canvas is empty — exporting blank poetry is meaningless. */
+  canExport: boolean;
 }
 
 export function BottomToolbar({
@@ -51,6 +53,7 @@ export function BottomToolbar({
   onExport,
   onDoodleToggle,
   uiVisible,
+  canExport,
 }: BottomToolbarProps) {
   const { trigger } = useWebHaptics();
   const isDark = inkMode === "ink-light";
@@ -120,8 +123,15 @@ export function BottomToolbar({
               <div className={cn("w-[1px] h-5 self-center", isDark ? "bg-white/10" : "bg-black/10")} />
 
               <button
+                disabled={!canExport}
                 onClick={() => { trigger("nudge"); onExport(); }}
-                className="flex items-center gap-2 px-6 py-4 min-h-[52px] transition-all hover:bg-[#F5F0E8]/10 font-jost text-[11px] font-bold tracking-[0.15em] uppercase select-none text-[#F5F0E8]"
+                title={canExport ? undefined : "write something first"}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-4 min-h-[52px] transition-all font-jost text-[11px] font-bold tracking-[0.15em] uppercase select-none text-[#F5F0E8]",
+                  canExport
+                    ? "hover:bg-[#F5F0E8]/10"
+                    : "opacity-30 cursor-not-allowed"
+                )}
               >
                 <HugeiconsIcon icon={ArrowRight01Icon} size={16} strokeWidth={2.5} />
                 <span>export</span>

@@ -99,6 +99,7 @@ export default function PoetikPage() {
         onExport={() => setIsExporting(true)}
         onDoodleToggle={() => setIsDoodleDrawerOpen(true)}
         uiVisible={chromeVisible}
+        canExport={text.trim().length > 0}
       />
 
       <DoodleDrawer
