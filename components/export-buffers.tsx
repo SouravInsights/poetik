@@ -66,6 +66,10 @@ interface ExportBufferSharedProps {
   doodle: string | null;
   author: string;
   align: "left" | "center";
+  /** Auto-fit font size (px) at 1080×1920 — shared with the live preview. */
+  poemSize: number;
+  /** Auto-fit line-height ratio, paired with poemSize. */
+  poemLeading: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -92,6 +96,8 @@ export function JpegExportBuffer({
   doodle,
   author,
   align,
+  poemSize,
+  poemLeading,
 }: JpegBufferProps) {
   return (
     // The outer wrapper positions this buffer off-screen and makes it invisible.
@@ -119,8 +125,8 @@ export function JpegExportBuffer({
 
         {/* The poem text — rendered at a large fixed size suitable for 1080px width */}
         <div
-          className={cn("italic leading-[1.6] tracking-[0.03em] whitespace-pre-wrap break-words w-full", align === "center" ? "text-center" : "text-left", font.class)}
-          style={{ fontFamily: `var(${font.variable})`, fontSize: "80px" }}
+          className={cn("italic tracking-[0.03em] whitespace-pre-wrap break-words w-full", align === "center" ? "text-center" : "text-left", font.class)}
+          style={{ fontFamily: `var(${font.variable})`, fontSize: `${poemSize}px`, lineHeight: poemLeading }}
         >
           {text}
         </div>
@@ -163,6 +169,8 @@ export function VideoOverlayBuffer({
   doodle,
   author,
   align,
+  poemSize,
+  poemLeading,
 }: VideoOverlayBufferProps) {
   return (
     <div className="absolute opacity-0 pointer-events-none overflow-hidden" style={{ width: 1080, height: 1920 }}>
@@ -194,8 +202,8 @@ export function VideoOverlayBuffer({
 
         {/* Poem text — same styles as the JPEG buffer, same font, same layout */}
         <div
-          className={cn("italic leading-[1.6] tracking-[0.03em] whitespace-pre-wrap break-words w-full z-10", align === "center" ? "text-center" : "text-left", font.class)}
-          style={{ fontFamily: `var(${font.variable})`, fontSize: "80px" }}
+          className={cn("italic tracking-[0.03em] whitespace-pre-wrap break-words w-full z-10", align === "center" ? "text-center" : "text-left", font.class)}
+          style={{ fontFamily: `var(${font.variable})`, fontSize: `${poemSize}px`, lineHeight: poemLeading }}
         >
           {text}
         </div>

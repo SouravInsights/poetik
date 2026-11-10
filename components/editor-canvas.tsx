@@ -7,6 +7,7 @@ import { useWebHaptics } from "web-haptics/react";
 import { AnimatePresence, motion } from "motion/react";
 import { getEraseAnimationPhysics } from "@/lib/erase-animations";
 import { useParallax } from "@/hooks/use-parallax";
+import { useAutoFit } from "@/hooks/use-autofit";
 import useSound from "use-sound";
 
 interface EditorCanvasProps {
@@ -42,9 +43,69 @@ export function EditorCanvas({
   onFocusChange,
 }: EditorCanvasProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
   const { trigger } = useWebHaptics();
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
+
+  // --- Content-aware typography (auto-fit) ---
+  // Track the usable writing box. Height comes from the viewport minus its
+  // vertical chrome padding; width from the max-800px text column.
+  const [box, setBox] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const outer = viewportRef.current;
+    const inner = measureRef.current;
+    if (!outer || !inner) return;
+
+    const update = () => {
+      const cs = getComputedStyle(outer);
+      const padTop = parseFloat(cs.paddingTop) || 0;
+      const padBottom = parseFloat(cs.paddingBottom) || 0;
+      const height = Math.max(0, outer.clientHeight - padTop - padBottom);
+      const width = inner.clientWidth;
+      setBox((b) =>
+        b.width === width && b.height === height ? b : { width, height }
+      );
+    };
+
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(outer);
+    ro.observe(inner);
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  // A doodle/author sits near the bottom edge — reserve a little room so a long
+  // poem never runs underneath it.
+  const authorReserve = doodle || author ? 56 : 0;
+  const availableHeight = Math.max(0, box.height - authorReserve);
+  const { size: poemSize, lineHeight: poemLeading, height: poemHeight } = useAutoFit({
+    text,
+    font,
+    width: box.width,
+    height: availableHeight,
+    maxSize: 52,
+    minSize: 18,
+    letterSpacing: "0.01em",
+  });
+
+  // A book-length poem cannot physically fit one 9:16 canvas at a readable
+  // size. Rather than clip it (the old behaviour), the canvas quietly becomes
+  // scrollable only in that rare case; everything shorter stays centered.
+  const overflowing = text.trim().length > 0 && poemHeight > availableHeight;
+
+  // Size the invisible input from the fitted, measured text height. We must
+  // NOT use `textarea.scrollHeight` here: it is a one-way ratchet — once the
+  // box grows it never reports smaller, so after an auto-fit shrink it would
+  // stay huge and shove the visual layer off-screen. Floor at one line so the
+  // placeholder still has height when the poem is empty.
+  const textareaHeight = Math.max(poemHeight, poemSize * poemLeading) + 2;
 
   // --- Cinematic Audio Engine ---
   const [playRain, { stop: stopRain, sound: rainSound }] = useSound('/sounds/rain-ambient-cinematic.mp3', { 
@@ -153,13 +214,6 @@ export function EditorCanvas({
     return () => vid.removeEventListener("canplay", onReady);
   }, [paper.path, paper.type, paper.poster]);
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [text]);
-
   const handleSelectionChange = () => {
     if (textareaRef.current) {
       const textBeforeCursor = text.slice(0, textareaRef.current.selectionStart || 0);
@@ -264,20 +318,28 @@ export function EditorCanvas({
         )}
       </AnimatePresence>
 
-      <div className={cn(
-        "absolute inset-0 flex flex-col items-center justify-center px-8 pb-[90px] pt-[80px] z-10",
-        isClearing && "pointer-events-none"
-      )}>
-        <div className="relative w-full max-w-[800px]">
+      <div
+        ref={viewportRef}
+        className={cn(
+          "absolute inset-0 flex flex-col items-center px-8 pb-[90px] pt-[80px] z-10",
+          overflowing ? "justify-start overflow-y-auto overscroll-contain" : "justify-center",
+          isClearing && "pointer-events-none"
+        )}
+      >
+        <div ref={measureRef} className="relative w-full max-w-[800px]">
           {/* Ghost Div: Visually renders the poetry with Focus 'Fade' Mode */}
           <div
             className={cn(
-              "absolute top-0 left-0 w-full whitespace-pre-wrap pointer-events-none transition-all duration-300",
-              "text-[clamp(26px,7.5vw,52px)] leading-[1.6] tracking-[0.01em] italic",
+              "absolute top-0 left-0 w-full whitespace-pre-wrap break-words pointer-events-none",
+              "tracking-[0.01em] italic",
               align === "center" ? "text-center" : "text-left",
               font.class
             )}
-            style={{ fontFamily: `var(${font.variable})` }}
+            style={{
+              fontFamily: `var(${font.variable})`,
+              fontSize: poemSize,
+              lineHeight: poemLeading,
+            }}
           >
             {text === "" ? (
               <motion.span 
@@ -348,16 +410,18 @@ export function EditorCanvas({
             autoComplete="off"
             autoCorrect="off"
             className={cn(
-              "w-full bg-transparent resize-none outline-none overflow-hidden",
-              "text-[clamp(26px,7.5vw,52px)] leading-[1.6] tracking-[0.01em] italic text-transparent caret-foreground",
-              "transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              "w-full bg-transparent p-0 resize-none outline-none overflow-hidden break-words",
+              "tracking-[0.01em] italic text-transparent caret-foreground",
               align === "center" ? "text-center" : "text-left",
               font.class
             )}
-            style={{ 
+            style={{
               fontFamily: `var(${font.variable})`,
+              fontSize: poemSize,
+              lineHeight: poemLeading,
+              height: textareaHeight,
               color: 'transparent',
-              caretColor: isDark ? '#f2ece0' : '#1a1714' 
+              caretColor: isDark ? '#f2ece0' : '#1a1714'
             }}
             rows={1}
           />

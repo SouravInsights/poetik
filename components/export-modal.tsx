@@ -1,8 +1,10 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 import { Font, Paper, Tone } from "@/lib/constants"
+import { useExport } from "@/hooks/use-export"
+import { useAutoFit } from "@/hooks/use-autofit"
 import { motion, AnimatePresence } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
@@ -14,7 +16,6 @@ import {
   Share01Icon,
   Loading03Icon,
 } from "@hugeicons/core-free-icons"
-import { useExport } from "@/hooks/use-export"
 import {
   JpegExportBuffer,
   VideoOverlayBuffer,
@@ -48,6 +49,34 @@ export function ExportModal({
   bgOpacity,
 }: ExportModalProps) {
   const isDark = inkMode === "ink-light"
+
+  // Auto-fit for the 1080×1920 export. The text column is 1080 − 2×120 (px-120)
+  // = 840px wide. When a doodle/author is present we reserve the bottom band so
+  // a long poem never collides with it; otherwise the poem may use the height.
+  const { size: exportPoemSize, lineHeight: exportPoemLeading } = useAutoFit({
+    text,
+    font,
+    width: 840,
+    height: doodle || author ? 1360 : 1800,
+    maxSize: 80,
+    minSize: 36,
+    letterSpacing: "0.03em",
+  })
+
+  // The live preview is a miniature of the export. Measure its text column and
+  // scale the export font by exactly the same ratio, so the WYSIWYG holds for
+  // long poems as well as short ones.
+  const previewTextBoxRef = useRef<HTMLDivElement>(null)
+  const [previewScale, setPreviewScale] = useState(280 / 1080)
+  useEffect(() => {
+    const el = previewTextBoxRef.current
+    if (!el) return
+    const update = () => setPreviewScale(el.clientWidth / 840)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [isOpen])
 
   const {
     exportRef,
@@ -92,6 +121,8 @@ export function ExportModal({
     doodle,
     author,
     align,
+    poemSize: exportPoemSize,
+    poemLeading: exportPoemLeading,
   }
 
   return (
@@ -174,12 +205,17 @@ export function ExportModal({
                 )}
               />
               <div
+                ref={previewTextBoxRef}
                 className={cn(
-                  "z-10 w-full text-[18px] leading-[1.6] tracking-[0.03em] whitespace-pre-wrap italic",
+                  "z-10 w-full tracking-[0.03em] whitespace-pre-wrap italic",
                   align === "center" ? "text-center" : "text-left",
                   font.class
                 )}
-                style={{ fontFamily: `var(${font.variable})` }}
+                style={{
+                  fontFamily: `var(${font.variable})`,
+                  fontSize: exportPoemSize * previewScale,
+                  lineHeight: exportPoemLeading,
+                }}
               >
                 {text}
               </div>
