@@ -87,16 +87,27 @@ export function DoodleDrawer({
                     onClose();
                   }}
                   className={cn(
-                    "aspect-square rounded-xl border p-2 transition-all duration-300 flex items-center justify-center group",
+                    "aspect-square rounded-xl border p-2 transition-all duration-300 flex items-center justify-center group text-[#f5f0e8]",
                     currentDoodle === doodle
                       ? "border-accent bg-accent/20"
                       : "border-white/5 bg-white/5 hover:bg-white/10 opacity-70 hover:opacity-100"
                   )}
                 >
-                  <img 
-                    src={`/doodles/${doodle}`}
-                    alt=""
-                    className="w-full h-full object-contain invert brightness-200 opacity-60 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110"
+                  <span
+                    aria-hidden
+                    className="block h-full w-full transition-all duration-500 group-hover:scale-110"
+                    style={{
+                      backgroundColor: "currentColor",
+                      maskImage: `url(/doodles/${doodle})`,
+                      WebkitMaskImage: `url(/doodles/${doodle})`,
+                      maskRepeat: "no-repeat",
+                      WebkitMaskRepeat: "no-repeat",
+                      maskSize: "contain",
+                      WebkitMaskSize: "contain",
+                      maskPosition: "center",
+                      WebkitMaskPosition: "center",
+                      opacity: currentDoodle === doodle ? 0.9 : 0.55,
+                    }}
                   />
                 </button>
               ))}

@@ -193,6 +193,15 @@
     z-index: 9998;
   }
 
+  /* The credit field is a contentEditable surface (not an input) so mobile
+     autofill never targets it. contentEditable has no placeholder attribute,
+     so draw one from the data attribute while the field is empty. */
+  .credit-input:empty::before {
+    content: attr(data-placeholder);
+    opacity: 0.2;
+    pointer-events: none;
+  }
+
   .ink-light {
     color: rgba(242, 236, 224, 0.92);
   }

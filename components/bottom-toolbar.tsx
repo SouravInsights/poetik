@@ -4,6 +4,7 @@ import { Font, Tone, Paper } from "@/lib/constants"
 import { FontPicker } from "./font-picker"
 import { SizePicker } from "./size-picker"
 import { SpacingPicker } from "./spacing-picker"
+import { CreditInput } from "./credit-input"
 import { BackgroundPicker } from "./background-picker"
 import { cn } from "@/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -277,19 +278,11 @@ export function BottomToolbar({
                         strokeWidth={2.5}
                       />
                     </div>
-                    <input
-                      type="text"
+                    <CreditInput
                       value={author}
-                      onChange={(e) => onAuthorChange(e.target.value)}
+                      onChange={onAuthorChange}
                       placeholder="signature"
-                      autoComplete="off"
-                      autoCorrect="off"
-                      autoCapitalize="none"
-                      spellCheck={false}
-                      enterKeyHint="done"
-                      // 16px minimum on inputs: any smaller and iOS Safari
-                      // force-zooms the whole viewport on focus.
-                      className="w-full border-b-2 border-white/5 bg-transparent py-3 pl-8 font-jost text-[16px] tracking-normal transition-all outline-none placeholder:opacity-20 focus:border-accent/60"
+                      className="credit-input w-full overflow-hidden border-b-2 border-white/5 bg-transparent py-3 pl-8 font-jost text-[16px] leading-6 tracking-normal whitespace-nowrap transition-all outline-none focus:border-accent/60"
                     />
                   </div>
                   <button

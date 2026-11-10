@@ -256,25 +256,29 @@ export function ExportModal({
                 </div>
               </div>
               {(doodle || author) && (
-                <div className="absolute right-0 bottom-[120px] left-0 flex flex-col items-center gap-4">
+                <div className="absolute right-0 bottom-[120px] left-0 flex flex-col items-center gap-8">
                   {doodle && (
                     <div
-                      className={cn(
-                        "opacity-40",
-                        isDark ? "brightness-200 invert" : "brightness-0"
-                      )}
-                      style={{ width: exportMotifSize, height: exportMotifSize }}
-                    >
-                      <img
-                        src={`/doodles/${doodle}`}
-                        alt=""
-                        className="h-full w-full object-contain"
-                      />
-                    </div>
+                      aria-hidden
+                      className="opacity-50"
+                      style={{
+                        width: exportMotifSize,
+                        height: exportMotifSize,
+                        backgroundColor: "currentColor",
+                        maskImage: `url(/doodles/${doodle})`,
+                        WebkitMaskImage: `url(/doodles/${doodle})`,
+                        maskRepeat: "no-repeat",
+                        WebkitMaskRepeat: "no-repeat",
+                        maskSize: "contain",
+                        WebkitMaskSize: "contain",
+                        maskPosition: "center",
+                        WebkitMaskPosition: "center",
+                      }}
+                    />
                   )}
                   {author && (
                     <span
-                      className="font-jost tracking-[0.3em] opacity-40"
+                      className="font-jost tracking-[0.3em] uppercase opacity-40"
                       style={{ fontSize: exportCreditSize }}
                     >
                       {author}

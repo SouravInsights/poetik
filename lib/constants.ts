@@ -135,9 +135,7 @@ export function exportSignature(poemSize: number): {
 } {
   return {
     motifSize: Math.max(40, Math.min(96, Math.round(poemSize * 1.2))),
-    // A small, tracked label — the motif/name pairing from the original design,
-    // kept in sentence case rather than uppercase.
-    creditSize: Math.max(16, Math.min(30, Math.round(poemSize * 0.3))),
+    creditSize: Math.max(18, Math.min(28, Math.round(poemSize * 0.3))),
   };
 }
 

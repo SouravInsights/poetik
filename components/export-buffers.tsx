@@ -135,14 +135,28 @@ export function JpegExportBuffer({
 
         {/* Doodle motif and author handle, if the user set them */}
         {(doodle || author) && (
-          <div className="absolute bottom-[120px] left-0 right-0 flex flex-col items-center gap-4">
+          <div className="absolute bottom-[120px] left-0 right-0 flex flex-col items-center gap-8">
             {doodle && (
-              <div className={cn("opacity-40", isDark ? "invert brightness-200" : "brightness-0")} style={{ width: motifSize, height: motifSize }}>
-                <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
-              </div>
+              <div
+                aria-hidden
+                className="opacity-50"
+                style={{
+                  width: motifSize,
+                  height: motifSize,
+                  backgroundColor: "currentColor",
+                  maskImage: `url(/doodles/${doodle})`,
+                  WebkitMaskImage: `url(/doodles/${doodle})`,
+                  maskRepeat: "no-repeat",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskSize: "contain",
+                  WebkitMaskSize: "contain",
+                  maskPosition: "center",
+                  WebkitMaskPosition: "center",
+                }}
+              />
             )}
             {author && (
-              <span className="font-jost tracking-[0.3em] opacity-40" style={{ fontSize: creditSize }}>
+              <span className="font-jost tracking-[0.3em] uppercase opacity-40" style={{ fontSize: creditSize }}>
                 {author}
               </span>
             )}
@@ -214,14 +228,28 @@ export function VideoOverlayBuffer({
 
         {/* Doodle and author handle */}
         {(doodle || author) && (
-          <div className="absolute bottom-[120px] left-0 right-0 flex flex-col items-center gap-4 z-10">
+          <div className="absolute bottom-[120px] left-0 right-0 flex flex-col items-center gap-8 z-10">
             {doodle && (
-              <div className={cn("opacity-40", isDark ? "invert brightness-200" : "brightness-0")} style={{ width: motifSize, height: motifSize }}>
-                <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
-              </div>
+              <div
+                aria-hidden
+                className="opacity-50"
+                style={{
+                  width: motifSize,
+                  height: motifSize,
+                  backgroundColor: "currentColor",
+                  maskImage: `url(/doodles/${doodle})`,
+                  WebkitMaskImage: `url(/doodles/${doodle})`,
+                  maskRepeat: "no-repeat",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskSize: "contain",
+                  WebkitMaskSize: "contain",
+                  maskPosition: "center",
+                  WebkitMaskPosition: "center",
+                }}
+              />
             )}
             {author && (
-              <span className="font-jost tracking-[0.3em] opacity-40" style={{ fontSize: creditSize }}>
+              <span className="font-jost tracking-[0.3em] uppercase opacity-40" style={{ fontSize: creditSize }}>
                 {author}
               </span>
             )}

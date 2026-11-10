@@ -153,11 +153,11 @@ export function useEditor() {
     setInkMode(mode);
   }, [trigger]);
 
-  // A credit, not a username. Allow spaces so full names work — crucially we
-  // must NOT trim on every keystroke, or the trailing space is eaten before
-  // the next word can be typed. A leading "@" is still a personal signature.
+  // Cap the length, but do NOT collapse whitespace per keystroke: the
+  // contentEditable field writes its value back, and rewriting it mid-typing
+  // would yank the caret. Newlines are stripped to keep it single-line.
   const handleSetAuthor = useCallback((val: string) => {
-    setAuthor(val.replace(/\s+/g, " ").slice(0, 40));
+    setAuthor(val.replace(/\n/g, " ").slice(0, 40));
   }, []);
 
   const handleSetDoodle = useCallback((d: string | null) => {

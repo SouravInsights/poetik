@@ -52,8 +52,6 @@ export function EditorCanvas({
   const viewportRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
   const { trigger } = useWebHaptics();
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const [isFocused, setIsFocused] = useState(false);
 
   // --- Content-aware typography (auto-fit) ---
   // Track the usable writing box. Height comes from the viewport minus its
@@ -125,8 +123,8 @@ export function EditorCanvas({
   // poemSize keeps the whole bottom mark in proportion. Capped at the original
   // size so short quotes look exactly as they always did.
   const motifSize = Math.max(18, Math.min(36, Math.round(poemSize * 1.2)));
-  // The credit is a small tracked label in the UI face — the motif/name
-  // pairing from the original design, but in sentence case, not uppercase.
+  // The credit is a small tracked label in the UI face, uppercase. No prefix
+  // or icon: the motif above is already the mark, so the name stands alone.
   const creditSize = Math.max(8, Math.min(11, Math.round(poemSize * 0.28)));
 
   // --- Cinematic Audio Engine ---
@@ -236,18 +234,9 @@ export function EditorCanvas({
     return () => vid.removeEventListener("canplay", onReady);
   }, [paper.path, paper.type, paper.poster]);
 
-  const handleSelectionChange = () => {
-    if (textareaRef.current) {
-      const textBeforeCursor = text.slice(0, textareaRef.current.selectionStart || 0);
-      const lineIndex = textBeforeCursor.split('\n').length - 1;
-      setActiveIndex(lineIndex);
-    }
-  };
-
   const handleTextChange = (val: string) => {
     trigger(15);
     setText(val);
-    setTimeout(handleSelectionChange, 0); // Sync active index after render
   };
 
   const isDark = inkMode === "ink-light";
@@ -349,57 +338,44 @@ export function EditorCanvas({
         )}
       >
         <div ref={measureRef} className="relative w-full max-w-[800px]">
-          {/* Ghost Div: Visually renders the poetry with Focus 'Fade' Mode */}
-          <div
-            className={cn(
-              "absolute top-0 left-0 w-full whitespace-pre-wrap break-words pointer-events-none",
-              "tracking-[0.01em] italic",
-              align === "center" ? "text-center" : "text-left",
-              font.class
-            )}
-            style={{
-              fontFamily: `var(${font.variable})`,
-              fontSize: poemSize,
-              lineHeight: poemLeading,
-            }}
-          >
-            {text === "" ? (
-              <motion.span 
-                initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                // 0.2 over video was illegible — 0.45 keeps the placeholder
-                // clearly quieter than typed text but readable on any background.
-                animate={{ opacity: 0.45, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 0.4, ease: "easeOut" }} // Lightning fast arrival (no artificial delay needed because 2.8s clear already passed)
-                className="inline-block select-none"
-                // Soft ambient shadow lifts the text off moving footage —
-                // dark glow on dark ink mode, warm glow on light.
-                style={{
-                  textShadow: isDark
-                    ? "0 1px 14px rgba(13, 11, 9, 0.5)"
-                    : "0 1px 12px rgba(245, 240, 232, 0.4)",
-                }}
-              >
-                arz kiya hai...
-              </motion.span>
-            ) : (
-              text.split('\n').map((line, i, arr) => (
-                <span
-                  key={i}
-                  className={cn(
-                    "transition-opacity duration-1000",
-                    isFocused && i !== activeIndex && !isClearing ? "opacity-30" : "opacity-100"
-                  )}
+          {/* Placeholder + erase layer. During normal writing the textarea's
+              own text is what you see (so the native caret sits exactly on the
+              glyphs); this overlay only exists for the placeholder or the wipe. */}
+          {(text === "" || isClearing) && (
+            <div
+              aria-hidden
+              className={cn(
+                "absolute top-0 left-0 w-full whitespace-pre-wrap break-words pointer-events-none",
+                "tracking-[0.01em] italic",
+                align === "center" ? "text-center" : "text-left",
+                font.class
+              )}
+              style={{
+                fontFamily: `var(${font.variable})`,
+                fontSize: poemSize,
+                lineHeight: poemLeading,
+              }}
+            >
+              {text === "" ? (
+                <motion.span 
+                  initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                  // 0.2 over video was illegible — 0.45 keeps the placeholder
+                  // clearly quieter than typed text but readable on any background.
+                  animate={{ opacity: 0.45, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="inline-block select-none"
+                  style={{
+                    textShadow: isDark
+                      ? "0 1px 14px rgba(13, 11, 9, 0.5)"
+                      : "0 1px 12px rgba(245, 240, 232, 0.4)",
+                  }}
                 >
-                  {/* While writing, the line is rendered as PLAIN TEXT so the
-                      visible layer shares the textarea's exact metrics —
-                      kerning, ligatures and all. Wrapping every glyph in an
-                      inline-block (as the erase animation needs) changes those
-                      metrics, which made the textarea believe a different
-                      character sat under the user's finger. The per-character
-                      tree is built only while the erase wipe is actually
-                      playing, where a few milliseconds of reflow don't matter. */}
-                  {isClearing ? (
-                    line.split(/(\s+)/).map((word, wIdx) => {
+                  arz kiya hai...
+                </motion.span>
+              ) : (
+                text.split('\n').map((line, i, arr) => (
+                  <span key={i}>
+                    {line.split(/(\s+)/).map((word, wIdx) => {
                       if (!word.trim()) return <span key={wIdx} className="whitespace-pre">{word}</span>;
 
                       return (
@@ -422,32 +398,29 @@ export function EditorCanvas({
                           })}
                         </span>
                       );
-                    })
-                  ) : (
-                    line
-                  )}
-                  {i !== arr.length - 1 && <br />}
-                </span>
-              ))
-            )}
-          </div>
+                    })}
+                    {i !== arr.length - 1 && <br />}
+                  </span>
+                ))
+              )}
+            </div>
+          )}
 
-          {/* Invisible Textarea: Handles exact cursor positioning & native typing */}
+          {/* Textarea: the visible, editable text. No transparent-overlay
+              trickery — the caret is native and always on the tapped glyph. */}
           <textarea
             ref={textareaRef}
             value={text}
             onChange={(e) => handleTextChange(e.target.value)}
-            onSelect={handleSelectionChange}
-            onFocus={() => { setIsFocused(true); handleSelectionChange(); onFocusChange?.(true); }}
-            onBlur={() => { setIsFocused(false); onFocusChange?.(false); }}
-            onKeyDown={handleSelectionChange}
-            onClick={handleSelectionChange}
+            onFocus={() => onFocusChange?.(true)}
+            onBlur={() => onFocusChange?.(false)}
             spellCheck={false}
             autoComplete="off"
             autoCorrect="off"
+            autoCapitalize="off"
             className={cn(
               "w-full bg-transparent p-0 resize-none outline-none overflow-hidden break-words",
-              "tracking-[0.01em] italic text-transparent caret-foreground",
+              "tracking-[0.01em] italic",
               align === "center" ? "text-center" : "text-left",
               font.class
             )}
@@ -456,7 +429,11 @@ export function EditorCanvas({
               fontSize: poemSize,
               lineHeight: poemLeading,
               height: textareaHeight,
-              color: 'transparent',
+              color: isClearing
+                ? "transparent"
+                : isDark
+                  ? "rgba(242, 236, 224, 0.92)"
+                  : "rgba(28, 22, 16, 0.9)",
               caretColor: isDark ? '#f2ece0' : '#1a1714'
             }}
             rows={1}
@@ -469,7 +446,7 @@ export function EditorCanvas({
             with the poem instead. */}
         {(doodle || author) && (
           <div className={cn(
-            "pointer-events-none z-10 flex flex-col items-center gap-1",
+            "pointer-events-none z-10 flex flex-col items-center gap-3",
             overflowing
               ? "relative mt-10"
               : "absolute bottom-16 left-1/2 -translate-x-1/2",
@@ -477,19 +454,27 @@ export function EditorCanvas({
           )}>
             {doodle && (
               <div
-                className={cn(
-                  "opacity-40 transition-all duration-700",
-                  isDark ? "invert brightness-200" : "brightness-0"
-                )}
-                style={{ width: motifSize, height: motifSize }}
-              >
-                <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
-              </div>
+                aria-hidden
+                className="opacity-50 transition-all duration-700"
+                style={{
+                  width: motifSize,
+                  height: motifSize,
+                  backgroundColor: "currentColor",
+                  maskImage: `url(/doodles/${doodle})`,
+                  WebkitMaskImage: `url(/doodles/${doodle})`,
+                  maskRepeat: "no-repeat",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskSize: "contain",
+                  WebkitMaskSize: "contain",
+                  maskPosition: "center",
+                  WebkitMaskPosition: "center",
+                }}
+              />
             )}
             {author && (
               <span
                 className={cn(
-                  "font-jost tracking-[0.3em] opacity-40",
+                  "font-jost tracking-[0.3em] uppercase opacity-40",
                   isDark ? "text-white" : "text-black"
                 )}
                 style={{ fontSize: creditSize }}
