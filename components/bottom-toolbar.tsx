@@ -269,7 +269,11 @@ export function BottomToolbar({
                 {/* Credit row: @handle signs your own words, a name credits
                     someone else's — so the field reads right either way. */}
                 <div className="flex items-center gap-3 px-8">
-                  <div className="group relative flex-1">
+                  <form
+                    autoComplete="off"
+                    onSubmit={(e) => e.preventDefault()}
+                    className="group relative flex-1"
+                  >
                     <div className="pointer-events-none absolute top-1/2 left-0 flex -translate-y-1/2 items-center opacity-40 transition-all group-focus-within:text-accent group-focus-within:opacity-100">
                       <HugeiconsIcon
                         icon={UserIcon}
@@ -281,21 +285,31 @@ export function BottomToolbar({
                       type="text"
                       value={author}
                       onChange={(e) => onAuthorChange(e.target.value)}
-                      placeholder="name or @handle"
-                      // A credit line, not a form field. Browsers otherwise read
-                      // "name" + a handle affordance as an identity/payment
-                      // field and throw up their native autofill panel, which
-                      // shoves the sheet around on mobile.
-                      autoComplete="off"
+                      placeholder="signature"
+                      // A credit line, not an identity field. Mobile browsers
+                      // otherwise classify it and raise their native autofill
+                      // panel (cards, addresses), which shoves the sheet around.
+                      // Plain autocomplete=off is widely ignored for this, so we
+                      // use the one token browsers reliably refuse to autofill
+                      // (new-password) plus every password-manager opt-out.
+                      autoComplete="new-password"
                       autoCorrect="off"
                       autoCapitalize="none"
                       spellCheck={false}
                       enterKeyHint="done"
+                      inputMode="text"
+                      aria-autocomplete="none"
+                      data-form-type="other"
+                      data-lpignore="true"
+                      data-1p-ignore="true"
+                      data-bwignore="true"
+                      data-protonpass-ignore="true"
+                      data-dashlane-ignore="true"
                       // 16px minimum on inputs: any smaller and iOS Safari
                       // force-zooms the whole viewport on focus.
                       className="w-full border-b-2 border-white/5 bg-transparent py-3 pl-8 font-jost text-[16px] tracking-normal transition-all outline-none placeholder:opacity-20 focus:border-accent/60"
                     />
-                  </div>
+                  </form>
                   <button
                     onClick={() => {
                       trigger(20)
