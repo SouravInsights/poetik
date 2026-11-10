@@ -29,7 +29,7 @@ export function SpacingPicker({ currentScale, onSelect }: SpacingPickerProps) {
       <span className="flex-shrink-0 pl-8 pr-4 font-jost text-[9px] font-bold tracking-[0.2em] uppercase opacity-40">
         spacing
       </span>
-      <div className="flex items-center gap-1 overflow-x-auto pr-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex items-center gap-1 overflow-x-auto py-1 pr-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {LINE_SCALES.map((scale, i) => {
           const active = currentScale === scale;
           return (
