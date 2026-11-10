@@ -99,8 +99,11 @@ export function ExportModal({
     return () => ro.disconnect()
   }, [isOpen])
 
-  const { motifSize: exportMotifSize, creditSize: exportCreditSize } =
-    exportSignature(exportPoemSize)
+  const {
+    motifSize: exportMotifSize,
+    creditSize: exportCreditSize,
+    creditRuleWidth: exportCreditRuleWidth,
+  } = exportSignature(exportPoemSize)
 
   const {
     exportRef,
@@ -273,15 +276,22 @@ export function ExportModal({
                     </div>
                   )}
                   {author && (
-                    <span
-                      className="font-signature opacity-60"
-                      style={{
-                        fontFamily: "var(--font-signature)",
-                        fontSize: exportCreditSize,
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {author}
+                    <span className="flex flex-col items-center gap-4">
+                      <span
+                        aria-hidden
+                        className={isDark ? "bg-white/25" : "bg-black/25"}
+                        style={{ width: exportCreditRuleWidth, height: 2 }}
+                      />
+                      <span
+                        className="italic opacity-55"
+                        style={{
+                          fontFamily: `var(${font.variable})`,
+                          fontSize: exportCreditSize,
+                          letterSpacing: "0.02em",
+                        }}
+                      >
+                        {author}
+                      </span>
                     </span>
                   )}
                 </div>

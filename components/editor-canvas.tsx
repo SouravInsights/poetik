@@ -125,9 +125,11 @@ export function EditorCanvas({
   // poemSize keeps the whole bottom mark in proportion. Capped at the original
   // size so short quotes look exactly as they always did.
   const motifSize = Math.max(18, Math.min(36, Math.round(poemSize * 1.2)));
-  // The credit is set in a handwriting face and sized to the words, so a name
-  // reads as an authored signature rather than a UI caption.
-  const creditSize = Math.max(16, Math.min(40, Math.round(poemSize * 0.6)));
+  // The credit is set in the poem's own italic (simple, legible typography)
+  // and sized to the words. A short hairline rule above it sets the name apart
+  // as a signature block — a cleaner device than an em dash.
+  const creditSize = Math.max(10, Math.min(28, Math.round(poemSize * 0.42)));
+  const creditRuleWidth = Math.round(creditSize * 2.4);
 
   // --- Cinematic Audio Engine ---
   const [playRain, { stop: stopRain, sound: rainSound }] = useSound('/sounds/rain-ambient-cinematic.mp3', { 
@@ -487,11 +489,22 @@ export function EditorCanvas({
               </div>
             )}
             {author && (
-              <span
-                className={cn("font-signature opacity-60", isDark ? "text-white" : "text-black")}
-                style={{ fontFamily: "var(--font-signature)", fontSize: creditSize, lineHeight: 1.2 }}
-              >
-                {author}
+              <span className="flex flex-col items-center gap-1">
+                <span
+                  aria-hidden
+                  className={cn(isDark ? "bg-white/25" : "bg-black/25")}
+                  style={{ width: creditRuleWidth, height: 1 }}
+                />
+                <span
+                  className={cn("italic opacity-55", isDark ? "text-white" : "text-black")}
+                  style={{
+                    fontFamily: `var(${font.variable})`,
+                    fontSize: creditSize,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {author}
+                </span>
               </span>
             )}
           </div>

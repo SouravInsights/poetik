@@ -6,8 +6,7 @@ import {
   Playfair_Display, 
   Lora,
   Italiana,
-  Jost,
-  Great_Vibes
+  Jost
 } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -63,13 +62,6 @@ const jost = Jost({
   weight: ['200', '300', '400'], 
   variable: '--font-jost' 
 })
-// The signature voice — a handwriting face reserved for credits. Kept
-// distinct from the four poetry fonts, which stay sacred to the verse itself.
-const greatVibes = Great_Vibes({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-signature'
-})
 
 export default function RootLayout({
   children,
@@ -88,8 +80,7 @@ export default function RootLayout({
         playfair.variable,
         lora.variable,
         italiana.variable,
-        jost.variable,
-        greatVibes.variable
+        jost.variable
       )}
     >
       <body>
