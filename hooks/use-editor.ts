@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { FONTS, PAPERS, TONES, DEFAULT_PAPER, Font, Paper, Tone } from "@/lib/constants";
+import { FONTS, PAPERS, TONES, DEFAULT_PAPER, DEFAULT_TEXT_SCALE, DEFAULT_LINE_SCALE, Font, Paper, Tone } from "@/lib/constants";
 import { useWebHaptics } from "web-haptics/react";
 
 export function useEditor() {
@@ -17,6 +17,8 @@ export function useEditor() {
   const [author, setAuthor] = useState<string>("");
   const [align, setAlign] = useState<"left" | "center">("center");
   const [bgOpacity, setBgOpacity] = useState(1);
+  const [textScale, setTextScale] = useState<number>(DEFAULT_TEXT_SCALE);
+  const [lineScale, setLineScale] = useState<number>(DEFAULT_LINE_SCALE);
   const [atmosphere, setAtmosphere] = useState<"none" | "rain" | "fireplace">("none");
   const [isExporting, setIsExporting] = useState(false);
   const [isDoodleDrawerOpen, setIsDoodleDrawerOpen] = useState(false);
@@ -106,6 +108,8 @@ export function useEditor() {
         if (parsed.author) setAuthor(parsed.author);
         if (parsed.align) setAlign(parsed.align);
         if (parsed.bgOpacity !== undefined) setBgOpacity(parsed.bgOpacity);
+        if (typeof parsed.textScale === "number") setTextScale(parsed.textScale);
+        if (typeof parsed.lineScale === "number") setLineScale(parsed.lineScale);
         if (parsed.atmosphere) setAtmosphere(parsed.atmosphere);
       } catch (e) {}
     }
@@ -115,9 +119,9 @@ export function useEditor() {
   useEffect(() => {
     if (!hydrated) return;
     localStorage.setItem("poetik-state", JSON.stringify({
-      text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, atmosphere
+      text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, textScale, lineScale, atmosphere
     }));
-  }, [hydrated, text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, atmosphere]);
+  }, [hydrated, text, font, paper, tone, inkMode, doodle, author, align, bgOpacity, textScale, lineScale, atmosphere]);
 
   const handleSetFont = useCallback((f: Font) => {
     trigger(15);
@@ -149,11 +153,13 @@ export function useEditor() {
     setInkMode(mode);
   }, [trigger]);
 
-  // A handle is a single token: strip a user-typed leading @ (the UI renders
-  // its own — otherwise "@sam" shows as "@ @sam" in the input) and all
-  // whitespace, and cap the length so it can never break the composition.
+  // The credit line does double duty. A leading "@" is a personal signature
+  // (rendered as typed). Anything else is a poet attribution — rendered with
+  // an em dash — so sharing someone else's shayari never looks like you are
+  // signing it. Spaces are allowed for full names; the length is capped so it
+  // can never break the composition.
   const handleSetAuthor = useCallback((val: string) => {
-    setAuthor(val.replace(/^@+/, "").replace(/\s+/g, "").slice(0, 30));
+    setAuthor(val.replace(/\s+/g, " ").trim().slice(0, 40));
   }, []);
 
   const handleSetDoodle = useCallback((d: string | null) => {
@@ -164,6 +170,16 @@ export function useEditor() {
   const handleSetAlign = useCallback(() => {
     trigger([20, 30, 20]);
     setAlign(a => a === "center" ? "left" : "center");
+  }, [trigger]);
+
+  const handleSetTextScale = useCallback((scale: number) => {
+    trigger(15);
+    setTextScale(scale);
+  }, [trigger]);
+
+  const handleSetLineScale = useCallback((scale: number) => {
+    trigger(15);
+    setLineScale(scale);
   }, [trigger]);
 
   const handleClear = useCallback(() => {
@@ -196,6 +212,8 @@ export function useEditor() {
     author, setAuthor: handleSetAuthor,
     align, toggleAlign: handleSetAlign,
     bgOpacity, setBgOpacity,
+    textScale, setTextScale: handleSetTextScale,
+    lineScale, setLineScale: handleSetLineScale,
     isExporting, setIsExporting,
     isDoodleDrawerOpen, setIsDoodleDrawerOpen,
     isToolbarOpen, setIsToolbarOpen,

@@ -28,6 +28,10 @@ interface UseAutoFitOptions {
   maxSize: number;
   minSize: number;
   letterSpacing: string;
+  /** User size preference multiplying the auto size (1 = pure auto). */
+  scale?: number;
+  /** User spacing preference multiplying the optical leading (1 = auto). */
+  lineScale?: number;
 }
 
 export function useAutoFit({
@@ -38,9 +42,12 @@ export function useAutoFit({
   maxSize,
   minSize,
   letterSpacing,
+  scale = 1,
+  lineScale = 1,
 }: UseAutoFitOptions): FitResult {
   const [result, setResult] = useState<FitResult>({
     size: maxSize,
+    baseSize: maxSize,
     lineHeight: 1.6,
     height: 0,
   });
@@ -57,10 +64,13 @@ export function useAutoFit({
         letterSpacing,
         maxSize,
         minSize,
+        scale,
+        lineScale,
       });
       if (cancelled) return;
       setResult((prev) =>
         prev.size === next.size &&
+        prev.baseSize === next.baseSize &&
         prev.lineHeight === next.lineHeight &&
         prev.height === next.height
           ? prev
@@ -82,7 +92,7 @@ export function useAutoFit({
     return () => {
       cancelled = true;
     };
-  }, [text, font.variable, width, height, maxSize, minSize, letterSpacing]);
+  }, [text, font.variable, width, height, maxSize, minSize, letterSpacing, scale, lineScale]);
 
   return result;
 }

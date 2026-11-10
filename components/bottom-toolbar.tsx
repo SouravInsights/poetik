@@ -2,6 +2,8 @@
 
 import { Font, Tone, Paper } from "@/lib/constants"
 import { FontPicker } from "./font-picker"
+import { SizePicker } from "./size-picker"
+import { SpacingPicker } from "./spacing-picker"
 import { BackgroundPicker } from "./background-picker"
 import { cn } from "@/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -26,6 +28,10 @@ interface BottomToolbarProps {
   author: string
   onAuthorChange: (val: string) => void
   onFontSelect: (font: Font) => void
+  textScale: number
+  onTextScaleChange: (scale: number) => void
+  lineScale: number
+  onLineScaleChange: (scale: number) => void
   onToneSelect: (tone: Tone) => void
   onPaperSelect: (paper: Paper) => void
   onInkModeChange: (mode: "ink-light" | "ink-dark") => void
@@ -47,6 +53,10 @@ export function BottomToolbar({
   author,
   onAuthorChange,
   onFontSelect,
+  textScale,
+  onTextScaleChange,
+  lineScale,
+  onLineScaleChange,
   onToneSelect,
   onPaperSelect,
   onInkModeChange,
@@ -241,27 +251,25 @@ export function BottomToolbar({
                   </button>
                 </div>
 
-                {/* Signature Row: author + motif */}
+                {/* Credit row: @handle signs your own words, a name credits
+                    someone else's — so the field reads right either way. */}
                 <div className="flex items-center gap-3 px-8">
                   <div className="group relative flex-1">
-                    <div className="pointer-events-none absolute top-1/2 left-0 flex -translate-y-1/2 items-center gap-2 opacity-40 transition-all group-focus-within:text-accent group-focus-within:opacity-100">
+                    <div className="pointer-events-none absolute top-1/2 left-0 flex -translate-y-1/2 items-center opacity-40 transition-all group-focus-within:text-accent group-focus-within:opacity-100">
                       <HugeiconsIcon
                         icon={UserIcon}
                         size={15}
                         strokeWidth={2.5}
                       />
-                      <span className="font-jost text-[10px] font-bold tracking-[0.2em] uppercase">
-                        @
-                      </span>
                     </div>
                     <input
                       type="text"
                       value={author}
                       onChange={(e) => onAuthorChange(e.target.value)}
-                      placeholder="USERNAME"
+                      placeholder="NAME OR @YOU"
                       // 16px minimum on inputs: any smaller and iOS Safari
                       // force-zooms the whole viewport on focus.
-                      className="w-full border-b-2 border-white/5 bg-transparent py-3 pl-12 font-jost text-[16px] font-medium tracking-[0.3em] uppercase transition-all outline-none placeholder:opacity-20 focus:border-accent/60"
+                      className="w-full border-b-2 border-white/5 bg-transparent py-3 pl-8 font-jost text-[16px] font-medium tracking-[0.2em] uppercase transition-all outline-none placeholder:opacity-20 focus:border-accent/60"
                     />
                   </div>
                   <button
@@ -284,6 +292,17 @@ export function BottomToolbar({
                   <FontPicker
                     currentFont={currentFont}
                     onSelect={onFontSelect}
+                  />
+
+                  {/* Text size lives with the fonts — same typographic family */}
+                  <SizePicker
+                    currentScale={textScale}
+                    onSelect={onTextScaleChange}
+                  />
+
+                  <SpacingPicker
+                    currentScale={lineScale}
+                    onSelect={onLineScaleChange}
                   />
 
                   <div className="mx-8 h-[1px] bg-white/5" />

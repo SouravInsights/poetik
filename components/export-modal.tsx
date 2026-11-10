@@ -33,6 +33,10 @@ interface ExportModalProps {
   author: string
   align: "left" | "center"
   bgOpacity: number
+  /** User text-size preference, shared with the editor (1 = auto). */
+  textScale: number
+  /** User line-spacing preference, shared with the editor (1 = auto). */
+  lineScale: number
 }
 
 export function ExportModal({
@@ -47,21 +51,37 @@ export function ExportModal({
   author,
   align,
   bgOpacity,
+  textScale,
+  lineScale,
 }: ExportModalProps) {
   const isDark = inkMode === "ink-light"
 
   // Auto-fit for the 1080×1920 export. The text column is 1080 − 2×120 (px-120)
   // = 840px wide. When a doodle/author is present we reserve the bottom band so
   // a long poem never collides with it; otherwise the poem may use the height.
-  const { size: exportPoemSize, lineHeight: exportPoemLeading } = useAutoFit({
+  const exportBoxHeight = doodle || author ? 1360 : 1800
+  const {
+    size: fittedExportSize,
+    baseSize: autoExportSize,
+    height: exportTextHeight,
+    lineHeight: exportPoemLeading,
+  } = useAutoFit({
     text,
     font,
     width: 840,
-    height: doodle || author ? 1360 : 1800,
+    height: exportBoxHeight,
     maxSize: 80,
     minSize: 36,
     letterSpacing: "0.03em",
+    scale: textScale,
+    lineScale,
   })
+
+  // A saved image/video cannot scroll. If the user's size preference would
+  // push the poem past the frame, quietly fall back to the auto-fitted size so
+  // the exported artifact is never clipped.
+  const exportPoemSize =
+    exportTextHeight > exportBoxHeight ? autoExportSize : fittedExportSize
 
   // The live preview is a miniature of the export. Measure its text column and
   // scale the export font by exactly the same ratio, so the WYSIWYG holds for

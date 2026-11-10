@@ -32,6 +32,8 @@ export default function PoetikPage() {
     author, setAuthor,
     align, toggleAlign,
     bgOpacity, setBgOpacity,
+    textScale, setTextScale,
+    lineScale, setLineScale,
     isExporting, setIsExporting,
     isDoodleDrawerOpen, setIsDoodleDrawerOpen,
     isToolbarOpen, setIsToolbarOpen,
@@ -63,6 +65,8 @@ export default function PoetikPage() {
         author={author}
         align={align}
         bgOpacity={bgOpacity}
+        textScale={textScale}
+        lineScale={lineScale}
         atmosphere={atmosphere} // Pass to canvas to orchestrate audio and lighting
         isClearing={isClearing}
         onFocusChange={onCanvasFocusChange}
@@ -93,6 +97,10 @@ export default function PoetikPage() {
         author={author}
         onAuthorChange={setAuthor}
         onFontSelect={setFont}
+        textScale={textScale}
+        onTextScaleChange={setTextScale}
+        lineScale={lineScale}
+        onLineScaleChange={setLineScale}
         onToneSelect={setTone}
         onPaperSelect={setPaper}
         onInkModeChange={setInkMode}
@@ -123,6 +131,8 @@ export default function PoetikPage() {
         author={author}
         align={align}
         bgOpacity={bgOpacity}
+        textScale={textScale}
+        lineScale={lineScale}
       />
     </main>
   );

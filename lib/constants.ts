@@ -99,4 +99,29 @@ export const DOODLES: string[] = [
   "sun-6.svg", "sun-12.svg",
 ];
 
+/**
+ * User-selectable text-size multipliers applied over the auto-fit result.
+ * 1.0 is "auto" — the size the canvas would pick on its own — held at the
+ * CENTRE of the range so it reads as the natural default, with room to lean
+ * smaller or larger in either direction.
+ */
+export const TEXT_SCALES = [0.65, 0.8, 1.0, 1.3, 1.7];
+export const DEFAULT_TEXT_SCALE = 1.0;
+
+/**
+ * User-selectable line-spacing multipliers applied over the optical leading.
+ * 1.0 is "auto" at the centre; smaller = tighter, larger = airier.
+ */
+export const LINE_SCALES = [0.82, 0.91, 1.0, 1.1, 1.22];
+export const DEFAULT_LINE_SCALE = 1.0;
+
+/**
+ * The editor's auto-fit ceiling, preserving the original responsive type
+ * scale (clamp(26px, 7.5vw, 52px)) so short quotes keep their intended size
+ * on every screen. The user's size preference multiplies on top of this.
+ */
+export function poemBaseMax(viewportWidth: number): number {
+  return Math.min(52, Math.max(26, viewportWidth * 0.075));
+}
+
 

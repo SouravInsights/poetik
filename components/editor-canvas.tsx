@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Font, Paper, Tone } from "@/lib/constants";
+import { Font, Paper, Tone, poemBaseMax } from "@/lib/constants";
 import { useWebHaptics } from "web-haptics/react";
 import { AnimatePresence, motion } from "motion/react";
 import { getEraseAnimationPhysics } from "@/lib/erase-animations";
@@ -21,6 +21,10 @@ interface EditorCanvasProps {
   author: string;
   align: "left" | "center";
   bgOpacity: number;
+  /** User text-size preference multiplying the auto-fitted size (1 = auto). */
+  textScale: number;
+  /** User line-spacing preference multiplying the optical leading (1 = auto). */
+  lineScale: number;
   atmosphere: "none" | "rain" | "fireplace";
   isClearing?: boolean;
   /** Reports textarea focus so the page can dissolve chrome while writing. */
@@ -38,6 +42,8 @@ export function EditorCanvas({
   author,
   align,
   bgOpacity,
+  textScale,
+  lineScale,
   atmosphere,
   isClearing,
   onFocusChange,
@@ -51,8 +57,10 @@ export function EditorCanvas({
 
   // --- Content-aware typography (auto-fit) ---
   // Track the usable writing box. Height comes from the viewport minus its
-  // vertical chrome padding; width from the max-800px text column.
-  const [box, setBox] = useState({ width: 0, height: 0 });
+  // vertical chrome padding; width from the max-800px text column. baseMax is
+  // the responsive type ceiling (clamp(26px, 7.5vw, 52px)); the user's size
+  // preference scales on top of whatever the fit produces.
+  const [box, setBox] = useState({ width: 0, height: 0, baseMax: 26 });
 
   useEffect(() => {
     const outer = viewportRef.current;
@@ -65,8 +73,11 @@ export function EditorCanvas({
       const padBottom = parseFloat(cs.paddingBottom) || 0;
       const height = Math.max(0, outer.clientHeight - padTop - padBottom);
       const width = inner.clientWidth;
+      const baseMax = poemBaseMax(window.innerWidth);
       setBox((b) =>
-        b.width === width && b.height === height ? b : { width, height }
+        b.width === width && b.height === height && b.baseMax === baseMax
+          ? b
+          : { width, height, baseMax }
       );
     };
 
@@ -90,9 +101,11 @@ export function EditorCanvas({
     font,
     width: box.width,
     height: availableHeight,
-    maxSize: 52,
+    maxSize: box.baseMax,
     minSize: 18,
     letterSpacing: "0.01em",
+    scale: textScale,
+    lineScale,
   });
 
   // A book-length poem cannot physically fit one 9:16 canvas at a readable
@@ -106,6 +119,13 @@ export function EditorCanvas({
   // stay huge and shove the visual layer off-screen. Floor at one line so the
   // placeholder still has height when the poem is empty.
   const textareaHeight = Math.max(poemHeight, poemSize * poemLeading) + 2;
+
+  // The signature scales with the poem's type. A long poem auto-shrinks its
+  // font, and a fixed-size motif would then dwarf the words; tying it to
+  // poemSize keeps the whole bottom mark in proportion. Capped at the original
+  // size so short quotes look exactly as they always did.
+  const motifSize = Math.max(18, Math.min(36, Math.round(poemSize * 1.2)));
+  const creditSize = Math.max(7, Math.min(9, Math.round(poemSize * 0.28)));
 
   // --- Cinematic Audio Engine ---
   const [playRain, { stop: stopRain, sound: rainSound }] = useSound('/sounds/rain-ambient-cinematic.mp3', { 
@@ -368,28 +388,42 @@ export function EditorCanvas({
                     isFocused && i !== activeIndex && !isClearing ? "opacity-30" : "opacity-100"
                   )}
                 >
-                  {line.split(/(\s+)/).map((word, wIdx) => {
-                    if (!word.trim()) return <span key={wIdx} className="whitespace-pre">{word}</span>;
-                    
-                    return (
-                      <span key={wIdx} className="inline-block whitespace-pre">
-                        {word.split('').map((char, cIdx) => {
-                          const physics = getEraseAnimationPhysics(variant, i, wIdx, cIdx, isClearing || false);
-                          
-                          return (
-                            <motion.span
-                              key={cIdx}
-                              className="inline-block origin-center"
-                              animate={physics.animate}
-                              transition={physics.transition as any}
-                            >
-                              {char}
-                            </motion.span>
-                          );
-                        })}
-                      </span>
-                    );
-                  })}
+                  {/* While writing, the line is rendered as PLAIN TEXT so the
+                      visible layer shares the textarea's exact metrics —
+                      kerning, ligatures and all. Wrapping every glyph in an
+                      inline-block (as the erase animation needs) changes those
+                      metrics, which made the textarea believe a different
+                      character sat under the user's finger. The per-character
+                      tree is built only while the erase wipe is actually
+                      playing, where a few milliseconds of reflow don't matter. */}
+                  {isClearing ? (
+                    line.split(/(\s+)/).map((word, wIdx) => {
+                      if (!word.trim()) return <span key={wIdx} className="whitespace-pre">{word}</span>;
+
+                      return (
+                        <span key={wIdx} className="inline-block whitespace-pre">
+                          {word.split('').map((char, cIdx) => {
+                            const rest = getEraseAnimationPhysics(variant, i, wIdx, cIdx, false);
+                            const erased = getEraseAnimationPhysics(variant, i, wIdx, cIdx, true);
+
+                            return (
+                              <motion.span
+                                key={cIdx}
+                                className="inline-block origin-center"
+                                initial={rest.animate}
+                                animate={erased.animate}
+                                transition={erased.transition as any}
+                              >
+                                {char}
+                              </motion.span>
+                            );
+                          })}
+                        </span>
+                      );
+                    })
+                  ) : (
+                    line
+                  )}
                   {i !== arr.length - 1 && <br />}
                 </span>
               ))
@@ -426,31 +460,44 @@ export function EditorCanvas({
             rows={1}
           />
         </div>
-      </div>
 
-      {(doodle || author) && (
-        <div className={cn(
-          "absolute bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none z-10",
-          isClearing ? "transition-all duration-300 scale-95 blur-[8px] opacity-0 rotate-2" : "transition-all duration-700 opacity-100 scale-100 blur-0 rotate-0"
-        )}>
-          {doodle && (
-            <div className={cn(
-              "w-9 h-9 opacity-40 transition-all duration-700",
-              isDark ? "invert brightness-200" : "brightness-0"
-            )}>
-              <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
-            </div>
-          )}
-          {author && (
-            <span className={cn(
-              "font-jost text-[8px] tracking-[0.3em] uppercase opacity-30",
-              isDark ? "text-white" : "text-black"
-            )}>
-              {author.startsWith('@') ? author : `@${author}`}
-            </span>
-          )}
-        </div>
-      )}
+        {/* Signature: a frame-pinned mark at the bottom of the poster — but
+            once the canvas scrolls, pinning would leave it floating while the
+            poem slid underneath. In that case it joins the flow and travels
+            with the poem instead. */}
+        {(doodle || author) && (
+          <div className={cn(
+            "pointer-events-none z-10 flex flex-col items-center gap-1",
+            overflowing
+              ? "relative mt-10"
+              : "absolute bottom-16 left-1/2 -translate-x-1/2",
+            isClearing ? "transition-all duration-300 scale-95 blur-[8px] opacity-0 rotate-2" : "transition-all duration-700 opacity-100 scale-100 blur-0 rotate-0"
+          )}>
+            {doodle && (
+              <div
+                className={cn(
+                  "opacity-40 transition-all duration-700",
+                  isDark ? "invert brightness-200" : "brightness-0"
+                )}
+                style={{ width: motifSize, height: motifSize }}
+              >
+                <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
+              </div>
+            )}
+            {author && (
+              <span
+                className={cn(
+                  "font-jost tracking-[0.3em] uppercase opacity-30",
+                  isDark ? "text-white" : "text-black"
+                )}
+                style={{ fontSize: creditSize }}
+              >
+                {author.startsWith("@") ? author : `— ${author}`}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
 
     </div>
   );

@@ -99,6 +99,9 @@ export function JpegExportBuffer({
   poemSize,
   poemLeading,
 }: JpegBufferProps) {
+  // Signature scales with the fitted poem type — see editor-canvas for why.
+  const motifSize = Math.max(40, Math.min(96, Math.round(poemSize * 1.2)));
+  const creditSize = Math.max(16, Math.min(24, Math.round(poemSize * 0.3)));
   return (
     // The outer wrapper positions this buffer off-screen and makes it invisible.
     // overflow-hidden ensures the 1080px-wide div doesn't create a horizontal scrollbar.
@@ -133,15 +136,15 @@ export function JpegExportBuffer({
 
         {/* Doodle motif and author handle, if the user set them */}
         {(doodle || author) && (
-          <div className="absolute bottom-[120px] left-0 right-0 flex flex-col items-center gap-8">
+          <div className="absolute bottom-[120px] left-0 right-0 flex flex-col items-center gap-4">
             {doodle && (
-              <div className={cn("w-24 h-24 opacity-40", isDark ? "invert brightness-200" : "brightness-0")}>
+              <div className={cn("opacity-40", isDark ? "invert brightness-200" : "brightness-0")} style={{ width: motifSize, height: motifSize }}>
                 <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
               </div>
             )}
             {author && (
-              <span className="font-jost text-[24px] tracking-[0.4em] uppercase opacity-40">
-                {author.startsWith('@') ? author : `@${author}`}
+              <span className="font-jost tracking-[0.4em] uppercase opacity-40" style={{ fontSize: creditSize }}>
+                {author.startsWith("@") ? author : `— ${author}`}
               </span>
             )}
           </div>
@@ -172,6 +175,9 @@ export function VideoOverlayBuffer({
   poemSize,
   poemLeading,
 }: VideoOverlayBufferProps) {
+  // Signature scales with the fitted poem type — see editor-canvas for why.
+  const motifSize = Math.max(40, Math.min(96, Math.round(poemSize * 1.2)));
+  const creditSize = Math.max(16, Math.min(24, Math.round(poemSize * 0.3)));
   return (
     <div className="absolute opacity-0 pointer-events-none overflow-hidden" style={{ width: 1080, height: 1920 }}>
       {/*
@@ -210,15 +216,15 @@ export function VideoOverlayBuffer({
 
         {/* Doodle and author handle */}
         {(doodle || author) && (
-          <div className="absolute bottom-[120px] left-0 right-0 flex flex-col items-center gap-8 z-10">
+          <div className="absolute bottom-[120px] left-0 right-0 flex flex-col items-center gap-4 z-10">
             {doodle && (
-              <div className={cn("w-24 h-24 opacity-40", isDark ? "invert brightness-200" : "brightness-0")}>
+              <div className={cn("opacity-40", isDark ? "invert brightness-200" : "brightness-0")} style={{ width: motifSize, height: motifSize }}>
                 <img src={`/doodles/${doodle}`} alt="" className="w-full h-full object-contain" />
               </div>
             )}
             {author && (
-              <span className="font-jost text-[24px] tracking-[0.4em] uppercase opacity-40">
-                {author.startsWith('@') ? author : `@${author}`}
+              <span className="font-jost tracking-[0.4em] uppercase opacity-40" style={{ fontSize: creditSize }}>
+                {author.startsWith("@") ? author : `— ${author}`}
               </span>
             )}
           </div>
