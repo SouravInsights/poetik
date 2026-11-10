@@ -153,13 +153,11 @@ export function useEditor() {
     setInkMode(mode);
   }, [trigger]);
 
-  // The credit line does double duty. A leading "@" is a personal signature
-  // (rendered as typed). Anything else is a poet attribution — rendered with
-  // an em dash — so sharing someone else's shayari never looks like you are
-  // signing it. Spaces are allowed for full names; the length is capped so it
-  // can never break the composition.
+  // A credit, not a username. Allow spaces so full names work — crucially we
+  // must NOT trim on every keystroke, or the trailing space is eaten before
+  // the next word can be typed. A leading "@" is still a personal signature.
   const handleSetAuthor = useCallback((val: string) => {
-    setAuthor(val.replace(/\s+/g, " ").trim().slice(0, 40));
+    setAuthor(val.replace(/\s+/g, " ").slice(0, 40));
   }, []);
 
   const handleSetDoodle = useCallback((d: string | null) => {

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
-import { Font, Paper, Tone } from "@/lib/constants"
+import { Font, Paper, Tone, exportSignature } from "@/lib/constants"
 import { useExport } from "@/hooks/use-export"
 import { useAutoFit } from "@/hooks/use-autofit"
 import { motion, AnimatePresence } from "motion/react"
@@ -83,20 +83,24 @@ export function ExportModal({
   const exportPoemSize =
     exportTextHeight > exportBoxHeight ? autoExportSize : fittedExportSize
 
-  // The live preview is a miniature of the export. Measure its text column and
-  // scale the export font by exactly the same ratio, so the WYSIWYG holds for
-  // long poems as well as short ones.
-  const previewTextBoxRef = useRef<HTMLDivElement>(null)
+  // The live preview is a literal miniature of the 1080×1920 export: we render
+  // the same composition at full size and scale the whole thing down. Whatever
+  // geometry changes in the export, the preview follows for free — no more
+  // drifting hand-tuned preview sizes.
+  const previewCardRef = useRef<HTMLDivElement>(null)
   const [previewScale, setPreviewScale] = useState(280 / 1080)
   useEffect(() => {
-    const el = previewTextBoxRef.current
+    const el = previewCardRef.current
     if (!el) return
-    const update = () => setPreviewScale(el.clientWidth / 840)
+    const update = () => setPreviewScale(el.clientWidth / 1080)
     update()
     const ro = new ResizeObserver(update)
     ro.observe(el)
     return () => ro.disconnect()
   }, [isOpen])
+
+  const { motifSize: exportMotifSize, creditSize: exportCreditSize } =
+    exportSignature(exportPoemSize)
 
   const {
     exportRef,
@@ -182,28 +186,39 @@ export function ExportModal({
 
           {/* Preview Card */}
           <motion.div
+            ref={previewCardRef}
             initial={{ scale: 0.9, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 1.05, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="relative aspect-[9/16] w-[min(280px,65vw)] overflow-hidden rounded-[24px] shadow-[0_32px_96px_-16px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
           >
+            {/* 1:1 scale model of the export. Children use the SAME raw
+                geometry as the 1080×1920 buffer, then the whole thing is
+                scaled by the card width. */}
             <div
-              className={cn(
-                "grain relative flex h-full w-full flex-col items-center justify-center px-8",
-                paper.type === "image"
-                  ? "bg-cover bg-center"
-                  : paper.type === "video"
-                    ? ""
-                    : tone.class,
-                inkMode
-              )}
+              className={cn("absolute top-0 left-0 origin-top-left", inkMode)}
               style={{
-                backgroundImage:
-                  paper.type === "image" ? `url(${paper.path})` : undefined,
+                width: 1080,
+                height: 1920,
+                transform: `scale(${previewScale})`,
                 opacity: bgOpacity,
               }}
             >
+              <div
+                className={cn(
+                  "absolute inset-0",
+                  paper.type === "image"
+                    ? "bg-cover bg-center"
+                    : paper.type === "video"
+                      ? ""
+                      : tone.class
+                )}
+                style={{
+                  backgroundImage:
+                    paper.type === "image" ? `url(${paper.path})` : undefined,
+                }}
+              />
               {paper.type === "video" && (
                 <video
                   ref={previewVideoRef}
@@ -224,29 +239,31 @@ export function ExportModal({
                   isDark ? "bg-black" : "bg-white"
                 )}
               />
-              <div
-                ref={previewTextBoxRef}
-                className={cn(
-                  "z-10 w-full tracking-[0.03em] whitespace-pre-wrap italic",
-                  align === "center" ? "text-center" : "text-left",
-                  font.class
-                )}
-                style={{
-                  fontFamily: `var(${font.variable})`,
-                  fontSize: exportPoemSize * previewScale,
-                  lineHeight: exportPoemLeading,
-                }}
-              >
-                {text}
+              <div className="relative flex h-full w-full flex-col items-center justify-center px-[120px]">
+                <div
+                  className={cn(
+                    "w-full whitespace-pre-wrap break-words tracking-[0.03em] italic",
+                    align === "center" ? "text-center" : "text-left",
+                    font.class
+                  )}
+                  style={{
+                    fontFamily: `var(${font.variable})`,
+                    fontSize: exportPoemSize,
+                    lineHeight: exportPoemLeading,
+                  }}
+                >
+                  {text}
+                </div>
               </div>
               {(doodle || author) && (
-                <div className="absolute right-0 bottom-6 left-0 z-10 flex flex-col items-center gap-2">
+                <div className="absolute right-0 bottom-[120px] left-0 flex flex-col items-center gap-4">
                   {doodle && (
                     <div
                       className={cn(
-                        "h-8 w-8 opacity-40",
+                        "opacity-40",
                         isDark ? "brightness-200 invert" : "brightness-0"
                       )}
+                      style={{ width: exportMotifSize, height: exportMotifSize }}
                     >
                       <img
                         src={`/doodles/${doodle}`}
@@ -256,8 +273,15 @@ export function ExportModal({
                     </div>
                   )}
                   {author && (
-                    <span className="font-jost text-[6px] tracking-[0.3em] uppercase opacity-40">
-                      {author.startsWith("@") ? author : `@${author}`}
+                    <span
+                      className="font-signature opacity-60"
+                      style={{
+                        fontFamily: "var(--font-signature)",
+                        fontSize: exportCreditSize,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {author}
                     </span>
                   )}
                 </div>

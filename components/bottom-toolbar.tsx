@@ -15,7 +15,7 @@ import {
   UserIcon,
 } from "@hugeicons/core-free-icons"
 import { useWebHaptics } from "web-haptics/react"
-import { motion, AnimatePresence } from "motion/react"
+import { motion, AnimatePresence, useDragControls } from "motion/react"
 
 interface BottomToolbarProps {
   isOpen: boolean
@@ -67,6 +67,10 @@ export function BottomToolbar({
 }: BottomToolbarProps) {
   const { trigger } = useWebHaptics()
   const isDark = inkMode === "ink-light"
+  // The sheet can outgrow a keyboard-shrunk viewport, so its body scrolls.
+  // That means the whole surface can no longer own the drag gesture (it would
+  // fight the scroll) — dismiss is driven from the grabber/header instead.
+  const dragControls = useDragControls()
 
   return (
     <>
@@ -210,6 +214,8 @@ export function BottomToolbar({
               // anything less springs back. dragDirectionLock keeps the
               // horizontal swatch rows scrolling instead of moving the sheet.
               drag="y"
+              dragControls={dragControls}
+              dragListener={false}
               dragDirectionLock
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={{ top: 0, bottom: 0.5 }}
@@ -223,16 +229,25 @@ export function BottomToolbar({
               // Promote to its own composited layer — the sheet (with its many
               // decoded swatch images) then moves as one GPU texture instead
               // of being repainted every frame over the playing video.
-              className="w-full overflow-hidden rounded-t-[32px] border-t border-white/10 bg-[#161412] shadow-2xl will-change-transform"
+              className="flex max-h-[calc(100dvh-3rem)] w-full flex-col overflow-hidden rounded-t-[32px] border-t border-white/10 bg-[#161412] shadow-2xl will-change-transform"
             >
-              <div className="space-y-5 pt-2 pb-[max(env(safe-area-inset-bottom),20px)] text-[#F5F0E8]">
-                {/* Grabber — the affordance that says "drag me" without words */}
-                <div className="flex justify-center pb-1">
+              <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain pt-2 pb-[max(env(safe-area-inset-bottom),20px)] text-[#F5F0E8]">
+                {/* Grabber — the affordance that says "drag me" without words,
+                    and the handle that dismisses the sheet. */}
+                <div
+                  className="flex cursor-grab justify-center pt-1 pb-2 active:cursor-grabbing"
+                  style={{ touchAction: "none" }}
+                  onPointerDown={(e) => dragControls.start(e)}
+                >
                   <div className="h-1 w-10 rounded-full bg-white/20" />
                 </div>
                 {/* Header / Dismiss */}
                 <div className="flex items-center justify-between px-8">
-                  <span className="font-jost text-[10px] font-bold tracking-[0.4em] uppercase opacity-40">
+                  <span
+                    className="cursor-grab font-jost text-[10px] font-bold tracking-[0.4em] uppercase opacity-40 active:cursor-grabbing"
+                    style={{ touchAction: "none" }}
+                    onPointerDown={(e) => dragControls.start(e)}
+                  >
                     style
                   </span>
                   <button
@@ -266,10 +281,19 @@ export function BottomToolbar({
                       type="text"
                       value={author}
                       onChange={(e) => onAuthorChange(e.target.value)}
-                      placeholder="NAME OR @YOU"
+                      placeholder="name or @handle"
+                      // A credit line, not a form field. Browsers otherwise read
+                      // "name" + a handle affordance as an identity/payment
+                      // field and throw up their native autofill panel, which
+                      // shoves the sheet around on mobile.
+                      autoComplete="off"
+                      autoCorrect="off"
+                      autoCapitalize="none"
+                      spellCheck={false}
+                      enterKeyHint="done"
                       // 16px minimum on inputs: any smaller and iOS Safari
                       // force-zooms the whole viewport on focus.
-                      className="w-full border-b-2 border-white/5 bg-transparent py-3 pl-8 font-jost text-[16px] font-medium tracking-[0.2em] uppercase transition-all outline-none placeholder:opacity-20 focus:border-accent/60"
+                      className="w-full border-b-2 border-white/5 bg-transparent py-3 pl-8 font-jost text-[16px] tracking-normal transition-all outline-none placeholder:opacity-20 focus:border-accent/60"
                     />
                   </div>
                   <button

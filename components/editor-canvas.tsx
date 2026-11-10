@@ -125,7 +125,9 @@ export function EditorCanvas({
   // poemSize keeps the whole bottom mark in proportion. Capped at the original
   // size so short quotes look exactly as they always did.
   const motifSize = Math.max(18, Math.min(36, Math.round(poemSize * 1.2)));
-  const creditSize = Math.max(7, Math.min(9, Math.round(poemSize * 0.28)));
+  // The credit is set in a handwriting face and sized to the words, so a name
+  // reads as an authored signature rather than a UI caption.
+  const creditSize = Math.max(16, Math.min(40, Math.round(poemSize * 0.6)));
 
   // --- Cinematic Audio Engine ---
   const [playRain, { stop: stopRain, sound: rainSound }] = useSound('/sounds/rain-ambient-cinematic.mp3', { 
@@ -486,13 +488,10 @@ export function EditorCanvas({
             )}
             {author && (
               <span
-                className={cn(
-                  "font-jost tracking-[0.3em] uppercase opacity-30",
-                  isDark ? "text-white" : "text-black"
-                )}
-                style={{ fontSize: creditSize }}
+                className={cn("font-signature opacity-60", isDark ? "text-white" : "text-black")}
+                style={{ fontFamily: "var(--font-signature)", fontSize: creditSize, lineHeight: 1.2 }}
               >
-                {author.startsWith("@") ? author : `— ${author}`}
+                {author}
               </span>
             )}
           </div>

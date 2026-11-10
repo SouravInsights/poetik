@@ -55,7 +55,7 @@
 
 import { RefObject } from "react";
 import { cn } from "@/lib/utils";
-import { Font, Paper, Tone } from "@/lib/constants";
+import { Font, Paper, Tone, exportSignature } from "@/lib/constants";
 
 /** Props shared by both buffer types — the text content of the poem card */
 interface ExportBufferSharedProps {
@@ -100,8 +100,7 @@ export function JpegExportBuffer({
   poemLeading,
 }: JpegBufferProps) {
   // Signature scales with the fitted poem type — see editor-canvas for why.
-  const motifSize = Math.max(40, Math.min(96, Math.round(poemSize * 1.2)));
-  const creditSize = Math.max(16, Math.min(24, Math.round(poemSize * 0.3)));
+  const { motifSize, creditSize } = exportSignature(poemSize);
   return (
     // The outer wrapper positions this buffer off-screen and makes it invisible.
     // overflow-hidden ensures the 1080px-wide div doesn't create a horizontal scrollbar.
@@ -143,8 +142,8 @@ export function JpegExportBuffer({
               </div>
             )}
             {author && (
-              <span className="font-jost tracking-[0.4em] uppercase opacity-40" style={{ fontSize: creditSize }}>
-                {author.startsWith("@") ? author : `— ${author}`}
+              <span className="font-signature opacity-60" style={{ fontFamily: "var(--font-signature)", fontSize: creditSize, lineHeight: 1.2 }}>
+                {author}
               </span>
             )}
           </div>
@@ -176,8 +175,7 @@ export function VideoOverlayBuffer({
   poemLeading,
 }: VideoOverlayBufferProps) {
   // Signature scales with the fitted poem type — see editor-canvas for why.
-  const motifSize = Math.max(40, Math.min(96, Math.round(poemSize * 1.2)));
-  const creditSize = Math.max(16, Math.min(24, Math.round(poemSize * 0.3)));
+  const { motifSize, creditSize } = exportSignature(poemSize);
   return (
     <div className="absolute opacity-0 pointer-events-none overflow-hidden" style={{ width: 1080, height: 1920 }}>
       {/*
@@ -223,8 +221,8 @@ export function VideoOverlayBuffer({
               </div>
             )}
             {author && (
-              <span className="font-jost tracking-[0.4em] uppercase opacity-40" style={{ fontSize: creditSize }}>
-                {author.startsWith("@") ? author : `— ${author}`}
+              <span className="font-signature opacity-60" style={{ fontFamily: "var(--font-signature)", fontSize: creditSize, lineHeight: 1.2 }}>
+                {author}
               </span>
             )}
           </div>

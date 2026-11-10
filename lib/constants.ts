@@ -124,4 +124,19 @@ export function poemBaseMax(viewportWidth: number): number {
   return Math.min(52, Math.max(26, viewportWidth * 0.075));
 }
 
+/**
+ * The signature (motif + credit) geometry for a 1080×1920 export, derived from
+ * the fitted poem size. Shared by the export buffers and the modal preview so
+ * the preview is a faithful miniature rather than a hand-tuned approximation.
+ */
+export function exportSignature(poemSize: number): {
+  motifSize: number;
+  creditSize: number;
+} {
+  return {
+    motifSize: Math.max(40, Math.min(96, Math.round(poemSize * 1.2))),
+    creditSize: Math.max(28, Math.min(72, Math.round(poemSize * 0.6))),
+  };
+}
+
 
