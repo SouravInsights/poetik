@@ -132,13 +132,12 @@ export function poemBaseMax(viewportWidth: number): number {
 export function exportSignature(poemSize: number): {
   motifSize: number;
   creditSize: number;
-  creditRuleWidth: number;
 } {
-  const creditSize = Math.max(18, Math.min(56, Math.round(poemSize * 0.42)));
   return {
     motifSize: Math.max(40, Math.min(96, Math.round(poemSize * 1.2))),
-    creditSize,
-    creditRuleWidth: Math.round(creditSize * 2.4),
+    // A small, tracked label — the motif/name pairing from the original design,
+    // kept in sentence case rather than uppercase.
+    creditSize: Math.max(16, Math.min(30, Math.round(poemSize * 0.3))),
   };
 }
 

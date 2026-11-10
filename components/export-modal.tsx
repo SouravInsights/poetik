@@ -99,11 +99,8 @@ export function ExportModal({
     return () => ro.disconnect()
   }, [isOpen])
 
-  const {
-    motifSize: exportMotifSize,
-    creditSize: exportCreditSize,
-    creditRuleWidth: exportCreditRuleWidth,
-  } = exportSignature(exportPoemSize)
+  const { motifSize: exportMotifSize, creditSize: exportCreditSize } =
+    exportSignature(exportPoemSize)
 
   const {
     exportRef,
@@ -160,7 +157,7 @@ export function ExportModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-[1000] flex flex-col items-center justify-center p-6 sm:p-10"
+          className="fixed inset-0 z-[1000] flex flex-col items-center justify-center overflow-y-auto overscroll-contain p-5 sm:p-8"
         >
           {/* Off-screen rendering buffers — invisible, used only for export */}
           {isVideoBackground ? (
@@ -184,7 +181,7 @@ export function ExportModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => !isBusy && onClose()}
-            className="absolute inset-0 bg-[#0D0B09]/98 backdrop-blur-3xl"
+            className="fixed inset-0 bg-[#0D0B09]/98 backdrop-blur-3xl"
           />
 
           {/* Preview Card */}
@@ -194,7 +191,7 @@ export function ExportModal({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 1.05, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="relative aspect-[9/16] w-[min(280px,65vw)] overflow-hidden rounded-[24px] shadow-[0_32px_96px_-16px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
+            className="relative aspect-[9/16] h-[min(54dvh,440px)] w-auto shrink-0 overflow-hidden rounded-[24px] shadow-[0_32px_96px_-16px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
           >
             {/* 1:1 scale model of the export. Children use the SAME raw
                 geometry as the 1080×1920 buffer, then the whole thing is
@@ -276,22 +273,11 @@ export function ExportModal({
                     </div>
                   )}
                   {author && (
-                    <span className="flex flex-col items-center gap-4">
-                      <span
-                        aria-hidden
-                        className={isDark ? "bg-white/25" : "bg-black/25"}
-                        style={{ width: exportCreditRuleWidth, height: 2 }}
-                      />
-                      <span
-                        className="italic opacity-55"
-                        style={{
-                          fontFamily: `var(${font.variable})`,
-                          fontSize: exportCreditSize,
-                          letterSpacing: "0.02em",
-                        }}
-                      >
-                        {author}
-                      </span>
+                    <span
+                      className="font-jost tracking-[0.3em] opacity-40"
+                      style={{ fontSize: exportCreditSize }}
+                    >
+                      {author}
                     </span>
                   )}
                 </div>
@@ -329,9 +315,9 @@ export function ExportModal({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ delay: 0.1, duration: 0.4 }}
-            className="relative z-20 mt-10 flex w-full flex-col items-center gap-6 px-6"
+            className="relative z-20 mt-6 flex w-full flex-col items-center gap-4 px-6"
           >
-            <p className="font-jost text-[12px] font-bold tracking-[0.4em] text-[#f2ece0] uppercase opacity-40">
+            <p className="font-jost text-[10px] font-bold tracking-[0.35em] text-[#f2ece0] uppercase opacity-40">
               {statusLabel}
             </p>
 
@@ -340,7 +326,7 @@ export function ExportModal({
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex w-full max-w-[280px] flex-col items-center gap-3"
+                className="flex w-full max-w-[240px] flex-col items-center gap-2"
               >
                 <div className="flex w-full items-center justify-between">
                   <span className="font-jost text-[9px] tracking-[0.25em] text-[#f2ece0] uppercase opacity-40">
@@ -386,7 +372,7 @@ export function ExportModal({
                 exportState === "done" && shareFile ? handleShare : handleExport
               }
               className={cn(
-                "group relative flex w-full max-w-[320px] items-center justify-center gap-3 overflow-hidden rounded-full px-10 py-5 font-italiana text-lg tracking-[0.1em] shadow-2xl transition-all",
+                "group relative flex w-full max-w-[300px] items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4 font-italiana text-base tracking-[0.1em] shadow-2xl transition-all",
                 // Monochrome status (palette rule: no greens/reds). Success and
                 // error are carried by icon + label, not hue — same doctrine as
                 // the clear button.

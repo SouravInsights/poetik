@@ -100,7 +100,7 @@ export function JpegExportBuffer({
   poemLeading,
 }: JpegBufferProps) {
   // Signature scales with the fitted poem type — see editor-canvas for why.
-  const { motifSize, creditSize, creditRuleWidth } = exportSignature(poemSize);
+  const { motifSize, creditSize } = exportSignature(poemSize);
   return (
     // The outer wrapper positions this buffer off-screen and makes it invisible.
     // overflow-hidden ensures the 1080px-wide div doesn't create a horizontal scrollbar.
@@ -142,11 +142,8 @@ export function JpegExportBuffer({
               </div>
             )}
             {author && (
-              <span className="flex flex-col items-center gap-4">
-                <span aria-hidden className={isDark ? "bg-white/25" : "bg-black/25"} style={{ width: creditRuleWidth, height: 2 }} />
-                <span className="italic opacity-55" style={{ fontFamily: `var(${font.variable})`, fontSize: creditSize, letterSpacing: "0.02em" }}>
-                  {author}
-                </span>
+              <span className="font-jost tracking-[0.3em] opacity-40" style={{ fontSize: creditSize }}>
+                {author}
               </span>
             )}
           </div>
@@ -178,7 +175,7 @@ export function VideoOverlayBuffer({
   poemLeading,
 }: VideoOverlayBufferProps) {
   // Signature scales with the fitted poem type — see editor-canvas for why.
-  const { motifSize, creditSize, creditRuleWidth } = exportSignature(poemSize);
+  const { motifSize, creditSize } = exportSignature(poemSize);
   return (
     <div className="absolute opacity-0 pointer-events-none overflow-hidden" style={{ width: 1080, height: 1920 }}>
       {/*
@@ -224,11 +221,8 @@ export function VideoOverlayBuffer({
               </div>
             )}
             {author && (
-              <span className="flex flex-col items-center gap-4">
-                <span aria-hidden className={isDark ? "bg-white/25" : "bg-black/25"} style={{ width: creditRuleWidth, height: 2 }} />
-                <span className="italic opacity-55" style={{ fontFamily: `var(${font.variable})`, fontSize: creditSize, letterSpacing: "0.02em" }}>
-                  {author}
-                </span>
+              <span className="font-jost tracking-[0.3em] opacity-40" style={{ fontSize: creditSize }}>
+                {author}
               </span>
             )}
           </div>
